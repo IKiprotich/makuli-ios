@@ -9,16 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(spacing: 16) {
+            Text("Karibu Makuli!")
+                .font(AppFonts.title2())
+                .foregroundStyle(AppColors.textCharcoal)
+            
+            Button("Start Planning") { }
+                .primaryButtonStyle()
         }
         .padding()
+        .background(AppColors.bgCream)
     }
 }
-
 #Preview {
     ContentView()
 }
