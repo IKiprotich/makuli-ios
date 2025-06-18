@@ -6,8 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0A5C4C402E02C37D0020B344 /* Google Service-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0A5C4C3F2E02C37D0020B344 /* Google Service-Info.plist */; };
+		0A5C4C422E02C48A0020B344 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C412E02C48A0020B344 /* FirebaseAuth */; };
+		0A5C4C442E02C48A0020B344 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C432E02C48A0020B344 /* FirebaseFirestore */; };
+		0A5C4C462E02C48A0020B344 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C452E02C48A0020B344 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		0A5C4C1C2E02B9900020B344 /* Makuli.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Makuli.app; path = "/Users/iankiprotich/Makuli/build/Debug-iphoneos/Makuli.app"; sourceTree = "<absolute>"; };
+		0A5C4C3F2E02C37D0020B344 /* Google Service-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Google Service-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +31,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A5C4C422E02C48A0020B344 /* FirebaseAuth in Frameworks */,
+				0A5C4C442E02C48A0020B344 /* FirebaseFirestore in Frameworks */,
+				0A5C4C462E02C48A0020B344 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				0A5C4C1E2E02B9900020B344 /* Makuli */,
+				0A5C4C3F2E02C37D0020B344 /* Google Service-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,6 +68,9 @@
 			);
 			name = Makuli;
 			packageProductDependencies = (
+				0A5C4C412E02C48A0020B344 /* FirebaseAuth */,
+				0A5C4C432E02C48A0020B344 /* FirebaseFirestore */,
+				0A5C4C452E02C48A0020B344 /* FirebaseStorage */,
 			);
 			productName = Makuli;
 			productReference = 0A5C4C1C2E02B9900020B344 /* Makuli.app */;
@@ -85,6 +100,9 @@
 			);
 			mainGroup = 0A5C4C132E02B9900020B344;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0A5C4C132E02B9900020B344;
 			projectDirPath = "";
@@ -100,6 +118,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A5C4C402E02C37D0020B344 /* Google Service-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +334,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0A5C4C412E02C48A0020B344 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		0A5C4C432E02C48A0020B344 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		0A5C4C452E02C48A0020B344 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0A5C4C142E02B9900020B344 /* Project object */;
 }
