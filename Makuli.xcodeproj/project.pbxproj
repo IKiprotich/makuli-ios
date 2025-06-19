@@ -14,8 +14,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0A5C4C1C2E02B9900020B344 /* Makuli.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Makuli.app; path = "/Users/iankiprotich/Makuli/build/Debug-iphoneos/Makuli.app"; sourceTree = "<absolute>"; };
 		0A5C4C3F2E02C37D0020B344 /* Google Service-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Google Service-Info.plist"; sourceTree = "<group>"; };
+		0AAF1CDD2E03F581002B62CF /* Makuli.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Makuli.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -45,6 +45,7 @@
 			children = (
 				0A5C4C1E2E02B9900020B344 /* Makuli */,
 				0A5C4C3F2E02C37D0020B344 /* Google Service-Info.plist */,
+				0AAF1CDD2E03F581002B62CF /* Makuli.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,7 +74,7 @@
 				0A5C4C452E02C48A0020B344 /* FirebaseStorage */,
 			);
 			productName = Makuli;
-			productReference = 0A5C4C1C2E02B9900020B344 /* Makuli.app */;
+			productReference = 0AAF1CDD2E03F581002B62CF /* Makuli.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
