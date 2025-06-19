@@ -2,3 +2,4 @@
 *.xcuserstate
 DerivedData
 .env
+GoogleService-Info.plist
