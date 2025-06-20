@@ -74,6 +74,7 @@ struct HomeView: View {
                     .padding(.horizontal, 16)
                     
                 }
+                .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
                 
                 
             }

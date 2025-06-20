@@ -30,7 +30,7 @@ struct AppTabView: View {
                     Label("Profile", systemImage: "person.crop.circle")
                 }
         }
-        .accentColor(AppColors.primaryOrange) // Use brand orange for the selected tab
+        .accentColor(AppColors.primaryOrange)
     }
 }
 
