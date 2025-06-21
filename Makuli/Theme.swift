@@ -14,6 +14,7 @@ enum AppColors {
     static let warnRed        = Color("WarnRed")
     static let bgCream        = Color("BackgroundCream")
     static let textCharcoal   = Color("TextCharcoal")
+    static let warmsand       = Color("WarmSand")
 }
 
 enum AppFonts {
