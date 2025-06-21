@@ -101,26 +101,26 @@ extension PlansView {
     
     //previous plans section
     private var previousPlansSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            
-            Text("Previous Plans")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(AppColors.textCharcoal)
-                .padding(.horizontal, 20)
-            
-            
-            LazyVStack(alignment: .leading, spacing: 16) {
-                ForEach(pastPlans) { plan in
-                    PreviousPlanRow(plan: plan)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Previous Plans")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(AppColors.textCharcoal)
+                    .padding(.horizontal, 20)
+                
+                LazyVStack(alignment: .leading, spacing: 16) {
+                    ForEach(pastPlans) { plan in
+                        NavigationLink(destination: WeekDetailView(weekPlan: plan)) {
+                            PreviousPlanRow(plan: plan)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
+                    }
                 }
             }
         }
-    }
     
-    // previoous plan row section
-    
+    // previous plan row section
     struct PreviousPlanRow: View {
         
         let plan: WeekPlan
