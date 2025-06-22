@@ -20,17 +20,18 @@ struct DayCardView: View {
             //meals list
             VStack(spacing: 1){
                 ForEach(dayPlan.meals, id: \.id) { meal in
-                  MealRowView(
-                    meal: meal,
-                    isExpanded: expandedMeal == meal.id
-                  )
-                  .onTapGesture {
-                      withAnimation(.easeInOut(duration: 0.3)) {
-                          expandedMeal = expandedMeal == meal.id ? nil : meal.id
-                      }
-                  }
-                    
+                    MealRowView(
+                        meal: meal,
+                        isExpanded: expandedMeal == meal.id,
+                        onExpansionToggle: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                expandedMeal = expandedMeal == meal.id ? nil : meal.id
+                            }
+                        },
+                        recipe: meal.recipe // pass the recipe to MealRowView
+                    )
                 }
+                
             }
         }
         .background(
@@ -40,7 +41,6 @@ struct DayCardView: View {
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Meal plan for \(dayPlan.dayName)")
-       
     }
 }
 
@@ -87,9 +87,6 @@ extension DayCardView {
     }
 }
 
-
-
-
 #Preview {
-    //DayCardView()
+    DayCardView(dayPlan: DayPlan.mockData().first!)
 }

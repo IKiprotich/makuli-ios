@@ -15,42 +15,46 @@ struct WeekDetailView: View {
     
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottom) {
-                
-                //main content
-                ScrollView {
-                    VStack (spacing: 0) {
-                        
-                        //header section
-                        headerSection
-                        
-                        //daycards
-                        LazyVStack(spacing: 16){
-                            ForEach(dayPlans) { dayPlan in
-                                DayCardView(dayPlan: dayPlan)
-                                    .padding(.horizontal, 20)
+        NavigationStack {
+            GeometryReader { geometry in
+                ZStack(alignment: .bottom) {
+                    
+                    //main content
+                    ScrollView {
+                        VStack (spacing: 0) {
+                            
+                            //header section
+                            headerSection
+                            
+                            //daycards
+                            LazyVStack(spacing: 16){
+                                ForEach(dayPlans) { dayPlan in
+                                    DayCardView(dayPlan: dayPlan)
+                                        .padding(.horizontal, 20)
+                                }
                             }
+                            .padding(.top, 24)
+                            .padding(.bottom, 100) //the space for the sticky button
                         }
-                        .padding(.top, 24)
-                        .padding(.bottom, 100) //the space for the sticky button
                     }
+                    
+                    //sticky bottom button
+                    groceryListButton
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
                 }
-                
-                //sticky bottom button
-                groceryListButton
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
             }
+            .navigationBarHidden(true)
+            .background(
+                AppColors.warmsand.opacity(0.3)
+            )
+            .onAppear {
+                dayPlans = DayPlan.mockData()
+            }
+//            .navigationDestination(for: Recipe.self) { recipe in
+//                RecipeDetailView(recipe: recipe)
+//            }
         }
-        .navigationBarBackButtonHidden(true)
-        .background(
-            AppColors.warmsand.opacity(0.3)
-        )
-        .onAppear {
-            dayPlans = DayPlan.mockData()
-        }
-        
     }
 }
 

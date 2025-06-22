@@ -11,6 +11,16 @@ struct MealRowView: View {
     
     let meal: Meal
     let isExpanded: Bool
+    let onExpansionToggle: (() -> Void)?
+    let recipe: Recipe?
+    
+    // Initialize with optional closure and recipe
+    init(meal: Meal, isExpanded: Bool, onExpansionToggle: (() -> Void)? = nil, recipe: Recipe? = nil) {
+        self.meal = meal
+        self.isExpanded = isExpanded
+        self.onExpansionToggle = onExpansionToggle
+        self.recipe = recipe
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing:0) {
@@ -44,6 +54,10 @@ struct MealRowView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                .onTapGesture {
+                    // Handle expansion toggle when tapping the meal info area
+                    onExpansionToggle?()
+                }
                 
                 Spacer()
                 
@@ -65,19 +79,20 @@ struct MealRowView: View {
 
                     }
                     
-                    //view recipes button
-                    Button {
-                        //to implement view recipes functionality
-                    } label: {
-                        Text("View Recipe")
-                            .font(.caption)
-                            .foregroundColor(Color("PrimaryOrange"))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color("WarmSand"))
-                            )
+                    //view recipes button - only show if recipe exists
+                    if let recipe = recipe {
+                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                            Text("View Recipe")
+                                .font(.caption)
+                                .foregroundColor(Color("PrimaryOrange"))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color("WarmSand"))
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
@@ -120,7 +135,7 @@ extension MealRowView {
                 Spacer()
                 
                 
-                Button("Add Ingerdients"){
+                Button("Add Ingredients"){
                     //implement the add recipe to the grocery list functionality
                 }
                 .font(.caption)
