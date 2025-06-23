@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: Int
     
     //sample meals
     private let sampleMeals = [
@@ -126,8 +127,7 @@ extension HomeView {
     
     //explore recipe fucntion
     private func handleExploreRecipesTap() {
-            // Navigate to recipes
-            print("Explore Recipes tapped")
+        selectedTab = 2
         }
     
     
@@ -135,5 +135,5 @@ extension HomeView {
 }
 
 #Preview {
-    HomeView()
+    HomeView(selectedTab: .constant(0))
 }
