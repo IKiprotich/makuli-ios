@@ -205,5 +205,5 @@ extension RecipeDetailView {
 
 
 #Preview {
-    RecipeDetailView(recipe: Recipe.sampleRecipe)
+    RecipeDetailView(recipe: Recipe.enhancedMockRecipes()[0])
 }
