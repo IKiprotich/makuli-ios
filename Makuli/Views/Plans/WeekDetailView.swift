@@ -39,9 +39,9 @@ struct WeekDetailView: View {
                     }
                     
                     //sticky bottom button
-                    groceryListButton
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
+                    // groceryListButton
+                    //     .padding(.horizontal, 20)
+                    //     .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
                 }
             }
             .navigationBarHidden(true)
@@ -51,10 +51,63 @@ struct WeekDetailView: View {
             .onAppear {
                 dayPlans = DayPlan.mockData()
             }
+            // Add the floating action button as a safe area inset
+            .safeAreaInset(edge: .bottom) {
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: GroceryListView(weekPlan: WeekPlan.sampleWeekPlan, groceryItems: WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan).generateGroceryList())) {
+                        HStack {
+                            Image(systemName: "cart.fill")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("🛒 Generate Grocery List")
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                        .background(AppColors.primaryOrange)
+                        .cornerRadius(25)
+                        .shadow(color: AppColors.primaryOrange.opacity(0.3), radius: 6, x: 0, y: 3)
+                    }
+                    Spacer()
+                }
+                .padding(.bottom, 16)
+                .background(AppColors.bgCream.opacity(0.9))
+            }
 //            .navigationDestination(for: Recipe.self) { recipe in
 //                RecipeDetailView(recipe: recipe)
 //            }
         }
+    }
+    
+    func generateGroceryList() -> [GroceryItem] {
+        var ingredientMap: [String: GroceryItem] = [:]
+        for meal in weekPlan.meals {
+            if let recipe = meal.recipe {
+                for ingredient in recipe.ingredients {
+                    let key = ingredient.name.lowercased()
+                    if let existing = ingredientMap[key] {
+                        // Combine quantities (simplified, just keeps the first for now)
+                        ingredientMap[key] = GroceryItem(
+                            id: existing.id,
+                            name: ingredient.name,
+                            quantity: existing.quantity, // You can improve this logic
+                            category: ingredient.category,
+                            emoji: ingredient.emoji
+                        )
+                    } else {
+                        ingredientMap[key] = GroceryItem(
+                            id: UUID().uuidString,
+                            name: ingredient.name,
+                            quantity: ingredient.quantity,
+                            category: ingredient.category,
+                            emoji: ingredient.emoji
+                        )
+                    }
+                }
+            }
+        }
+        return Array(ingredientMap.values).sorted { $0.name < $1.name }
     }
 }
 
@@ -180,5 +233,5 @@ extension WeekDetailView {
 }
 
 #Preview {
-    WeekDetailView(weekPlan: WeekPlan.mockData[2])
+    WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan)
 }
