@@ -18,6 +18,7 @@ struct WeekPlan: Identifiable, Hashable {
     let planName: String
     let featuredImageName: String
     let isActive: Bool
+    let meals: [Meal]
     
     var progressPercentage: Double {
         guard totalMeals > 0 else { return 0 }
@@ -111,7 +112,8 @@ extension WeekPlan {
             totalMeals: 7,
             planName: "Coastal Favorites",
             featuredImageName: "meal_coastal",
-            isActive: false
+            isActive: false,
+            meals: []
         ),
         WeekPlan(
             weekNumber: 25,
@@ -122,7 +124,8 @@ extension WeekPlan {
             totalMeals: 7,
             planName: "Traditional Mix",
             featuredImageName: "meal_traditional",
-            isActive: false
+            isActive: false,
+            meals: []
         ),
         WeekPlan(
             weekNumber: 24,
@@ -133,7 +136,8 @@ extension WeekPlan {
             totalMeals: 7,
             planName: "Kenyan Stew",
             featuredImageName: "meal_stew",
-            isActive: true
+            isActive: true,
+            meals: []
         )
     ]
 }
@@ -203,6 +207,172 @@ func generateMockMealsForDay(dayOffset: Int) -> [Meal] {
             imageURL: nil,
             isCompleted: dayOffset < 3, // First 3 days completed
             recipe: selectedMeal.3
+        )
+    }
+}
+
+// MARK: - WeekPlan Extensions for Mock Data
+extension WeekPlan {
+    static var sampleWeekPlan: WeekPlan {
+        let calendar = Calendar.current
+        let today = Date()
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        
+        return WeekPlan(
+            weekNumber: calendar.component(.weekOfYear, from: startOfWeek),
+            startDate: startOfWeek,
+            endDate: calendar.date(byAdding: .day, value: 6, to: startOfWeek) ?? startOfWeek,
+            totalCost: 0,
+            mealsCompleted: 0,
+            totalMeals: 5,
+            planName: "Sample Plan",
+            featuredImageName: "sample",
+            isActive: true,
+            meals: [
+                // Monday Breakfast - Chapati na Beans
+                Meal(
+                    name: "Chapati na Beans",
+                    category: .breakfast,
+                    cookingTime: 35,
+                    difficulty: .medium,
+                    imageURL: nil,
+                    isCompleted: false,
+                    recipe: Recipe(
+                        id: UUID(),
+                        title: "Chapati na Beans",
+                        cookTime: "35 mins",
+                        servings: 4,
+                        imageName: "🫓",
+                        ingredients: [
+                            Ingredient(name: "All-purpose flour", quantity: "2 cups", category: "Grains", emoji: "🌾"),
+                            Ingredient(name: "Water", quantity: "3/4 cup", category: "Liquids", emoji: "💧"),
+                            Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂"),
+                            Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
+                            Ingredient(name: "Red beans", quantity: "2 cups", category: "Legumes", emoji: "🫘"),
+                            Ingredient(name: "Onion", quantity: "1 medium", category: "Vegetables", emoji: "🧅"),
+                            Ingredient(name: "Tomatoes", quantity: "2 medium", category: "Vegetables", emoji: "🍅"),
+                            Ingredient(name: "Garlic", quantity: "2 cloves", category: "Spices", emoji: "🧄")
+                        ],
+                        steps: ["Make chapati dough", "Prepare beans", "Cook chapati", "Serve together"],
+                        substitutions: ["Use whole wheat flour"],
+                        tags: ["Budget", "High-Protein"]
+                    )
+                ),
+                // Monday Lunch - Nyama Choma
+                Meal(
+                    name: "Nyama Choma",
+                    category: .lunch,
+                    cookingTime: 60,
+                    difficulty: .medium,
+                    imageURL: nil,
+                    isCompleted: false,
+                    recipe: Recipe(
+                        id: UUID(),
+                        title: "Nyama Choma",
+                        cookTime: "60 mins",
+                        servings: 4,
+                        imageName: "🥩",
+                        ingredients: [
+                            Ingredient(name: "Beef chunks", quantity: "1 kg", category: "Meat", emoji: "🥩"),
+                            Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂"),
+                            Ingredient(name: "Black pepper", quantity: "1 tsp", category: "Spices", emoji: "🌶️"),
+                            Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
+                            Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
+                            Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒")
+                        ],
+                        steps: ["Season meat", "Marinate", "Grill", "Serve hot"],
+                        substitutions: ["Can use goat meat"],
+                        tags: ["Traditional", "High-Protein"]
+                    )
+                ),
+                // Tuesday Breakfast - Mukimo
+                Meal(
+                    name: "Mukimo",
+                    category: .breakfast,
+                    cookingTime: 55,
+                    difficulty: .medium,
+                    imageURL: nil,
+                    isCompleted: false,
+                    recipe: Recipe(
+                        id: UUID(),
+                        title: "Mukimo",
+                        cookTime: "55 mins",
+                        servings: 4,
+                        imageName: "🥔",
+                        ingredients: [
+                            Ingredient(name: "Potatoes", quantity: "4 large", category: "Vegetables", emoji: "🥔"),
+                            Ingredient(name: "Green maize", quantity: "2 cups", category: "Vegetables", emoji: "🌽"),
+                            Ingredient(name: "Spinach", quantity: "2 cups", category: "Vegetables", emoji: "🥬"),
+                            Ingredient(name: "Green peas", quantity: "1 cup", category: "Vegetables", emoji: "🟢"),
+                            Ingredient(name: "Onion", quantity: "1 large", category: "Vegetables", emoji: "🧅"),
+                            Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒"),
+                            Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
+                        ],
+                        steps: ["Boil vegetables", "Mash together", "Fry onions", "Mix and serve"],
+                        substitutions: ["Use sweet potatoes", "Kale instead of spinach"],
+                        tags: ["Traditional", "Healthy", "Budget"]
+                    )
+                ),
+                // Tuesday Dinner - Sukuma Wiki
+                Meal(
+                    name: "Sukuma Wiki with Ugali",
+                    category: .dinner,
+                    cookingTime: 35,
+                    difficulty: .medium,
+                    imageURL: nil,
+                    isCompleted: false,
+                    recipe: Recipe(
+                        id: UUID(),
+                        title: "Sukuma Wiki with Ugali",
+                        cookTime: "35 mins",
+                        servings: 3,
+                        imageName: "🥬",
+                        ingredients: [
+                            Ingredient(name: "Sukuma wiki", quantity: "1 bunch", category: "Vegetables", emoji: "🥬"),
+                            Ingredient(name: "Onion", quantity: "1 medium", category: "Vegetables", emoji: "🧅"),
+                            Ingredient(name: "Tomatoes", quantity: "2 medium", category: "Vegetables", emoji: "🍅"),
+                            Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
+                            Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
+                            Ingredient(name: "Maize flour", quantity: "2 cups", category: "Grains", emoji: "🌽"),
+                            Ingredient(name: "Water", quantity: "3 cups", category: "Liquids", emoji: "💧"),
+                            Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂")
+                        ],
+                        steps: ["Prepare sukuma wiki", "Make ugali", "Serve together"],
+                        substitutions: ["Use spinach instead"],
+                        tags: ["Quick", "Healthy", "Budget"]
+                    )
+                ),
+                // Wednesday Lunch - Pilau
+                Meal(
+                    name: "Pilau",
+                    category: .lunch,
+                    cookingTime: 75,
+                    difficulty: .medium,
+                    imageURL: nil,
+                    isCompleted: false,
+                    recipe: Recipe(
+                        id: UUID(),
+                        title: "Pilau",
+                        cookTime: "75 mins",
+                        servings: 6,
+                        imageName: "🍚",
+                        ingredients: [
+                            Ingredient(name: "Basmati rice", quantity: "2 cups", category: "Grains", emoji: "🍚"),
+                            Ingredient(name: "Beef", quantity: "500g", category: "Meat", emoji: "🥩"),
+                            Ingredient(name: "Onions", quantity: "2 large", category: "Vegetables", emoji: "🧅"),
+                            Ingredient(name: "Tomatoes", quantity: "2 medium", category: "Vegetables", emoji: "🍅"),
+                            Ingredient(name: "Pilau masala", quantity: "2 tbsp", category: "Spices", emoji: "🌶️"),
+                            Ingredient(name: "Garlic", quantity: "4 cloves", category: "Spices", emoji: "🧄"),
+                            Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
+                            Ingredient(name: "Beef stock", quantity: "4 cups", category: "Liquids", emoji: "🍲"),
+                            Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒")
+                        ],
+                        steps: ["Brown meat", "Cook aromatics", "Add rice and stock", "Simmer"],
+                        substitutions: ["Use chicken instead of beef"],
+                        tags: ["Traditional", "High-Protein"]
+                    )
+                )
+            ]
         )
     }
 }

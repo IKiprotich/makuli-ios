@@ -55,11 +55,11 @@ extension Recipe {
                 servings: 2,
                 imageName: "🍌",
                 ingredients: [
-                    Ingredient(name: "Ripe bananas", quantity: "2"),
-                    Ingredient(name: "Red beans", quantity: "1/2 cup"),
-                    Ingredient(name: "Onion", quantity: "1"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp"),
-                    Ingredient(name: "Salt", quantity: "To taste")
+                    Ingredient(name: "Ripe bananas", quantity: "2", category: "Fruits", emoji: "🍌"),
+                    Ingredient(name: "Red beans", quantity: "1/2 cup", category: "Legumes", emoji: "🫘"),
+                    Ingredient(name: "Onion", quantity: "1", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
+                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
                 ],
                 steps: [
                     "Peel and chop the bananas into small pieces.",
@@ -82,12 +82,12 @@ extension Recipe {
                 servings: 4,
                 imageName: "🥩",
                 ingredients: [
-                    Ingredient(name: "Beef chunks", quantity: "1 kg"),
-                    Ingredient(name: "Salt", quantity: "To taste"),
-                    Ingredient(name: "Black pepper", quantity: "1 tsp"),
-                    Ingredient(name: "Garlic", quantity: "3 cloves"),
-                    Ingredient(name: "Ginger", quantity: "1 inch piece"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp")
+                    Ingredient(name: "Beef chunks", quantity: "1 kg", category: "Meat", emoji: "🥩"),
+                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂"),
+                    Ingredient(name: "Black pepper", quantity: "1 tsp", category: "Spices", emoji: "🌶️"),
+                    Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
+                    Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
+                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒")
                 ],
                 steps: [
                     "Cut the beef into medium-sized chunks.",
@@ -112,15 +112,15 @@ extension Recipe {
                 servings: 6,
                 imageName: "🍚",
                 ingredients: [
-                    Ingredient(name: "Basmati rice", quantity: "2 cups"),
-                    Ingredient(name: "Beef or chicken", quantity: "500g"),
-                    Ingredient(name: "Onions", quantity: "2 large"),
-                    Ingredient(name: "Tomatoes", quantity: "2"),
-                    Ingredient(name: "Pilau masala", quantity: "2 tbsp"),
-                    Ingredient(name: "Garlic", quantity: "4 cloves"),
-                    Ingredient(name: "Ginger", quantity: "1 inch piece"),
-                    Ingredient(name: "Beef stock", quantity: "4 cups"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp")
+                    Ingredient(name: "Basmati rice", quantity: "2 cups", category: "Grains", emoji: "🍚"),
+                    Ingredient(name: "Beef or chicken", quantity: "500g", category: "Meat", emoji: "🥩"),
+                    Ingredient(name: "Onions", quantity: "2 large", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
+                    Ingredient(name: "Pilau masala", quantity: "2 tbsp", category: "Spices", emoji: "🌶️"),
+                    Ingredient(name: "Garlic", quantity: "4 cloves", category: "Spices", emoji: "🧄"),
+                    Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
+                    Ingredient(name: "Beef stock", quantity: "4 cups", category: "Liquids", emoji: "🍲"),
+                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒")
                 ],
                 steps: [
                     "Wash and soak the rice for 30 minutes.",
@@ -146,13 +146,13 @@ extension Recipe {
                 servings: 4,
                 imageName: "🥔",
                 ingredients: [
-                    Ingredient(name: "Potatoes", quantity: "4 large"),
-                    Ingredient(name: "Green maize", quantity: "2 cups"),
-                    Ingredient(name: "Pumpkin leaves or spinach", quantity: "2 cups"),
-                    Ingredient(name: "Green peas", quantity: "1 cup"),
-                    Ingredient(name: "Onion", quantity: "1 large"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp"),
-                    Ingredient(name: "Salt", quantity: "To taste")
+                    Ingredient(name: "Potatoes", quantity: "4 large", category: "Vegetables", emoji: "🥔"),
+                    Ingredient(name: "Green maize", quantity: "2 cups", category: "Vegetables", emoji: "🌽"),
+                    Ingredient(name: "Pumpkin leaves or spinach", quantity: "2 cups", category: "Vegetables", emoji: "🥬"),
+                    Ingredient(name: "Green peas", quantity: "1 cup", category: "Vegetables", emoji: "🟢"),
+                    Ingredient(name: "Onion", quantity: "1 large", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒"),
+                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
                 ],
                 steps: [
                     "Peel and chop potatoes into chunks.",
@@ -178,14 +178,14 @@ extension Recipe {
                 servings: 4,
                 imageName: "🫓",
                 ingredients: [
-                    Ingredient(name: "All-purpose flour", quantity: "2 cups"),
-                    Ingredient(name: "Water", quantity: "3/4 cup"),
-                    Ingredient(name: "Salt", quantity: "1/2 tsp"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp + extra for cooking"),
-                    Ingredient(name: "Cooked beans", quantity: "2 cups"),
-                    Ingredient(name: "Onion", quantity: "1"),
-                    Ingredient(name: "Tomatoes", quantity: "2"),
-                    Ingredient(name: "Garlic", quantity: "2 cloves")
+                    Ingredient(name: "All-purpose flour", quantity: "2 cups", category: "Grains", emoji: "🌾"),
+                    Ingredient(name: "Water", quantity: "3/4 cup", category: "Liquids", emoji: "💧"),
+                    Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂"),
+                    Ingredient(name: "Cooking oil", quantity: "2 tbsp + extra for cooking", category: "Oils", emoji: "🫒"),
+                    Ingredient(name: "Cooked beans", quantity: "2 cups", category: "Legumes", emoji: "🫘"),
+                    Ingredient(name: "Onion", quantity: "1", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
+                    Ingredient(name: "Garlic", quantity: "2 cloves", category: "Spices", emoji: "🧄")
                 ],
                 steps: [
                     "Mix flour and salt, add water and oil to form soft dough.",
@@ -211,12 +211,12 @@ extension Recipe {
                 servings: 3,
                 imageName: "🥬",
                 ingredients: [
-                    Ingredient(name: "Sukuma wiki (collard greens)", quantity: "1 bunch"),
-                    Ingredient(name: "Onion", quantity: "1 medium"),
-                    Ingredient(name: "Tomatoes", quantity: "2"),
-                    Ingredient(name: "Garlic", quantity: "3 cloves"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp"),
-                    Ingredient(name: "Salt", quantity: "To taste")
+                    Ingredient(name: "Sukuma wiki (collard greens)", quantity: "1 bunch", category: "Vegetables", emoji: "🥬"),
+                    Ingredient(name: "Onion", quantity: "1 medium", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
+                    Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
+                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
+                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
                 ],
                 steps: [
                     "Wash and chop the sukuma wiki into strips.",
@@ -241,9 +241,9 @@ extension Recipe {
                 servings: 4,
                 imageName: "🌽",
                 ingredients: [
-                    Ingredient(name: "Maize flour (unga)", quantity: "2 cups"),
-                    Ingredient(name: "Water", quantity: "3 cups"),
-                    Ingredient(name: "Salt", quantity: "1/2 tsp")
+                    Ingredient(name: "Maize flour (unga)", quantity: "2 cups", category: "Grains", emoji: "🌽"),
+                    Ingredient(name: "Water", quantity: "3 cups", category: "Liquids", emoji: "💧"),
+                    Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂")
                 ],
                 steps: [
                     "Bring water to boil in a heavy-bottomed pot.",
@@ -268,13 +268,13 @@ extension Recipe {
                 servings: 6,
                 imageName: "🌽",
                 ingredients: [
-                    Ingredient(name: "Maize (dry corn)", quantity: "1 cup"),
-                    Ingredient(name: "Beans", quantity: "1 cup"),
-                    Ingredient(name: "Onions", quantity: "2"),
-                    Ingredient(name: "Tomatoes", quantity: "3"),
-                    Ingredient(name: "Carrots", quantity: "2"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp"),
-                    Ingredient(name: "Salt", quantity: "To taste")
+                    Ingredient(name: "Maize (dry corn)", quantity: "1 cup", category: "Grains", emoji: "🌽"),
+                    Ingredient(name: "Beans", quantity: "1 cup", category: "Legumes", emoji: "🫘"),
+                    Ingredient(name: "Onions", quantity: "2", category: "Vegetables", emoji: "🧅"),
+                    Ingredient(name: "Tomatoes", quantity: "3", category: "Vegetables", emoji: "🍅"),
+                    Ingredient(name: "Carrots", quantity: "2", category: "Vegetables", emoji: "🥕"),
+                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒"),
+                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
                 ],
                 steps: [
                     "Soak maize and beans overnight.",
