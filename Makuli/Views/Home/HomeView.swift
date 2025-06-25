@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var selectedTab: Int
+    @State private var navigateToWeekDetail = false
     
     //sample meals
     private let sampleMeals = [
@@ -48,8 +49,7 @@ struct HomeView: View {
     
     
     var body: some View {
-        NavigationView {
-            
+        NavigationStack {
             ZStack{
                 
                 AppColors.bgCream
@@ -57,7 +57,10 @@ struct HomeView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
-                        HeaderView()
+                        HeaderView(
+                            onProfileTap: handleProfileTap,
+                            onSettingsTap: handleSettingsTap
+                        )
                         
                         greetingView
                         
@@ -81,7 +84,9 @@ struct HomeView: View {
             }
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden()
-            
+            .navigationDestination(isPresented: $navigateToWeekDetail) {
+                WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan)
+            }
         }
         
     }
@@ -119,18 +124,28 @@ extension HomeView {
         }
     }
     
-    // handle grocery list tap fucn
+    // handle grocery list tap function
     private func handleGroceryListTap() {
-            // Navigate to grocery list
-            print("Grocery List tapped")
-        }
+        // Navigate to week detail view
+        navigateToWeekDetail = true
+    }
     
     //explore recipe fucntion
     private func handleExploreRecipesTap() {
         selectedTab = 2
         }
     
+    // handle profile tap function
+    private func handleProfileTap() {
+        // Navigate to profile tab
+        selectedTab = 3
+    }
     
+    // handle settings tap function
+    private func handleSettingsTap() {
+        // Navigate to profile tab (settings are in profile view)
+        selectedTab = 3
+    }
     
 }
 
