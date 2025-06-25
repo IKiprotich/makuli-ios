@@ -8,13 +8,18 @@
 import SwiftUI
 
 struct HeaderView: View {
+    let onProfileTap: () -> Void
+    let onSettingsTap: () -> Void
+    
     var body: some View {
         HStack{
             //profile image
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .frame(width: 40, height: 40)
-                .foregroundColor(AppColors.textCharcoal)
+            Button(action: onProfileTap) {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(AppColors.textCharcoal)
+            }
             
             Spacer()
             
@@ -26,9 +31,7 @@ struct HeaderView: View {
             Spacer()
             
             //settings button
-            Button(action: {
-                //to handle redirect to settings
-            }) {
+            Button(action: onSettingsTap) {
                 Image(systemName: "gearshape")
                     .font(.title2)
                     .foregroundColor(AppColors.textCharcoal)
@@ -39,5 +42,8 @@ struct HeaderView: View {
 }
 
 #Preview {
-    HeaderView()
+    HeaderView(
+        onProfileTap: {},
+        onSettingsTap: {}
+    )
 }
