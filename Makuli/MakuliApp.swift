@@ -6,23 +6,23 @@
 //
 
 import SwiftUI
-import Firebase
-
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
-    return true
-  }
-}
 
 @main
 struct MakuliApp: App {
+    
+    init() {
+        _ = SupabaseManager.shared
+        print("✅ Supabase initialized")
+    }
+
     var body: some Scene {
+        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         WindowGroup {
-            ContentView()
+            if hasCompletedOnboarding {
+                AppTabView()
+            } else {
+                OnboardingView()
+            }
         }
     }
 }
