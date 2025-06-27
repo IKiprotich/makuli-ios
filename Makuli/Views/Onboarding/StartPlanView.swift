@@ -7,10 +7,19 @@
 
 import SwiftUI
 
+// Profile data struct for Supabase
+struct ProfileUpdateData: Encodable {
+    let age: Int
+    let gender: String
+    let diet: String
+    let budget: String
+    let updated_at: String
+}
+
 struct StartPlanView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var hasCompletedOnboarding: Bool
-    @State private var showingAppTabView = false
+    @EnvironmentObject var authManager: AuthManager
     
     var body: some View {
         ZStack {
@@ -95,8 +104,16 @@ struct StartPlanView: View {
                 Spacer()
                 
                 Button(action: {
+                    // Save onboarding data to user profile
+                    Task {
+                        await saveOnboardingData()
+                    }
+                    
+                    // Mark onboarding as completed
                     hasCompletedOnboarding = true
-                    showingAppTabView = true
+                    
+                    // Notify that onboarding is completed
+                    NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
                 }) {
                     Text("Start My Meal Plan")
                         .font(.headline)
@@ -110,8 +127,27 @@ struct StartPlanView: View {
                 .padding(.bottom, 50)
             }
         }
-        .fullScreenCover(isPresented: $showingAppTabView) {
-            AppTabView()
+    }
+    
+    private func saveOnboardingData() async {
+        guard let user = authManager.user else { return }
+        
+        do {
+            let profileData = ProfileUpdateData(
+                age: onboardingData.age,
+                gender: onboardingData.gender,
+                diet: onboardingData.dietPreferences.joined(separator: ", "),
+                budget: onboardingData.budget,
+                updated_at: ISO8601DateFormatter().string(from: Date())
+            )
+            
+            try await SupabaseManager.shared.client
+                .from("profiles")
+                .update(profileData)
+                .eq("id", value: user.email) 
+                .execute()
+        } catch {
+            print("Error saving onboarding data: \(error)")
         }
     }
 }
@@ -128,4 +164,5 @@ struct StartPlanView: View {
         onboardingData: data,
         hasCompletedOnboarding: .constant(false)
     )
+    .environmentObject(AuthManager())
 }

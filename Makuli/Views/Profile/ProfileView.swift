@@ -9,11 +9,15 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @State private var user = mockUser
+    @EnvironmentObject var authManager: AuthManager
     @State private var mealReminders = false
     @State private var darkMode = false
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
+    
+    private var user: User {
+        authManager.user ?? mockUser
+    }
     
     var body: some View {
         NavigationView {
@@ -337,8 +341,9 @@ extension ProfileView {
     
     private func handleLogout() {
         print("User logged out")
-        // TODO: Implement logout logic
-        // Clear user session, navigate to auth screen
+        Task {
+            await authManager.signOut()
+        }
     }
     
     private func handleDeleteAccount() {
