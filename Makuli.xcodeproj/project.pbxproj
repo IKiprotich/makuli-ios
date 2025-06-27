@@ -13,18 +13,32 @@
 		0A1DB19A2E0DCD3800F82D54 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1DB1992E0DCD3800F82D54 /* Realtime */; };
 		0A1DB19C2E0DCD3800F82D54 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1DB19B2E0DCD3800F82D54 /* Storage */; };
 		0A1DB21F2E0DDCFC00F82D54 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1DB21E2E0DDCFC00F82D54 /* Supabase */; };
-		0A5C4C422E02C48A0020B344 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C412E02C48A0020B344 /* FirebaseAuth */; };
-		0A5C4C442E02C48A0020B344 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C432E02C48A0020B344 /* FirebaseFirestore */; };
-		0A5C4C462E02C48A0020B344 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 0A5C4C452E02C48A0020B344 /* FirebaseStorage */; };
+		0AF3527E2E0E97E800CB84F1 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0AF3527D2E0E97E800CB84F1 /* GoogleSignIn */; };
+		0AF352802E0E97E800CB84F1 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 0AF3527F2E0E97E800CB84F1 /* GoogleSignInSwift */; };
+		0AF352842E0E9B7800CB84F1 /* Google Auth Client.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0AF352832E0E9B7800CB84F1 /* Google Auth Client.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0AAF1CDD2E03F581002B62CF /* Makuli.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Makuli.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0AF352832E0E9B7800CB84F1 /* Google Auth Client.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Google Auth Client.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0AF352822E0E989600CB84F1 /* Exceptions for "Makuli" folder in "Makuli" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0A5C4C1B2E02B9900020B344 /* Makuli */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0A5C4C1E2E02B9900020B344 /* Makuli */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0AF352822E0E989600CB84F1 /* Exceptions for "Makuli" folder in "Makuli" target */,
+			);
 			path = Makuli;
 			sourceTree = "<group>";
 		};
@@ -38,12 +52,11 @@
 				0A1DB19A2E0DCD3800F82D54 /* Realtime in Frameworks */,
 				0A1DB1982E0DCD3800F82D54 /* PostgREST in Frameworks */,
 				0A1DB1962E0DCD3800F82D54 /* Functions in Frameworks */,
-				0A5C4C422E02C48A0020B344 /* FirebaseAuth in Frameworks */,
 				0A1DB19C2E0DCD3800F82D54 /* Storage in Frameworks */,
+				0AF3527E2E0E97E800CB84F1 /* GoogleSignIn in Frameworks */,
 				0A1DB21F2E0DDCFC00F82D54 /* Supabase in Frameworks */,
-				0A5C4C442E02C48A0020B344 /* FirebaseFirestore in Frameworks */,
 				0A1DB1942E0DCD3800F82D54 /* Auth in Frameworks */,
-				0A5C4C462E02C48A0020B344 /* FirebaseStorage in Frameworks */,
+				0AF352802E0E97E800CB84F1 /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,6 +68,7 @@
 			children = (
 				0A5C4C1E2E02B9900020B344 /* Makuli */,
 				0AAF1CDD2E03F581002B62CF /* Makuli.app */,
+				0AF352832E0E9B7800CB84F1 /* Google Auth Client.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -78,15 +92,14 @@
 			);
 			name = Makuli;
 			packageProductDependencies = (
-				0A5C4C412E02C48A0020B344 /* FirebaseAuth */,
-				0A5C4C432E02C48A0020B344 /* FirebaseFirestore */,
-				0A5C4C452E02C48A0020B344 /* FirebaseStorage */,
 				0A1DB1932E0DCD3800F82D54 /* Auth */,
 				0A1DB1952E0DCD3800F82D54 /* Functions */,
 				0A1DB1972E0DCD3800F82D54 /* PostgREST */,
 				0A1DB1992E0DCD3800F82D54 /* Realtime */,
 				0A1DB19B2E0DCD3800F82D54 /* Storage */,
 				0A1DB21E2E0DDCFC00F82D54 /* Supabase */,
+				0AF3527D2E0E97E800CB84F1 /* GoogleSignIn */,
+				0AF3527F2E0E97E800CB84F1 /* GoogleSignInSwift */,
 			);
 			productName = Makuli;
 			productReference = 0AAF1CDD2E03F581002B62CF /* Makuli.app */;
@@ -117,8 +130,8 @@
 			mainGroup = 0A5C4C132E02B9900020B344;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				0A1DB1922E0DCD3800F82D54 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				0AF3527C2E0E97E800CB84F1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0A5C4C132E02B9900020B344;
@@ -135,6 +148,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AF352842E0E9B7800CB84F1 /* Google Auth Client.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,6 +296,7 @@
 				DEVELOPMENT_TEAM = 2GK5HW9YR2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Makuli/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -310,6 +325,7 @@
 				DEVELOPMENT_TEAM = 2GK5HW9YR2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Makuli/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -360,12 +376,12 @@
 				minimumVersion = 2.5.1;
 			};
 		};
-		0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		0AF3527C2E0E97E800CB84F1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 11.14.0;
+				minimumVersion = 8.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -400,20 +416,15 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = Supabase;
 		};
-		0A5C4C412E02C48A0020B344 /* FirebaseAuth */ = {
+		0AF3527D2E0E97E800CB84F1 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
+			package = 0AF3527C2E0E97E800CB84F1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
-		0A5C4C432E02C48A0020B344 /* FirebaseFirestore */ = {
+		0AF3527F2E0E97E800CB84F1 /* GoogleSignInSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		0A5C4C452E02C48A0020B344 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0A5C4C3E2E02C3420020B344 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
+			package = 0AF3527C2E0E97E800CB84F1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
