@@ -14,11 +14,9 @@ struct MainAppView: View {
     var body: some View {
         Group {
             if hasCompletedOnboarding {
-                // User has completed onboarding, show main app
                 AppTabView()
                     .environmentObject(authManager)
             } else {
-                // User needs to complete onboarding first
                 OnboardingView()
                     .environmentObject(authManager)
             }

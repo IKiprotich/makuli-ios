@@ -8,19 +8,24 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var authManager = AuthManager()
+    
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Karibu Makuli!")
-                .font(AppFonts.title2())
-                .foregroundStyle(AppColors.textCharcoal)
-            
-            Button("Start Planning") { }
-                .primaryButtonStyle()
+        Group {
+            if authManager.user != nil {
+                MainAppView()
+                    .environmentObject(authManager)
+            } else {
+                AuthView()
+                    .environmentObject(authManager)
+            }
         }
-        .padding()
-        .background(AppColors.bgCream)
     }
 }
-#Preview {
-    ContentView()
+
+// MARK: - Preview
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

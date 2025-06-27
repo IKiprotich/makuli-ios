@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 
 @main
 struct MakuliApp: App {
@@ -16,13 +17,11 @@ struct MakuliApp: App {
     }
 
     var body: some Scene {
-        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         WindowGroup {
-            if hasCompletedOnboarding {
-                AppTabView()
-            } else {
-                OnboardingView()
-            }
+            ContentView()
+                .onOpenURL { url in
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }
