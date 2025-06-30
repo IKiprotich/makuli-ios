@@ -8,57 +8,36 @@
 import SwiftUI
 
 struct PlansView: View {
-    
-    @State private var weekPlans = WeekPlan.mockData
-    @State private var selectedWeek: WeekPlan?
-    
-    var activePlan: WeekPlan? {
-        weekPlans.first {$0.isActive}
-    }
-    
-    var pastPlans: [WeekPlan] {
-        weekPlans.filter{ !$0.isActive}.sorted { $0.weekNumber > $1.weekNumber}
-    }
-    
+    @StateObject private var viewModel = PlansViewModel()
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    
-                    //header with add button
+                    // Header with add button
                     headerSection
                     
-                    //week carousel section
+                    // Week carousel section
                     weekCarouselSection
                     
-                    //current active plan section
-                    if let activePlan = activePlan {
+                    // Current active plan section
+                    if let activePlan = viewModel.activePlan {
                         currentPlansSection(activePlan)
                     }
                     
-                    //previous plans section
+                    // Previous plans section
                     previousPlansSection
-
                 }
                 .padding(.top, 8)
             }
             .navigationBarHidden(true)
             .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
         }
-        .onAppear {
-            selectedWeek = weekPlans.first
-        }
     }
-    
-    
 }
 
-
-
 extension PlansView {
-    
-    //headersection
+    // MARK: - UI Components
     private var headerSection: some View {
         HStack {
             Text("My Meal Plans")
@@ -69,7 +48,7 @@ extension PlansView {
             Spacer()
             
             Button {
-                //implement the add plan functionality later
+                viewModel.addNewPlan()
             } label: {
                 Image(systemName: "plus")
                     .font(.title2)
@@ -82,86 +61,38 @@ extension PlansView {
                     )
             }
             .accessibilityLabel("Add a new meal plan")
-
         }
         .padding(.horizontal, 20)
     }
     
-    //week carousel section
     private var weekCarouselSection: some View {
-        WeekCarouselView(weeks: weekPlans, selectedWeek: $selectedWeek )
+        WeekCarouselView(weeks: viewModel.weekPlans, selectedWeek: $viewModel.selectedWeek)
     }
     
-    //current plans section
     private func currentPlansSection(_ plan: WeekPlan) -> some View {
         CurrentPlanCard(plan: plan)
             .padding(.horizontal, 20)
     }
     
-    
-    //previous plans section
     private var previousPlansSection: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Previous Plans")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(AppColors.textCharcoal)
-                    .padding(.horizontal, 20)
-                
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(pastPlans) { plan in
-                        NavigationLink(destination: WeekDetailView(weekPlan: plan)) {
-                            PreviousPlanRow(plan: plan)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.horizontal, 20)
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Previous Plans")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(AppColors.textCharcoal)
+                .padding(.horizontal, 20)
+            
+            LazyVStack(alignment: .leading, spacing: 16) {
+                ForEach(viewModel.pastPlans) { plan in
+                    NavigationLink(destination: WeekDetailView(weekPlan: plan)) {
+                        PreviousPlanRow(plan: plan)
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.horizontal, 20)
                 }
             }
-        }
-    
-    // previous plan row section
-    struct PreviousPlanRow: View {
-        
-        let plan: WeekPlan
-        
-        var body: some View {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    
-                    Text(plan.weekTitle)
-                        .font(.headline)
-                        .foregroundColor(AppColors.textCharcoal)
-                    
-                    
-                    Text(plan.planName)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
-            }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.05), radius: 4)
-            )
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(Text("Previous plan: \(plan.planName) from week \(plan.weekNumber)"))
-            .accessibilityHint(Text("Tap to view details"))
         }
     }
-    
-    
-    
-    
 }
 
 #Preview {

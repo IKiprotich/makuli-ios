@@ -8,18 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var authManager = AuthManager()
-    
     var body: some View {
-        Group {
-            if authManager.user != nil {
-                MainAppView()
-                    .environmentObject(authManager)
-            } else {
-                AuthView()
-                    .environmentObject(authManager)
-            }
-        }
+        MainAppView()
     }
 }
 

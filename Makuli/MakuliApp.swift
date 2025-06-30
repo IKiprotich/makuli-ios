@@ -13,7 +13,7 @@ struct MakuliApp: App {
     
     init() {
         _ = SupabaseManager.shared
-        print("✅ Supabase initialized")
+        Logger.info("Supabase initialized")
     }
 
     var body: some Scene {

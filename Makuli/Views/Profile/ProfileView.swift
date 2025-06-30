@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var mealReminders = false
     @State private var darkMode = false
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
     
     private var user: User {
-        authManager.user ?? mockUser
+        authViewModel.user ?? MockData.mockUser
     }
     
     var body: some View {
@@ -297,32 +297,32 @@ extension ProfileView {
     
     // MARK: - Action Handlers
     private func handleEditProfile() {
-        print("Edit Profile tapped")
+                    Logger.debug("Edit Profile tapped")
         // TODO: Navigate to edit profile screen
     }
     
     private func handleUpdatePreferences() {
-        print("Update Preferences tapped")
+        Logger.debug("Update Preferences tapped")
         // TODO: Navigate to preferences screen
     }
     
     private func handleUpgradeToPremium() {
-        print("Upgrade to Premium tapped")
+        Logger.debug("Upgrade to Premium tapped")
         // TODO: Present premium upgrade flow
     }
     
     private func handleManageSubscription() {
-        print("Manage Subscription tapped")
+        Logger.debug("Manage Subscription tapped")
         // TODO: Present subscription management
     }
     
     private func handleHelpCenter() {
-        print("Help Center tapped")
+        Logger.debug("Help Center tapped")
         // TODO: Navigate to help center
     }
     
     private func handleContactUs() {
-        print("Contact Us tapped")
+        Logger.debug("Contact Us tapped")
         // TODO: Open contact options (WhatsApp, email, etc.)
         if let whatsappURL = URL(string: "https://wa.me/254728925915") {
             UIApplication.shared.open(whatsappURL)
@@ -330,24 +330,24 @@ extension ProfileView {
     }
     
     private func handlePrivacyPolicy() {
-        print("Privacy Policy tapped")
+        Logger.debug("Privacy Policy tapped")
         // TODO: Present privacy policy
     }
     
     private func handleTermsOfUse() {
-        print("Terms of Use tapped")
+        Logger.debug("Terms of Use tapped")
         // TODO: Present terms of use
     }
     
     private func handleLogout() {
-        print("User logged out")
+        Logger.authEvent("User logged out from profile")
         Task {
-            await authManager.signOut()
+            await authViewModel.signOut()
         }
     }
     
     private func handleDeleteAccount() {
-        print("Account deletion requested")
+        Logger.warning("Account deletion requested")
         // TODO: Implement account deletion
         // API call to delete user data, clear local storage
     }

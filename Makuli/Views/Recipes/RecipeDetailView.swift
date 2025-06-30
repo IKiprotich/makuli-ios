@@ -190,7 +190,7 @@ extension RecipeDetailView {
     //MARK: ACTIONS
     private func addToPlan(){
         //implement the add to plan functionality later
-        print("Adding \(recipe.title) to plan")
+        Logger.debug("Adding recipe to plan")
     }
     
     

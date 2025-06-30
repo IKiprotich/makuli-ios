@@ -9,95 +9,51 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var selectedTab: Int
-    @State private var navigateToWeekDetail = false
-    
-    //sample meals
-    private let sampleMeals = [
-            MealPlan(
-                mealType: .breakfast,
-                name: "Kenyan Chai and Mandazi",
-                duration: 30,
-                difficulty: .easy,
-                imageName: "cup.and.saucer.fill",
-                backgroundColor: "orange"
-            ),
-            MealPlan(
-                mealType: .lunch,
-                name: "Sukuma Wiki with Ugali",
-                duration: 45,
-                difficulty: .medium,
-                imageName: "leaf.fill",
-                backgroundColor: "green"
-            ),
-            MealPlan(
-                mealType: .dinner,
-                name: "Nyama Choma with Kachumbari",
-                duration: 60,
-                difficulty: .hard,
-                imageName: "flame.fill",
-                backgroundColor: "red"
-            )
-        ]
-    
-    //sample metrics
-    private let sampleMetrics = [
-           ProgressMetrics(title: "Meals Cooked", value: "12", change: "+10%", isPositive: true),
-           ProgressMetrics(title: "Budget Usage", value: "Ksh 2,500", change: "-5%", isPositive: false),
-           ProgressMetrics(title: "Consistency Streak", value: "7 days", change: "+20%", isPositive: true)
-       ]
-    
-    
+    @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
         NavigationStack {
-            ZStack{
-                
+            ZStack {
                 AppColors.bgCream
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                         HeaderView(
-                            onProfileTap: handleProfileTap,
-                            onSettingsTap: handleSettingsTap
+                            onProfileTap: { viewModel.handleProfileTap(selectedTab: $selectedTab) },
+                            onSettingsTap: { viewModel.handleSettingsTap(selectedTab: $selectedTab) }
                         )
                         
                         greetingView
                         
-                        TodaysMealPlanSection(meals: sampleMeals)
+                        TodaysMealPlanSection(meals: viewModel.sampleMeals)
                         
-                        QuickAccessSection(onGroceryListTap:handleGroceryListTap ,
-                                           onExploreRecipeTap: handleExploreRecipesTap)
+                        QuickAccessSection(
+                            onGroceryListTap: viewModel.handleGroceryListTap,
+                            onExploreRecipeTap: { viewModel.handleExploreRecipesTap(selectedTab: $selectedTab) }
+                        )
                         
-                        ProgressTrackerSection(metrics: sampleMetrics)
+                        ProgressTrackerSection(metrics: viewModel.sampleMetrics)
                         
                         featuredMealView
                         
                         Spacer(minLength: 100)
                     }
                     .padding(.horizontal, 16)
-                    
                 }
                 .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
-                
-                
             }
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden()
-            .navigationDestination(isPresented: $navigateToWeekDetail) {
+            .navigationDestination(isPresented: $viewModel.navigateToWeekDetail) {
                 WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan)
             }
         }
-        
     }
-    
 }
 
-
-
 extension HomeView {
-    
-    //greeting view
+    // MARK: - UI Components
     private var greetingView: some View {
         HStack {
             Text("Good Morning, Ian 👋")
@@ -107,7 +63,6 @@ extension HomeView {
         }
     }
     
-    //featured meal view
     private var featuredMealView: some View {
         VStack {
             Image(systemName: "photo")
@@ -116,37 +71,15 @@ extension HomeView {
                 .frame(height: 200)
                 .frame(maxWidth: .infinity)
                 .background(
-                    LinearGradient(gradient: Gradient(colors: [.primary.opacity(0.3), .brown.opacity(0.3)]),
-                                   startPoint: .topLeading,
-                                   endPoint: .bottomTrailing)
+                    LinearGradient(
+                        gradient: Gradient(colors: [.primary.opacity(0.3), .brown.opacity(0.3)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                 )
                 .cornerRadius(16)
         }
     }
-    
-    // handle grocery list tap function
-    private func handleGroceryListTap() {
-        // Navigate to week detail view
-        navigateToWeekDetail = true
-    }
-    
-    //explore recipe fucntion
-    private func handleExploreRecipesTap() {
-        selectedTab = 2
-        }
-    
-    // handle profile tap function
-    private func handleProfileTap() {
-        // Navigate to profile tab
-        selectedTab = 3
-    }
-    
-    // handle settings tap function
-    private func handleSettingsTap() {
-        // Navigate to profile tab (settings are in profile view)
-        selectedTab = 3
-    }
-    
 }
 
 #Preview {
