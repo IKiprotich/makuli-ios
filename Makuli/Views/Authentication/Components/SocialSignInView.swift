@@ -9,12 +9,12 @@ import SwiftUI
 import GoogleSignIn
 
 struct SocialSignInView: View {
-    let authManager: AuthManager
+    let authViewModel: AuthViewModel
     
     var body: some View {
         VStack(spacing: 12) {
             // Google Sign In Button
-            GoogleSignInButton(authManager: authManager)
+            GoogleSignInButton(authViewModel: authViewModel)
         }
         .padding(.horizontal)
     }
@@ -22,12 +22,12 @@ struct SocialSignInView: View {
 
 // MARK: - Google Sign In Button
 struct GoogleSignInButton: View {
-    let authManager: AuthManager
+    let authViewModel: AuthViewModel
     
     var body: some View {
         Button(action: {
             Task {
-                await authManager.signInWithGoogle()
+                await authViewModel.signInWithGoogle()
             }
         }) {
             HStack {
@@ -41,14 +41,14 @@ struct GoogleSignInButton: View {
             .foregroundColor(.primary)
             .cornerRadius(10)
         }
-        .disabled(authManager.isLoading)
+        .disabled(authViewModel.isLoading)
     }
 }
 
 // MARK: - Preview
 struct SocialSignInView_Previews: PreviewProvider {
     static var previews: some View {
-        SocialSignInView(authManager: AuthManager())
+        SocialSignInView(authViewModel: AuthViewModel())
             .padding()
     }
 } 

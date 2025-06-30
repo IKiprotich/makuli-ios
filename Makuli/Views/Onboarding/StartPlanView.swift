@@ -7,19 +7,10 @@
 
 import SwiftUI
 
-// Profile data struct for Supabase
-struct ProfileUpdateData: Encodable {
-    let age: Int
-    let gender: String
-    let diet: String
-    let budget: String
-    let updated_at: String
-}
-
 struct StartPlanView: View {
     @ObservedObject var onboardingData: OnboardingData
-    @Binding var hasCompletedOnboarding: Bool
-    @EnvironmentObject var authManager: AuthManager
+    @ObservedObject var onboardingViewModel: OnboardingViewModel
+    let authViewModel: AuthViewModel
     
     var body: some View {
         ZStack {
@@ -104,50 +95,35 @@ struct StartPlanView: View {
                 Spacer()
                 
                 Button(action: {
-                    // Save onboarding data to user profile
                     Task {
-                        await saveOnboardingData()
+                        await onboardingViewModel.completeOnboarding(
+                            age: onboardingData.age,
+                            gender: onboardingData.gender,
+                            diet: onboardingData.dietPreferences.joined(separator: ", "),
+                            budget: onboardingData.budget,
+                            authViewModel: authViewModel
+                        )
                     }
-                    
-                    // Mark onboarding as completed
-                    hasCompletedOnboarding = true
-                    
-                    // Notify that onboarding is completed
-                    NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
                 }) {
-                    Text("Start My Meal Plan")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(AppColors.primaryOrange)
-                        .cornerRadius(12)
+                    HStack {
+                        if onboardingViewModel.isCompleting {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        }
+                        Text(onboardingViewModel.isCompleting ? "Setting up..." : "Start My Meal Plan")
+                            .font(.headline)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(AppColors.primaryOrange)
+                    .cornerRadius(12)
                 }
+                .disabled(onboardingViewModel.isCompleting)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
             }
-        }
-    }
-    
-    private func saveOnboardingData() async {
-        guard let user = authManager.user else { return }
-        
-        do {
-            let profileData = ProfileUpdateData(
-                age: onboardingData.age,
-                gender: onboardingData.gender,
-                diet: onboardingData.dietPreferences.joined(separator: ", "),
-                budget: onboardingData.budget,
-                updated_at: ISO8601DateFormatter().string(from: Date())
-            )
-            
-            try await SupabaseManager.shared.client
-                .from("profiles")
-                .update(profileData)
-                .eq("id", value: user.email) 
-                .execute()
-        } catch {
-            print("Error saving onboarding data: \(error)")
         }
     }
 }
@@ -162,7 +138,7 @@ struct StartPlanView: View {
     
     return StartPlanView(
         onboardingData: data,
-        hasCompletedOnboarding: .constant(false)
+        onboardingViewModel: OnboardingViewModel(),
+        authViewModel: AuthViewModel()
     )
-    .environmentObject(AuthManager())
 }

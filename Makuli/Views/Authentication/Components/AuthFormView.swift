@@ -11,7 +11,7 @@ struct AuthFormView: View {
     @Binding var email: String
     @Binding var password: String
     let isSignUp: Bool
-    let authManager: AuthManager
+    let authViewModel: AuthViewModel
     
     var body: some View {
         VStack(spacing: 16) {
@@ -33,14 +33,14 @@ struct AuthFormView: View {
             // Submit Button
             AuthSubmitButton(
                 isSignUp: isSignUp,
-                isLoading: authManager.isLoading,
-                isDisabled: authManager.isLoading || email.isEmpty || password.isEmpty
+                isLoading: authViewModel.isLoading,
+                isDisabled: authViewModel.isLoading || email.isEmpty || password.isEmpty
             ) {
                 Task {
                     if isSignUp {
-                        await authManager.signUp(email: email, password: password)
+                        await authViewModel.signUp(email: email, password: password)
                     } else {
-                        await authManager.signIn(email: email, password: password)
+                        await authViewModel.signIn(email: email, password: password)
                     }
                 }
             }
@@ -111,7 +111,7 @@ struct AuthFormView_Previews: PreviewProvider {
             email: .constant("test@example.com"),
             password: .constant("password"),
             isSignUp: false,
-            authManager: AuthManager()
+            authViewModel: AuthViewModel()
         )
         .padding()
     }

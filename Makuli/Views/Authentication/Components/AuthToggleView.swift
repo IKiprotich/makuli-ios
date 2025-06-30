@@ -9,12 +9,12 @@ import SwiftUI
 
 struct AuthToggleView: View {
     @Binding var isSignUp: Bool
-    let authManager: AuthManager
+    let authViewModel: AuthViewModel
     
     var body: some View {
         Button(action: {
             isSignUp.toggle()
-            authManager.errorMessage = nil
+            authViewModel.errorMessage = nil
         }) {
             Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
                 .font(.footnote)
@@ -27,8 +27,8 @@ struct AuthToggleView: View {
 struct AuthToggleView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {
-            AuthToggleView(isSignUp: .constant(false), authManager: AuthManager())
-            AuthToggleView(isSignUp: .constant(true), authManager: AuthManager())
+            AuthToggleView(isSignUp: .constant(false), authViewModel: AuthViewModel())
+            AuthToggleView(isSignUp: .constant(true), authViewModel: AuthViewModel())
         }
         .padding()
     }

@@ -8,34 +8,43 @@
 import SwiftUI
 
 struct MainAppView: View {
-    @EnvironmentObject var authManager: AuthManager
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @StateObject private var authViewModel = AuthViewModel()
     
     var body: some View {
         Group {
-            if hasCompletedOnboarding {
-                AppTabView()
-                    .environmentObject(authManager)
-            } else {
+            if authViewModel.user == nil {
+                // User not logged in - show auth view
+                AuthView()
+                    .onAppear {
+                        Logger.info("Showing AuthView - no user logged in")
+                    }
+            } else if authViewModel.user?.isOnboardingCompleted == false {
+                // User logged in but onboarding not completed - show onboarding
                 OnboardingView()
-                    .environmentObject(authManager)
+                    .onAppear {
+                        Logger.info("Showing OnboardingView - user needs to complete onboarding")
+                    }
+            } else {
+                // User logged in and onboarding completed - show main app
+                AppTabView()
+                    .onAppear {
+                        Logger.info("Showing AppTabView - user fully authenticated and onboarded")
+                    }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { _ in
-            hasCompletedOnboarding = true
+        .environmentObject(authViewModel)
+        .onChange(of: authViewModel.user?.isOnboardingCompleted) { _, newValue in
+            if let completed = newValue {
+                Logger.debug("Onboarding status changed: \(completed)")
+            }
         }
     }
-}
-
-// MARK: - Notification Extension
-extension Notification.Name {
-    static let onboardingCompleted = Notification.Name("onboardingCompleted")
 }
 
 // MARK: - Preview
 struct MainAppView_Previews: PreviewProvider {
     static var previews: some View {
         MainAppView()
-            .environmentObject(AuthManager())
     }
 } 
+

@@ -10,8 +10,9 @@ import SwiftUI
 
 struct OnboardingView: View {
     @StateObject private var onboardingData = OnboardingData()
+    @StateObject private var onboardingViewModel = OnboardingViewModel()
     @State private var currentPage = 0
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     private let totalPages = 7
     
@@ -53,7 +54,8 @@ struct OnboardingView: View {
                 
                 StartPlanView(
                     onboardingData: onboardingData,
-                    hasCompletedOnboarding: $hasCompletedOnboarding
+                    onboardingViewModel: onboardingViewModel,
+                    authViewModel: authViewModel
                 )
                 .tag(6)
             }
@@ -61,9 +63,13 @@ struct OnboardingView: View {
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            Logger.debug("OnboardingView appeared - User needs to complete onboarding")
+        }
     }
 }
 
 #Preview {
     OnboardingView()
+        .environmentObject(AuthViewModel())
 }

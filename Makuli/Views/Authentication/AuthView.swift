@@ -9,7 +9,7 @@ import SwiftUI
 import GoogleSignIn
 
 struct AuthView: View {
-    @StateObject private var authManager = AuthManager()
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var isSignUp = false
     @State private var firstName = ""
     @State private var email = ""
@@ -82,7 +82,7 @@ struct AuthView: View {
                     // Submit Button
                     Button(action: handleSubmit) {
                         HStack {
-                            if authManager.isLoading {
+                            if authViewModel.isLoading {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                     .scaleEffect(0.8)
@@ -96,7 +96,7 @@ struct AuthView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                     }
-                    .disabled(!isSubmitEnabled || authManager.isLoading)
+                    .disabled(!isSubmitEnabled || authViewModel.isLoading)
                 }
                 
                 // Toggle Sign Up/Sign In
@@ -128,7 +128,7 @@ struct AuthView: View {
                 // Google Sign In Button
                 Button(action: {
                     Task {
-                        await authManager.signInWithGoogle()
+                        await authViewModel.signInWithGoogle()
                     }
                 }) {
                     HStack {
@@ -150,16 +150,33 @@ struct AuthView: View {
                     .cornerRadius(12)
                     .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                 }
-                .disabled(authManager.isLoading)
+                .disabled(authViewModel.isLoading)
                 
                 // Error Message
-                if let errorMessage = authManager.errorMessage {
+                if let errorMessage = authViewModel.errorMessage {
                     Text(errorMessage)
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(AppColors.warnRed)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
+                
+                // Test Connection Button (for debugging)
+                // Button(action: {
+                //     Task {
+                //         let isConnected = await SupabaseManager.shared.testConnection()
+                //         if isConnected {
+                //             print("🎉 Supabase is properly configured and accessible!")
+                //         } else {
+                //             print("⚠️ Supabase connection issues detected - check your configuration")
+                //         }
+                //     }
+                // }) {
+                //     Text("Test Supabase Connection")
+                //         .font(.system(size: 12, weight: .medium, design: .rounded))
+                //         .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                // }
+                // .padding(.top, 8)
                 
                 Spacer()
             }
@@ -188,9 +205,9 @@ struct AuthView: View {
     private func handleSubmit() {
         Task {
             if isSignUp {
-                await authManager.signUp(email: email, password: password)
+                await authViewModel.signUp(email: email, password: password)
             } else {
-                await authManager.signIn(email: email, password: password)
+                await authViewModel.signIn(email: email, password: password)
             }
         }
     }
@@ -200,14 +217,14 @@ struct AuthView: View {
         email = ""
         password = ""
         focusedField = nil
-        authManager.errorMessage = nil
+        authViewModel.errorMessage = nil
     }
     
     private func configureGoogleSignIn() {
         guard let path = Bundle.main.path(forResource: "Google Auth Client", ofType: "plist"),
               let plist = NSDictionary(contentsOfFile: path),
               let clientId = plist["CLIENT_ID"] as? String else {
-            print("Failed to get Google Client ID")
+                            Logger.error("Failed to get Google Client ID")
             return
         }
         
