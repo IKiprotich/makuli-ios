@@ -18,17 +18,5 @@ struct User {
     var isPremium: Bool
     var subscriptionRenewalDate: String?
     var profileImageURL: String?
+    var isOnboardingCompleted: Bool
 }
-
-// MARK: - Mock Data
-let mockUser = User(
-    name: "Ian Kiprotich",
-    email: "ian.kiprotich@email.com",
-    age: 24,
-    gender: "Male",
-    diet: "Vegetarian",
-    budget: "Ksh 5,000 - Ksh 10,000",
-    isPremium: true,
-    subscriptionRenewalDate: "2024-08-15",
-    profileImageURL: nil
-)
