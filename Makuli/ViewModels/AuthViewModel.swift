@@ -1,0 +1,47 @@
+//
+//  AuthViewModel.swift
+//  Makuli
+//
+//  Created by Ian   on 30/06/2025.
+//
+
+import Foundation
+import Combine
+
+@MainActor
+class AuthViewModel: ObservableObject {
+    @Published var user: User?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let authManager = AuthManager()
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        // Bind AuthManager's published properties to this ViewModel
+        authManager.$user.assign(to: &$user)
+        authManager.$isLoading.assign(to: &$isLoading)
+        authManager.$errorMessage.assign(to: &$errorMessage)
+    }
+    
+    func signUp(email: String, password: String) async {
+        await authManager.signUp(email: email, password: password)
+    }
+    
+    func signIn(email: String, password: String) async {
+        await authManager.signIn(email: email, password: password)
+    }
+    
+    func signInWithGoogle() async {
+        await authManager.signInWithGoogle()
+    }
+    
+    func signOut() async {
+        await authManager.signOut()
+    }
+    
+    func completeOnboarding(age: Int, gender: String, diet: String, budget: String) async {
+        await authManager.completeOnboarding(age: age, gender: gender, diet: diet, budget: budget)
+    }
+}
+
