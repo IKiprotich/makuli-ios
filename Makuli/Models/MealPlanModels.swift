@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Represents a weekly meal plan, including metadata and a list of meals for the week.
 struct WeekPlan: Identifiable, Hashable {
     let id = UUID()
     let weekNumber: Int
@@ -20,19 +21,23 @@ struct WeekPlan: Identifiable, Hashable {
     let isActive: Bool
     let meals: [Meal]
     
+    /// The percentage of meals completed in the week.
     var progressPercentage: Double {
         guard totalMeals > 0 else { return 0 }
         return Double(mealsCompleted) / Double(totalMeals)
     }
     
+    /// Returns the total cost formatted as a string in Ksh.
     var costFormatted: String {
         return "Ksh \(Int(totalCost).formatted())"
     }
     
+    /// Returns a short title for the week (e.g., "Wk 24").
     var weekTitle: String {
         return "Wk \(weekNumber)"
     }
     
+    /// Returns the formatted date range for the week.
     var dateRangeFormatted: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
@@ -42,6 +47,7 @@ struct WeekPlan: Identifiable, Hashable {
     }
 }
 
+/// Represents a single day's meal plan.
 struct DayPlan: Identifiable {
     let id = UUID()
     let date: Date
@@ -49,6 +55,7 @@ struct DayPlan: Identifiable {
     let isCompleted: Bool
 }
 
+/// Represents a single meal, including its category, difficulty, and optional recipe.
 struct Meal: Identifiable, Equatable, Hashable {
     let id = UUID()
     let name: String
@@ -79,6 +86,7 @@ struct Meal: Identifiable, Equatable, Hashable {
         hasher.combine(id)
     }
     
+    /// Meal category (breakfast, lunch, dinner) with icon for UI.
     enum MealCategory: String, CaseIterable, Codable {
         case breakfast = "Breakfast"
         case lunch = "Lunch"
@@ -93,6 +101,7 @@ struct Meal: Identifiable, Equatable, Hashable {
         }
     }
     
+    /// Difficulty level for preparing the meal.
     enum DifficultyLevel: String, CaseIterable, Codable {
         case easy = "Easy"
         case medium = "Medium"
@@ -101,6 +110,7 @@ struct Meal: Identifiable, Equatable, Hashable {
 }
 
 // MARK: - Mock Data Extensions
+// Provides mock data for previews and testing.
 extension WeekPlan {
     static let mockData: [WeekPlan] = [
         WeekPlan(
@@ -143,6 +153,7 @@ extension WeekPlan {
 }
 
 extension DayPlan {
+    /// Returns mock data for a week of day plans.
     static func mockData() -> [DayPlan] {
         let calendar = Calendar.current
         let today = Date()
@@ -157,12 +168,14 @@ extension DayPlan {
         }
     }
     
+    /// Returns the name of the day (e.g., Monday).
     var dayName: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE"
         return formatter.string(from: date)
     }
     
+    /// Returns the day number as a string.
     var dayNumber: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "d"
@@ -171,6 +184,7 @@ extension DayPlan {
 }
 
 // MARK: - Mock meal data with authentic Kenyan dishes
+/// Generates mock meals for a given day offset, used for previews and testing.
 func generateMockMealsForDay(dayOffset: Int) -> [Meal] {
     let kenyanMeals: [(String, Meal.MealCategory, Int, Recipe?)] = [
         // Breakfast options

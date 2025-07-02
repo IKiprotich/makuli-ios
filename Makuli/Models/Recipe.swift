@@ -6,6 +6,7 @@
 //
 import Foundation
 
+/// Represents a cooking recipe, including ingredients, steps, and metadata.
 struct Recipe: Identifiable, Hashable {
     let id: UUID
     let title: String
@@ -17,7 +18,7 @@ struct Recipe: Identifiable, Hashable {
     let substitutions: [String]?
     let tags: [String]
     
-    // initializer that accepts an ID
+    /// Custom initializer that allows specifying an ID (default is a new UUID).
     init(id: UUID = UUID(), title: String, cookTime: String, servings: Int, imageName: String?, ingredients: [Ingredient], steps: [String], substitutions: [String]?, tags: [String] = []) {
         self.id = id
         self.title = title
@@ -30,12 +31,12 @@ struct Recipe: Identifiable, Hashable {
         self.tags = tags
     }
     
-    // Custom Hashable implementation
+    /// Custom Hashable implementation based on the recipe's ID.
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
-    // Custom Equatable implementation
+    /// Custom Equatable implementation based on the recipe's ID.
     static func == (lhs: Recipe, rhs: Recipe) -> Bool {
         return lhs.id == rhs.id
     }
@@ -44,6 +45,7 @@ struct Recipe: Identifiable, Hashable {
 
 
 // **MARK: - Mock Data Extensions**
+// Provides mock recipes for previews and testing.
 extension Recipe {
     
     static func enhancedMockRecipes() -> [Recipe] {

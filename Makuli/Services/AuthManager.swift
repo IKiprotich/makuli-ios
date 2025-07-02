@@ -393,6 +393,7 @@ class AuthManager: ObservableObject {
     }
     
     // MARK: - Profile Data Structure
+    /// Represents a user profile as stored in the database (decodable from Supabase).
     private struct DatabaseProfile: Decodable {
         let id: String
         let name: String
@@ -407,6 +408,7 @@ class AuthManager: ObservableObject {
         let createdAt: String
         let isOnboardingCompleted: Bool
         
+        /// Maps struct properties to database column names for decoding.
         enum CodingKeys: String, CodingKey {
             case id
             case name
@@ -423,6 +425,7 @@ class AuthManager: ObservableObject {
         }
     }
     
+    /// Represents the data used to create or update a user profile in the database (encodable to Supabase).
     private struct ProfileData: Encodable {
         let id: String
         let name: String
@@ -437,6 +440,7 @@ class AuthManager: ObservableObject {
         let createdAt: Date
         let isOnboardingCompleted: Bool
         
+        /// Maps struct properties to database column names for encoding.
         enum CodingKeys: String, CodingKey {
             case id
             case name

@@ -282,6 +282,7 @@ extension ProfileView {
     }
     
     // MARK: - Helper Views
+    /// Helper view for section headers with an icon and title.
     private func sectionHeader(_ title: String, icon: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
@@ -296,31 +297,37 @@ extension ProfileView {
     }
     
     // MARK: - Action Handlers
+    /// Handles the edit profile action.
     private func handleEditProfile() {
-                    Logger.debug("Edit Profile tapped")
+        Logger.debug("Edit Profile tapped")
         // TODO: Navigate to edit profile screen
     }
     
+    /// Handles the update preferences action.
     private func handleUpdatePreferences() {
         Logger.debug("Update Preferences tapped")
         // TODO: Navigate to preferences screen
     }
     
+    /// Handles the upgrade to premium action.
     private func handleUpgradeToPremium() {
         Logger.debug("Upgrade to Premium tapped")
         // TODO: Present premium upgrade flow
     }
     
+    /// Handles the manage subscription action.
     private func handleManageSubscription() {
         Logger.debug("Manage Subscription tapped")
         // TODO: Present subscription management
     }
     
+    /// Handles the help center action.
     private func handleHelpCenter() {
         Logger.debug("Help Center tapped")
         // TODO: Navigate to help center
     }
     
+    /// Handles the contact us action (opens WhatsApp).
     private func handleContactUs() {
         Logger.debug("Contact Us tapped")
         // TODO: Open contact options (WhatsApp, email, etc.)
@@ -329,16 +336,19 @@ extension ProfileView {
         }
     }
     
+    /// Handles the privacy policy action.
     private func handlePrivacyPolicy() {
         Logger.debug("Privacy Policy tapped")
         // TODO: Present privacy policy
     }
     
+    /// Handles the terms of use action.
     private func handleTermsOfUse() {
         Logger.debug("Terms of Use tapped")
         // TODO: Present terms of use
     }
     
+    /// Handles the logout action.
     private func handleLogout() {
         Logger.authEvent("User logged out from profile")
         Task {
@@ -346,6 +356,7 @@ extension ProfileView {
         }
     }
     
+    /// Handles the delete account action.
     private func handleDeleteAccount() {
         Logger.warning("Account deletion requested")
         // TODO: Implement account deletion
