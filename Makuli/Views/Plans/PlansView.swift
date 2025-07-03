@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PlansView: View {
-    @StateObject private var viewModel = PlansViewModel()
+    @StateObject var viewModel = PlanViewModel()
     
     var body: some View {
         NavigationStack {
