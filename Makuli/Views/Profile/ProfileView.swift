@@ -14,6 +14,7 @@ struct ProfileView: View {
     @State private var darkMode = false
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
+    @StateObject var viewModel = ProfileViewModel()
     
     private var user: User {
         authViewModel.user ?? MockData.mockUser
