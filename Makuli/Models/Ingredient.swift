@@ -7,15 +7,16 @@
 
 import Foundation
 
-struct Ingredient: Identifiable, Hashable {
-    let id = UUID()
+struct Ingredient: Codable, Identifiable, Hashable {
+    var id: UUID
     let name: String
     let quantity: String
     let category: String
     let emoji: String
     var isCompleted: Bool = false
     
-    init(name: String, quantity: String, category: String, emoji: String, isCompleted: Bool = false) {
+    init(id: UUID = UUID(), name: String, quantity: String, category: String, emoji: String, isCompleted: Bool = false) {
+        self.id = id
         self.name = name
         self.quantity = quantity
         self.category = category
