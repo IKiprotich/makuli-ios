@@ -308,8 +308,10 @@ class AuthManager: ObservableObject {
     
     //MARK: Convert to user after onboarding
     private func convertToCustomUser(_ supabaseUser: Supabase.User) -> User {
+        let name = anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? ""
+        let profileImageURL = anyJSONToString(supabaseUser.userMetadata["avatar_url"]) ?? ""
         return User(
-            name: supabaseUser.userMetadata["name"] as? String ?? supabaseUser.email ?? "",
+            name: name,
             email: supabaseUser.email ?? "",
             age: 0, 
             gender: "",
@@ -317,7 +319,7 @@ class AuthManager: ObservableObject {
             budget: "",
             isPremium: false,
             subscriptionRenewalDate: nil,
-            profileImageURL: supabaseUser.userMetadata["avatar_url"] as? String,
+            profileImageURL: profileImageURL,
             isOnboardingCompleted: false
         )
     }
@@ -326,8 +328,8 @@ class AuthManager: ObservableObject {
     private func handleAuthError(_ error: Error) -> String {
         if let authError = error as? AuthError {
             switch authError {
-            case .api(let apiError):
-                return apiError.message ?? "Database error saving new user"
+            case .api(_, let apiError, _, _):
+                return String(describing: apiError)
             default:
                 return "Authentication failed: \(authError.localizedDescription)"
             }
@@ -366,7 +368,7 @@ class AuthManager: ObservableObject {
         do {
             let profileData = ProfileData(
                 id: supabaseUser.id.uuidString.lowercased(),
-                name: supabaseUser.userMetadata["name"] as? String ?? supabaseUser.email ?? "",
+                name: anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? "",
                 email: supabaseUser.email ?? "",
                 age: 0,
                 gender: "",
@@ -374,7 +376,7 @@ class AuthManager: ObservableObject {
                 budget: "",
                 isPremium: false,
                 subscriptionRenewal: nil,
-                profileImageURL: supabaseUser.userMetadata["avatar_url"] as? String,
+                profileImageURL: anyJSONToString(supabaseUser.userMetadata["avatar_url"]),
                 createdAt: Date(),
                 isOnboardingCompleted: false // New users always need onboarding
             )
@@ -473,7 +475,11 @@ class AuthManager: ObservableObject {
         }
     }
     
-
+    private func anyJSONToString(_ value: Any?) -> String? {
+        guard let anyJSON = value as? AnyJSON else { return nil }
+        if case let .string(str) = anyJSON { return str }
+        return nil
+    }
     
     //MARK: Refresh user profile from database
     func refreshUserProfile() async {
