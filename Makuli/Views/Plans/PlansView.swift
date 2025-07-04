@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PlansView: View {
     @StateObject var viewModel = PlanViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     var body: some View {
         NavigationStack {
@@ -17,12 +18,18 @@ struct PlansView: View {
                     // Header with add button
                     headerSection
                     
-                    // Week carousel section
-                    weekCarouselSection
-                    
-                    // Current active plan section
-                    if let activePlan = viewModel.activePlan {
-                        currentPlansSection(activePlan)
+                    if viewModel.plans.isEmpty {
+                        Text("No plans yet. Start by creating one!")
+                            .foregroundColor(.gray)
+                            .padding()
+                    } else {
+                        // Week carousel section
+                        weekCarouselSection
+                        
+                        // Current active plan section
+                        if let activePlan = viewModel.activePlan {
+                            currentPlansSection(activePlan)
+                        }
                     }
                     
                     // Previous plans section
@@ -32,6 +39,11 @@ struct PlansView: View {
             }
             .navigationBarHidden(true)
             .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
+            .task {
+                if let user = authViewModel.user, !user.email.isEmpty {
+                    await viewModel.fetchPlans(for: user.email)
+                }
+            }
         }
     }
 }
