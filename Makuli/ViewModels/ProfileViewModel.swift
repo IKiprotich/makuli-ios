@@ -13,13 +13,13 @@ import Supabase
 class ProfileViewModel: ObservableObject {
     @Published var profile: UserProfile?
 
-    func fetchProfile(userId: String) async {
+    func fetchProfile(for userId: String) async {
         do {
             let response = try await SupabaseManager.shared.client
-                .database
                 .from("profiles")
-                .select("*")
+                .select()
                 .eq("id", value: userId)
+                .single()
                 .execute()
             let profile = try JSONDecoder().decode([UserProfile].self, from: response.data).first
             self.profile = profile

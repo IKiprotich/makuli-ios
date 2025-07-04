@@ -60,7 +60,6 @@ class PlanViewModel: ObservableObject {
     func fetchPlans(for userId: String) async {
         do {
             let response = try await SupabaseManager.shared.client
-                .database
                 .from("plans")
                 .select("*")
                 .eq("user_id", value: userId)

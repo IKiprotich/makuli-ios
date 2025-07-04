@@ -10,9 +10,9 @@ import Foundation
 @MainActor
 class RecipesViewModel: ObservableObject {
     @Published var selectedFilter = "All"
+    @Published var recipes: [Recipe] = []
     
     let filterOptions = ["All", "Quick", "High-Protein", "Budget"]
-    let recipes = Recipe.enhancedMockRecipes()
     
     // Computed property to filter recipes based on selected filter
     var filteredRecipes: [Recipe] {
@@ -31,5 +31,20 @@ class RecipesViewModel: ObservableObject {
     // Actions
     func selectFilter(_ filter: String) {
         selectedFilter = filter
+    }
+
+    // Supabase fetch
+    func fetchRecipes() async {
+        do {
+            let response = try await SupabaseManager.shared.client
+                .from("recipes")
+                .select()
+                .execute()
+            let recipes = try JSONDecoder().decode([Recipe].self, from: response.data)
+            self.recipes = recipes
+        } catch {
+            print("Error fetching recipes: \(error.localizedDescription)")
+            self.recipes = []
+        }
     }
 } 
