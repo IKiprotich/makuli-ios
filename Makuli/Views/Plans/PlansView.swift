@@ -11,6 +11,8 @@ struct PlansView: View {
     @StateObject var viewModel = PlanViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
     
+    @State private var showingMealPlanGeneration = false
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -41,8 +43,12 @@ struct PlansView: View {
             .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
             .task {
                 if let user = authViewModel.user, !user.email.isEmpty {
-                    await viewModel.fetchPlans(for: user.email)
+                    await viewModel.fetchPlans(for: user.id)
                 }
+            }
+            .sheet(isPresented: $showingMealPlanGeneration) {
+                MealPlanGenerationView()
+                    .environmentObject(authViewModel)
             }
         }
     }
@@ -60,19 +66,21 @@ extension PlansView {
             Spacer()
             
             Button {
-                viewModel.addNewPlan()
+                showingMealPlanGeneration = true
             } label: {
-                Image(systemName: "plus")
-                    .font(.title2)
-                    .foregroundColor(AppColors.primaryOrange)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(Color(.systemBackground))
-                            .shadow(color: .black.opacity(0.1), radius: 4)
-                    )
+                HStack {
+                    Image(systemName: "sparkles")
+                    Text("AI Plan")
+                }
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(AppColors.primaryOrange)
+                .cornerRadius(20)
             }
-            .accessibilityLabel("Add a new meal plan")
+            .accessibilityLabel("Generate AI meal plan")
         }
         .padding(.horizontal, 20)
     }
@@ -96,7 +104,7 @@ extension PlansView {
             
             LazyVStack(alignment: .leading, spacing: 16) {
                 ForEach(viewModel.pastPlans) { plan in
-                    NavigationLink(destination: WeekDetailView(weekPlan: plan)) {
+                    NavigationLink(destination: WeekDetailView(plan: plan)) {
                         PreviousPlanRow(plan: plan)
                     }
                     .buttonStyle(PlainButtonStyle())
