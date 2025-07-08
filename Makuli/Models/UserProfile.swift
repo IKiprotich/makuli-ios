@@ -33,7 +33,7 @@ struct UserProfile: Identifiable, Codable {
         case isPremium = "is_premium"
         case email
         case diet
-        case subscriptionRenewalDate = "subscription_renewal_date"
+        case subscriptionRenewalDate = "subscription_renewal"
         case profileImageUrl = "profile_image_url"
         case createdAt = "created_at"
         case isOnboardingCompleted = "is_onboarding_completed"

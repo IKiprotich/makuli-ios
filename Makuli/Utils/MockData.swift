@@ -1,59 +1,47 @@
 //
 //  MockData.swift
-//  Makuli
+//  Buildplate
 //
-//  Created by Ian   on 30/06/2025.
+//  Created by ian on 2025-01-03.
 //
 
 import Foundation
 
-struct MockData {
-    // MARK: - User Mock Data
-    static let mockUser = User(
-        name: "John Doe",
-        email: "john@example.com",
-        age: 25,
-        gender: "Male",
-        diet: "Vegetarian",
-        budget: "$100-200",
-        isPremium: false,
-        subscriptionRenewalDate: nil,
-        profileImageURL: nil,
-        isOnboardingCompleted: true
-    )
-    
-    // MARK: - Meal Plans Mock Data
-    static let sampleMeals = [
+extension ProgressMetrics {
+    static let sampleData: [ProgressMetrics] = [
+        ProgressMetrics(title: "This Week", value: "5/7", change: "+2", isPositive: true),
+        ProgressMetrics(title: "Calories", value: "1,850", change: "-150", isPositive: true),
+        ProgressMetrics(title: "Protein", value: "85g", change: "+10g", isPositive: true),
+        ProgressMetrics(title: "Budget Usage", value: "$67.50", change: "-$8.25", isPositive: true),
+    ]
+}
+
+// MARK: - Sample Meal Plans
+extension MealPlan {
+    static let sampleMeals: [MealPlan] = [
         MealPlan(
             mealType: .breakfast,
-            name: "Kenyan Chai and Mandazi",
-            duration: 30,
+            name: "Avocado Toast with Eggs",
+            duration: 10,
             difficulty: .easy,
-            imageName: "cup.and.saucer.fill",
-            backgroundColor: "orange"
-        ),
-        MealPlan(
-            mealType: .lunch,
-            name: "Sukuma Wiki with Ugali",
-            duration: 45,
-            difficulty: .medium,
-            imageName: "leaf.fill",
+            imageName: "cup.and.saucer",
             backgroundColor: "green"
         ),
         MealPlan(
+            mealType: .lunch,
+            name: "Mediterranean Quinoa Bowl",
+            duration: 25,
+            difficulty: .medium,
+            imageName: "fork.knife",
+            backgroundColor: "blue"
+        ),
+        MealPlan(
             mealType: .dinner,
-            name: "Nyama Choma with Kachumbari",
-            duration: 60,
-            difficulty: .hard,
-            imageName: "flame.fill",
-            backgroundColor: "red"
+            name: "Grilled Salmon with Asparagus",
+            duration: 20,
+            difficulty: .medium,
+            imageName: "fish.fill",
+            backgroundColor: "orange"
         )
-    ]
-    
-    // MARK: - Progress Metrics Mock Data
-    static let sampleMetrics = [
-        ProgressMetrics(title: "Meals Cooked", value: "12", change: "+10%", isPositive: true),
-        ProgressMetrics(title: "Budget Usage", value: "Ksh 2,500", change: "-5%", isPositive: false),
-        ProgressMetrics(title: "Consistency Streak", value: "7 days", change: "+20%", isPositive: true)
     ]
 } 
