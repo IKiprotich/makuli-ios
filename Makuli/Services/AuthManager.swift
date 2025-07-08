@@ -154,7 +154,7 @@ class AuthManager: ObservableObject {
     }
     
     //MARK: Complete onboarding
-    func completeOnboarding(age: Int, gender: String, diet: String, budget: String) async {
+    func completeOnboarding(age: Int, gender: String, diet: String, budget: String, goal: String) async {
         guard let currentUser = user else { 
             Logger.error("Cannot complete onboarding - no current user")
             return 
@@ -167,47 +167,77 @@ class AuthManager: ObservableObject {
             let session = try await supabase.auth.session
             let userId = session.user.id.uuidString.lowercased()
             
-            // Ensure profile exists before attempting update (for existing sessions)
-            Logger.debug("Ensuring profile exists before update")
-            let wasNewUser = try await createUserProfileIfNotExists(session.user)
-            if wasNewUser {
-                Logger.debug("Missing profile created for existing session")
-            } else {
-                Logger.debug("Profile already exists")
-            }
+            // Try upsert approach - create or update in one operation
+            Logger.debug("Using upsert approach for user ID: \(userId)")
             
-            // Create update data struct
-            let updateData = ProfileUpdateData(
-                age: age,
-                gender: gender,
-                diet: diet,
-                budget: budget,
-                isOnboardingCompleted: true
-            )
-            
-            Logger.debug("Updating database profile")
-            
-            // Update profile in database
-            let response = try await supabase
+            // Check if profile exists to preserve createdAt
+            let existingProfiles: [DatabaseProfile] = try await supabase
                 .from("profiles")
-                .update(updateData)
+                .select("created_at")
                 .eq("id", value: userId)
                 .execute()
+                .value
             
-            let responseCount = response.count ?? 0
-            
-            if responseCount == 0 {
-                Logger.warning("Database update returned 0 rows affected")
+            let createdAt: Date
+            if let existingProfile = existingProfiles.first,
+               let existingCreatedAt = ISO8601DateFormatter().date(from: existingProfile.createdAt) {
+                createdAt = existingCreatedAt
+                Logger.debug("Preserving existing createdAt: \(existingProfile.createdAt)")
             } else {
-                Logger.success("Profile updated successfully")
+                createdAt = Date()
+                Logger.debug("Using new createdAt for new profile")
             }
             
-            // Update local user object
-            self.user = User(
+            // Create complete profile data for upsert
+            let profileData = ProfileData(
+                id: userId,
                 name: currentUser.name,
                 email: currentUser.email,
                 age: age,
                 gender: gender,
+                goal: goal,
+                diet: diet,
+                budget: budget,
+                isPremium: currentUser.isPremium,
+                subscriptionRenewal: currentUser.subscriptionRenewalDate,
+                profileImageURL: currentUser.profileImageURL,
+                createdAt: createdAt,
+                isOnboardingCompleted: true
+            )
+            
+            // Use upsert to handle both insert and update cases
+            let response = try await supabase
+                .from("profiles")
+                .upsert(profileData)
+                .execute()
+            
+            Logger.success("Profile upserted successfully")
+            
+            // Verify the upsert worked by checking the database
+            let verifyResponse: [DatabaseProfile] = try await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", value: userId)
+                .execute()
+                .value
+            
+            if let profile = verifyResponse.first {
+                Logger.debug("Verified profile: isOnboardingCompleted=\(profile.isOnboardingCompleted)")
+                if !profile.isOnboardingCompleted {
+                    Logger.warning("Upsert completed but onboarding status is still false")
+                }
+            } else {
+                Logger.warning("Profile not found after upsert")
+            }
+            
+            // Update local user object
+            self.user = User(
+                id: userId,
+                name: currentUser.name,
+                email: currentUser.email,
+                age: age,
+                gender: gender,
+                goal: goal,
                 diet: diet,
                 budget: budget,
                 isPremium: currentUser.isPremium,
@@ -270,10 +300,12 @@ class AuthManager: ObservableObject {
             if let profile = response.first {
                 // Create User with database data
                 self.user = User(
+                    id: profile.id,
                     name: profile.name,
                     email: profile.email,
                     age: profile.age,
                     gender: profile.gender,
+                    goal: profile.goal,
                     diet: profile.diet,
                     budget: profile.budget,
                     isPremium: profile.isPremium,
@@ -311,10 +343,12 @@ class AuthManager: ObservableObject {
         let name = anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? ""
         let profileImageURL = anyJSONToString(supabaseUser.userMetadata["avatar_url"]) ?? ""
         return User(
+            id: supabaseUser.id.uuidString.lowercased(),
             name: name,
             email: supabaseUser.email ?? "",
             age: 0, 
             gender: "",
+            goal: "",
             diet: "",
             budget: "",
             isPremium: false,
@@ -372,6 +406,7 @@ class AuthManager: ObservableObject {
                 email: supabaseUser.email ?? "",
                 age: 0,
                 gender: "",
+                goal: "",
                 diet: "",
                 budget: "",
                 isPremium: false,
@@ -402,6 +437,7 @@ class AuthManager: ObservableObject {
         let email: String
         let age: Int
         let gender: String
+        let goal: String
         let diet: String
         let budget: String
         let isPremium: Bool
@@ -417,6 +453,7 @@ class AuthManager: ObservableObject {
             case email
             case age
             case gender
+            case goal
             case diet
             case budget
             case isPremium = "is_premium"
@@ -434,6 +471,7 @@ class AuthManager: ObservableObject {
         let email: String
         let age: Int
         let gender: String
+        let goal: String
         let diet: String
         let budget: String
         let isPremium: Bool
@@ -449,6 +487,7 @@ class AuthManager: ObservableObject {
             case email
             case age
             case gender
+            case goal
             case diet
             case budget
             case isPremium = "is_premium"
@@ -464,6 +503,7 @@ class AuthManager: ObservableObject {
         let gender: String
         let diet: String
         let budget: String
+        let goal: String
         let isOnboardingCompleted: Bool
         
         enum CodingKeys: String, CodingKey {
@@ -471,6 +511,7 @@ class AuthManager: ObservableObject {
             case gender
             case diet
             case budget
+            case goal
             case isOnboardingCompleted = "is_onboarding_completed"
         }
     }
@@ -492,4 +533,5 @@ class AuthManager: ObservableObject {
         }
     }
 }
+
 
