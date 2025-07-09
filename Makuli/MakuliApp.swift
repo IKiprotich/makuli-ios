@@ -1,27 +1,17 @@
+//  BuildplateApp.swift
+//  Buildplate
 //
-//  MakuliApp.swift
-//  Makuli
-//
-//  Created by Ian   on 18/06/2025.
+//  Created by ian on 2025-01-03.
 //
 
 import SwiftUI
-import GoogleSignIn
 
 @main
-struct MakuliApp: App {
-    
-    init() {
-        _ = SupabaseManager.shared
-        Logger.info("Supabase initialized")
-    }
-
+struct BuildplateApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .onOpenURL { url in
-                    GIDSignIn.sharedInstance.handle(url)
-                }
+            MainAppView()
+                .preferredColorScheme(.light)
         }
     }
 }
