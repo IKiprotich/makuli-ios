@@ -347,10 +347,10 @@ class AuthManager: ObservableObject {
             name: name,
             email: supabaseUser.email ?? "",
             age: 0, 
-            gender: "",
-            goal: "",
-            diet: "",
-            budget: "",
+            gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
+            goal: "maintain_weight", // Default goal value to satisfy database constraint
+            diet: "none", // Default diet value to satisfy database constraint
+            budget: "medium", // Default budget value to satisfy database constraint
             isPremium: false,
             subscriptionRenewalDate: nil,
             profileImageURL: profileImageURL,
@@ -405,10 +405,10 @@ class AuthManager: ObservableObject {
                 name: anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? "",
                 email: supabaseUser.email ?? "",
                 age: 0,
-                gender: "",
-                goal: "",
-                diet: "",
-                budget: "",
+                gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
+                goal: "maintain_weight", // Default goal value to satisfy database constraint
+                diet: "none", // Default diet value to satisfy database constraint
+                budget: "medium", // Default budget value to satisfy database constraint
                 isPremium: false,
                 subscriptionRenewal: nil,
                 profileImageURL: anyJSONToString(supabaseUser.userMetadata["avatar_url"]),
