@@ -40,8 +40,8 @@ class AuthViewModel: ObservableObject {
         await authManager.signOut()
     }
     
-    func completeOnboarding(age: Int, gender: String, diet: String, budget: String) async {
-        await authManager.completeOnboarding(age: age, gender: gender, diet: diet, budget: budget)
+    func completeOnboarding(age: Int, gender: String, diet: String, budget: String, goal: String) async {
+        await authManager.completeOnboarding(age: age, gender: gender, diet: diet, budget: budget, goal: goal)
     }
 }
 
