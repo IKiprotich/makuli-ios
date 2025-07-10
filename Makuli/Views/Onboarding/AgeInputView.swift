@@ -12,6 +12,7 @@ struct AgeInputView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
     @State private var ageText = ""
+    @FocusState private var isTextFieldFocused: Bool
     
     
     var body: some View {
@@ -23,7 +24,7 @@ struct AgeInputView: View {
                 
                 //progress indicator
                 ProgressView(value: 2, total: 7)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color(hex: "#F97316")))
+                    .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
                 
@@ -32,12 +33,12 @@ struct AgeInputView: View {
                 VStack(spacing: 20) {
                     Text("How old are you?")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(Color(hex: "#1F2937"))
+                        .foregroundColor(AppColors.textCharcoal)
                         .multilineTextAlignment(.center)
                     
                     Text("This helps us personalize your meal plans")
                         .font(.body)
-                        .foregroundColor(Color(hex: "#1F2937").opacity(0.7))
+                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
                         .multilineTextAlignment(.center)
                 }
                 
@@ -50,8 +51,18 @@ struct AgeInputView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(maxWidth: 200)
                         .multilineTextAlignment(.center)
-                        .onChange(of: ageText) { newValue in
-                            if let age = Int(newValue) {
+                        .focused($isTextFieldFocused)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    isTextFieldFocused = false
+                                }
+                                .foregroundColor(AppColors.primaryOrange)
+                            }
+                        }
+                        .onChange(of: ageText) {
+                            if let age = Int(ageText) {
                                 onboardingData.age = age
                             }
                         }
@@ -63,6 +74,7 @@ struct AgeInputView: View {
                 
                 //continue button
                 Button(action: {
+                    isTextFieldFocused = false // Dismiss keyboard
                     if onboardingData.age > 0 {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             currentPage = 2
@@ -76,7 +88,7 @@ struct AgeInputView: View {
                         .padding()
                         .background(
                             onboardingData.age > 0
-                                ? Color(hex: "#F97316")
+                                ? AppColors.primaryOrange
                                 : Color.gray.opacity(0.5)
                         )
                         .cornerRadius(12)
@@ -86,6 +98,9 @@ struct AgeInputView: View {
                 .padding(.bottom, 50)
                 
             }
+        }
+        .onTapGesture {
+            isTextFieldFocused = false // Dismiss keyboard when tapping outside
         }
         .onAppear {
             if onboardingData.age > 0 {

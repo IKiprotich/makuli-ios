@@ -263,7 +263,7 @@ extension MealPlanGenerationView {
         .cornerRadius(12)
     }
     
-    private func successView(_ plan: Plan) -> some View {
+    private func successView(_ plan: Makuli.Plan) -> some View {
         VStack(spacing: 20) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 50))

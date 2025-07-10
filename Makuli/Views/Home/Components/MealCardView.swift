@@ -48,5 +48,5 @@ struct MealCardView: View {
 }
 
 #Preview {
-    MealCardView(meal: MealPlan(mealType: MealType(rawValue: "breakfast")!, name: "Kenyan Chai and Mandazi", duration: 30, difficulty: Difficulty(rawValue: "easy")!, imageName: "cup.and.saucer", backgroundColor: "orange"))
+    MealCardView(meal: MealPlan(mealType: MealType(rawValue: "breakfast")!, name: "Avocado Toast with Eggs", duration: 10, difficulty: Difficulty(rawValue: "easy")!, imageName: "cup.and.saucer", backgroundColor: "orange"))
 }

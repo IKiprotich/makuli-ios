@@ -21,7 +21,7 @@ struct GoalSelectionView: View {
     
     var body: some View {
         ZStack {
-            Color(hex: "#F9F7F4")
+            AppColors.bgCream
                 .ignoresSafeArea()
             
             VStack(spacing: 30) {

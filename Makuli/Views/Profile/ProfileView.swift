@@ -15,9 +15,25 @@ struct ProfileView: View {
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
     @StateObject var viewModel = ProfileViewModel()
+    @StateObject private var profileViewModel = UserProfileViewModel()
+    
+    @State private var showingDeveloperPanel = false
     
     private var user: User {
-        authViewModel.user ?? MockData.mockUser
+        authViewModel.user ?? User(
+            id: "guest-id",
+            name: "Guest User",
+            email: "guest@example.com",
+            age: 25,
+            gender: "Other",
+            goal: "General Health",
+            diet: "Balanced",
+            budget: "$50-75",
+            isPremium: false,
+            subscriptionRenewalDate: nil,
+            profileImageURL: nil,
+            isOnboardingCompleted: false
+        )
     }
     
     var body: some View {
@@ -68,6 +84,12 @@ struct ProfileView: View {
         } message: {
             Text("This action cannot be undone. All your data will be permanently deleted.")
         }
+        .sheet(isPresented: $showingDeveloperPanel) {
+            DeveloperPanelView()
+        }
+        .task {
+            await profileViewModel.fetchProfile()
+        }
     }
 }
 
@@ -91,15 +113,25 @@ extension ProfileView {
             
             //user info
             VStack(spacing: 4) {
-                
-                Text(user.name)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
-                Text(user.email)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                if profileViewModel.isLoading {
+                    ProgressView()
+                } else if let error = profileViewModel.error {
+                    Text(error)
+                        .foregroundColor(.red)
+                } else if let profile = profileViewModel.profile {
+                    Text(profile.name ?? "No Name")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    if let goal = profile.goal {
+                        Text("Goal: \(goal)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    Text("Looks like your profile is missing. Please restart onboarding.")
+                        .foregroundColor(.orange)
+                }
             }
             
             //edit profile buton
@@ -115,20 +147,23 @@ extension ProfileView {
         }
         .padding(.vertical, 20)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Profile \(user.name), \(user.email)")
+        .accessibilityLabel("Profile \(profileViewModel.profile?.name ?? user.name), \(profileViewModel.profile?.id ?? user.email)")
     }
     
     
     //MARK: Dietary Preferences Section
     private var dietaryPreferencesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Dietary Preferemces", icon: "fork.knife")
+            sectionHeader("Dietary Preferences", icon: "fork.knife")
             
             VStack (spacing: 8) {
-                ProfileRowView(title: "Goal", value: "Set Goal")
-                ProfileRowView(title: "Dietary Type", value: user.diet)
-                ProfileRowView(title: "Budget", value: user.diet)
-                
+                if let profile = profileViewModel.profile {
+                    ProfileRowView(title: "Goal", value: profile.goal ?? "Set Goal")
+                    ProfileRowView(title: "Budget", value: profile.budget ?? "Not set")
+                } else {
+                    ProfileRowView(title: "Goal", value: "Set Goal")
+                    ProfileRowView(title: "Budget", value: "Not set")
+                }
                 
                 Button ("Update Preferences"){
                     handleUpdatePreferences()
@@ -255,6 +290,15 @@ extension ProfileView {
                                title: "Terms Of Use") {
                     handleTermsOfUse()
                 }
+                
+                // Developer Panel (only show in debug builds)
+                #if DEBUG
+                ProfileRowView(icon: "hammer.circle.fill",
+                               iconColor: AppColors.primaryOrange,
+                               title: "Developer Panel") {
+                    showingDeveloperPanel = true
+                }
+                #endif
             }
         }
     }

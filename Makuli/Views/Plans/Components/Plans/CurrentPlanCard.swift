@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CurrentPlanCard: View {
     
-    let plan: WeekPlan
+    let plan: Plan
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -26,7 +26,7 @@ struct CurrentPlanCard: View {
                         .fontWeight(.bold)
                         .foregroundColor(AppColors.textCharcoal)
                     
-                    Text("\(plan.mealsCompleted)/\(plan.totalMeals)")
+                    Text("\(plan.completedMealsCount)/\(plan.totalMealsCount)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -58,14 +58,14 @@ struct CurrentPlanCard: View {
                     
                     Spacer()
                     
-                    Text("\(Int(plan.progressPercentage * 100))%")
+                    Text("\(Int(plan.progress * 100))%")
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(AppColors.successGreen)
                 }
                 
                 // Resume button with NavigationLink
-                NavigationLink(destination: WeekDetailView(weekPlan: plan)) {
+                NavigationLink(destination: WeekDetailView(plan: PlanWithRecipes(id: plan.id, plan: plan, recipes: []))) {
                     HStack {
                         Text("Resume")
                             .fontWeight(.medium)
@@ -91,12 +91,12 @@ struct CurrentPlanCard: View {
                     .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 4)
             )
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Active Meal Plan: \(plan.planName), \(plan.mealsCompleted) of \(plan.totalMeals) meals completed")
+            .accessibilityLabel("Active Meal Plan: \(plan.planName), \(plan.completedMealsCount) of \(plan.totalMealsCount) meals completed")
         }
     }
 }
 
 #Preview {
-    CurrentPlanCard(plan: WeekPlan.mockData.first!)
+    CurrentPlanCard(plan: Plan.mockWeeklyPlan().plan)
 }
 

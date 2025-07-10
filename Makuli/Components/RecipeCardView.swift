@@ -47,9 +47,6 @@ struct RecipeCardView: View {
     }
 }
 
-
-
-
 extension RecipeCardView {
     //MARK: Recipe Image View
     private var recipeImageView: some View {
@@ -58,7 +55,7 @@ extension RecipeCardView {
                 .fill(Color(.systemGray6))
                 .frame(width: 80, height: 80)
             
-            Text(recipe.imageName ?? "🍽️")
+            Text("🍽️") // Default emoji since Recipe model doesn't have imageName
                 .font(.system(size: 36))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -70,7 +67,7 @@ extension RecipeCardView {
             Image(systemName: "clock.fill")
                 .font(.system(size: 10))
             
-            Text("\(recipe.cookTime) min)")
+            Text("\(recipe.cookTime ?? "30") min")
                 .font(.system(size: 12, weight: .medium))
         }
         .foregroundColor(.secondary)
@@ -81,7 +78,6 @@ extension RecipeCardView {
                 .fill(Color(.systemGray6))
         )
     }
-    
     
     //MARK: Tag Badge
     private func tagBadge(_ tag: String) -> some View {
@@ -95,7 +91,6 @@ extension RecipeCardView {
                     .fill(tagBackgroundColor(for: tag))
             )
     }
-    
     
     //MARK: Helper Methods
     
@@ -134,24 +129,8 @@ extension RecipeCardView {
             return Color(.systemGray6)
         }
     }
-    
-//    //accesibility
-//    private var accessibilityDescription: String {
-//           let timeText = recipe.cookTime == 1 ? "1 minute" : "\(recipe.cookTime) minutes"
-//           let tagText = recipe.tags.isEmpty ? "" : ", tagged as \(recipe.tags.joined(separator: ", "))"
-//           return "Recipe: \(recipe.title), \(timeText)\(tagText)"
-//       }
-    
-    
-    
-    
-    
-    
-    
-    
 }
 
-
 #Preview {
-    //RecipeCardView()
+    RecipeCardView(recipe: Recipe.mockRecipe())
 }

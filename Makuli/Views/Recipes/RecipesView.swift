@@ -18,7 +18,13 @@ struct RecipesView: View {
                     filterChipsView
                     
                     // Recipe grid view
-                    recipesGridView
+                    if viewModel.recipes.isEmpty {
+                        Text("No recipes found. Please check back later!")
+                            .foregroundColor(.gray)
+                            .padding()
+                    } else {
+                        recipesGridView
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -26,6 +32,9 @@ struct RecipesView: View {
             .navigationTitle("Recipes")
             .navigationBarTitleDisplayMode(.large)
             .background(AppColors.warmsand.opacity(0.3).ignoresSafeArea())
+            .task {
+                await viewModel.fetchRecipes()
+            }
         }
     }
 }
@@ -37,7 +46,7 @@ extension RecipesView {
             HStack(spacing: 12) {
                 ForEach(viewModel.filterOptions, id: \.self) { filter in
                     FilterChip(
-                        title: filter,
+                        title: filter.displayName,
                         isSelected: viewModel.selectedFilter == filter,
                         action: {
                             withAnimation(.easeInOut(duration: 0.2)) {

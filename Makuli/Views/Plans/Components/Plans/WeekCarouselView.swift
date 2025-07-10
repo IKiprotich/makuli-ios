@@ -58,7 +58,7 @@ struct WeekCarouselCard: View {
                     .font(.headline)
                     .foregroundColor(isSelected ? Color(AppColors.primaryOrange) : Color(AppColors.textCharcoal))
                 
-                Text(week.costFormatted)
+                Text(week.formattedTotalCost)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

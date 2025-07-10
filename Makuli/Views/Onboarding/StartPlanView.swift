@@ -96,13 +96,7 @@ struct StartPlanView: View {
                 
                 Button(action: {
                     Task {
-                        await onboardingViewModel.completeOnboarding(
-                            age: onboardingData.age,
-                            gender: onboardingData.gender,
-                            diet: onboardingData.dietPreferences.joined(separator: ", "),
-                            budget: onboardingData.budget,
-                            authViewModel: authViewModel
-                        )
+                        await onboardingViewModel.completeOnboarding(authViewModel: authViewModel)
                     }
                 }) {
                     HStack {

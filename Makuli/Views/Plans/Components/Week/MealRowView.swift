@@ -27,7 +27,7 @@ struct MealRowView: View {
             //main meal row
             HStack(spacing: 16) {
                 //meal category icon
-                Image(systemName: meal.category.icon)
+                Image(systemName: getMealCategoryIcon(meal.category))
                     .foregroundColor(iconColor)
                     .font(.system(size: 16, weight: .medium))
                     .frame(width: 24)
@@ -157,6 +157,16 @@ extension MealRowView {
         case .breakfast: return .orange
         case .lunch: return .blue
         case .dinner: return .purple
+        case .snack: return .green
+        }
+    }
+    
+    private func getMealCategoryIcon(_ category: Meal.MealCategory) -> String {
+        switch category {
+        case .breakfast: return "sunrise.fill"
+        case .lunch: return "sun.max.fill"
+        case .dinner: return "moon.fill"
+        case .snack: return "apple.logo"
         }
     }
     

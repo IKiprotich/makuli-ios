@@ -19,7 +19,7 @@ struct OnboardingView: View {
     var body: some View {
         NavigationView {
             TabView(selection: $currentPage) {
-                SplashScreenView(currentPage: $currentPage)
+                SplashScreenView()
                     .tag(0)
                 
                 AgeInputView(

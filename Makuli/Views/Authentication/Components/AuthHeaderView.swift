@@ -1,6 +1,6 @@
 //
 //  AuthHeaderView.swift
-//  Makuli
+//  Buildplate
 //
 //  Created by Ian   on 27/06/2025.
 //
@@ -12,7 +12,7 @@ struct AuthHeaderView: View {
     
     var body: some View {
         VStack {
-            Text("Makuli")
+            Text("Buildplate")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)

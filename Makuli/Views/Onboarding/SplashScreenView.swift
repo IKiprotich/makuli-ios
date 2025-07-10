@@ -1,95 +1,64 @@
 //
 //  SplashScreenView.swift
-//  Makuli
+//  Buildplate
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by ian on 2025-01-03.
 //
 
 import SwiftUI
 
 struct SplashScreenView: View {
-    
-    @Binding var currentPage: Int
+    @State private var scale = 0.8
+    @State private var opacity = 0.6
     
     var body: some View {
-        ZStack{
+        ZStack {
             //Background Gradient
             LinearGradient(
-                colors: [Color(hex: "#F97316"), Color(hex: "#EF4444")],
-                           startPoint: .topLeading,
-                           endPoint: .bottomTrailing)
-            .ignoresSafeArea(.all)
+                gradient: Gradient(colors: [AppColors.primaryOrange, AppColors.warmsand]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
-            VStack(spacing: 40) {
-                Spacer()
-                
-                //logo/icon placeholder
+            VStack(spacing: 30) {
+                // App Logo/Icon
                 Image(systemName: "fork.knife.circle.fill")
                     .font(.system(size: 100))
                     .foregroundColor(.white)
                 
-                //App title
-                Text("Makuli")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                // App Name
+                Text("Buildplate")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
                     .foregroundColor(.white)
                 
-                //tag line
-                Text("Smart Meal Planning Made Simple")
-                    .font(.title2)
+                // Tagline
+                Text("Your personalized meal planning companion")
+                    .font(.title3)
+                    .fontWeight(.medium)
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
                 
-                Spacer()
-                
-                //get started button
-                Button( action: {
-                    withAnimation(.easeInOut(duration: 0.5)){
-                        currentPage = 1
-                    }
-                }){
-                    Text("Get Started")
-                        .font(.headline)
-                        .foregroundColor(Color(hex: "#F97316"))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
+                // Loading indicator
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(1.2)
+            }
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.2)) {
+                    scale = 1.0
+                    opacity = 1.0
                 }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 50)
             }
         }
-        .ignoresSafeArea(.all) 
-    }
-}
-
-// Extension for hex colors
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+        .background(Color.white)
     }
 }
 
 #Preview {
-    SplashScreenView(currentPage: .constant(0))
+    SplashScreenView()
 }

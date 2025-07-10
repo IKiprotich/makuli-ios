@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WeekDetailView: View {
     
-    let weekPlan: WeekPlan
+    let plan: PlanWithRecipes
     @State private var dayPlans: [DayPlan] = []
     @Environment(\.dismiss) private var dismiss
     
@@ -49,13 +49,13 @@ struct WeekDetailView: View {
                 AppColors.warmsand.opacity(0.3)
             )
             .onAppear {
-                dayPlans = DayPlan.mockData()
+                dayPlans = generateDayPlans(from: plan)
             }
             // Add the floating action button as a safe area inset
             .safeAreaInset(edge: .bottom) {
                 HStack {
                     Spacer()
-                    NavigationLink(destination: GroceryListView(weekPlan: WeekPlan.sampleWeekPlan, groceryItems: WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan).generateGroceryList())) {
+                    NavigationLink(destination: GroceryListView()) {
                         HStack {
                             Image(systemName: "cart.fill")
                                 .font(.system(size: 16, weight: .medium))
@@ -82,32 +82,58 @@ struct WeekDetailView: View {
     
     func generateGroceryList() -> [GroceryItem] {
         var ingredientMap: [String: GroceryItem] = [:]
-        for meal in weekPlan.meals {
-            if let recipe = meal.recipe {
-                for ingredient in recipe.ingredients {
-                    let key = ingredient.name.lowercased()
-                    if let existing = ingredientMap[key] {
-                        // Combine quantities (simplified, just keeps the first for now)
-                        ingredientMap[key] = GroceryItem(
-                            id: existing.id,
-                            name: ingredient.name,
-                            quantity: existing.quantity, // You can improve this logic
-                            category: ingredient.category,
-                            emoji: ingredient.emoji
-                        )
-                    } else {
+        for planRecipe in plan.recipes {
+            // Note: This would need to be updated when we have actual Recipe objects linked to PlanRecipe
+            if let ingredients = planRecipe.customIngredients {
+                for ingredient in ingredients {
+                    let key = ingredient.lowercased()
+                    if ingredientMap[key] == nil {
                         ingredientMap[key] = GroceryItem(
                             id: UUID().uuidString,
-                            name: ingredient.name,
-                            quantity: ingredient.quantity,
-                            category: ingredient.category,
-                            emoji: ingredient.emoji
+                            name: ingredient,
+                            quantity: "1", // Default quantity since we don't have detailed ingredient data
+                            category: "Other", // Default category
+                            emoji: "🥄" // Default emoji
                         )
                     }
                 }
             }
         }
         return Array(ingredientMap.values).sorted { $0.name < $1.name }
+    }
+    
+    func generateDayPlans(from plan: PlanWithRecipes) -> [DayPlan] {
+        let calendar = Calendar.current
+        var dayPlans: [DayPlan] = []
+        
+        // Create day plans for each day of the week
+        for dayOffset in 0..<7 {
+            guard let date = calendar.date(byAdding: .day, value: dayOffset, to: plan.plan.weekStart) else { continue }
+            
+            let dayName = date.dayOfWeek
+            let dayNumber = "\(calendar.component(.day, from: date))"
+            
+            // Get meals for this specific day based on day of week
+            let mealsForDay = plan.recipes.filter { planRecipe in
+                return planRecipe.dayOfWeek == calendar.component(.weekday, from: date) - 1 // Sunday = 0
+            }
+            
+            // If no meals scheduled for this day, create empty day
+            let dayMeals = mealsForDay.isEmpty ? [] : mealsForDay
+            let isCompleted = !dayMeals.isEmpty && dayMeals.allSatisfy { $0.isCompleted }
+            
+            let dayPlan = DayPlan(
+                dayName: dayName,
+                dayNumber: dayNumber,
+                meals: [], // For now, empty meals array since DayPlan expects different meal structure
+                isCompleted: isCompleted,
+                date: date
+            )
+            
+            dayPlans.append(dayPlan)
+        }
+        
+        return dayPlans
     }
 }
 
@@ -130,7 +156,7 @@ extension WeekDetailView {
                 Spacer()
                 
                 
-                Text(weekPlan.weekTitle + " Plan")
+                Text(plan.plan.title + " Plan")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(AppColors.textCharcoal)
@@ -166,17 +192,17 @@ extension WeekDetailView {
                     .textCase(.uppercase)
                 
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("KES \(Int(weekPlan.totalCost * 0.8).formatted())")
+                    Text("$\(Int((plan.plan.totalCost ?? 0.0) * 0.8).formatted())")
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(AppColors.textCharcoal)
                     
-                    Text("/ KES \(Int(weekPlan.totalCost).formatted())")
+                    Text("/ $\(Int(plan.plan.totalCost ?? 0.0).formatted())")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 
-                Text("\(weekPlan.mealsCompleted) of \(weekPlan.totalMeals) Days Completed")
+                Text("\(plan.recipes.filter { $0.isCompleted }.count) of \(plan.recipes.count) Meals Completed")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -184,7 +210,7 @@ extension WeekDetailView {
             Spacer()
             
             // circular progress indicator
-            CircularProgressView(progress: weekPlan.progressPercentage)
+            CircularProgressView(progress: plan.plan.progress)
                 .frame(width: 60, height: 60)
             
             Button("Add to Grocery List") {
@@ -233,5 +259,5 @@ extension WeekDetailView {
 }
 
 #Preview {
-    WeekDetailView(weekPlan: WeekPlan.sampleWeekPlan)
+    WeekDetailView(plan: Plan.mockWeeklyPlan())
 }

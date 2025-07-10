@@ -1,6 +1,6 @@
 //
 //  AuthView.swift
-//  Makuli
+//  Buildplate
 //
 //  Created by Ian   on 27/06/2025.
 //
@@ -39,7 +39,7 @@ struct AuthView: View {
                         .shadow(color: AppColors.primaryOrange.opacity(0.3), radius: 8, x: 0, y: 4)
                     
                     // App Name
-                    Text("Makuli")
+                    Text("Buildplate")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(AppColors.textCharcoal)
                         .tracking(1.2)

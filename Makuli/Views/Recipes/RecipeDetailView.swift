@@ -15,7 +15,16 @@ struct RecipeDetailView: View {
     
     init(recipe: Recipe) {
         self.recipe = recipe
-        self._ingredients = State(initialValue: recipe.ingredients)
+        // Convert string ingredients to Ingredient objects
+        let convertedIngredients = recipe.ingredients.map { ingredientString in
+            Ingredient(
+                name: ingredientString,
+                quantity: "1", // Default quantity since strings don't specify
+                category: "Other", // Default category
+                emoji: "🥄" // Default emoji
+            )
+        }
+        self._ingredients = State(initialValue: convertedIngredients)
     }
     
     var body: some View {
@@ -59,15 +68,13 @@ extension RecipeDetailView {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                if let imageName = recipe.imageName {
-                    Text(imageName)
-                        .font(.system(size: 60))
-                        .frame(width: 80, height: 80)
-                        .background(
-                            Circle()
-                                .fill(AppColors.bgCream)
-                        )
-                }
+                Text("🍽️") // Default emoji since Recipe model doesn't have imageName
+                    .font(.system(size: 60))
+                    .frame(width: 80, height: 80)
+                    .background(
+                        Circle()
+                            .fill(AppColors.bgCream)
+                    )
                 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(recipe.title)
@@ -78,8 +85,8 @@ extension RecipeDetailView {
                     
                     
                     HStack(spacing: 12) {
-                        badgeView(text: recipe.cookTime, icon: "clock")
-                        badgeView(text: "Serves\(recipe.servings)", icon: "person.2")
+                        badgeView(text: recipe.cookTime ?? "30 mins", icon: "clock")
+                        badgeView(text: "Serves \(recipe.servings ?? 4)", icon: "person.2")
                     }
                 }
                 Spacer()
