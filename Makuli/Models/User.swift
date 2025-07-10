@@ -9,10 +9,12 @@ import Foundation
 
 // MARK: - User Model
 struct User {
+    var id: String // Supabase UUID
     var name: String
     var email: String
     var age: Int
     var gender: String
+    var goal: String
     var diet: String
     var budget: String
     var isPremium: Bool

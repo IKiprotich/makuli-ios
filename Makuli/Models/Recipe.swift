@@ -2,325 +2,560 @@
 //  Recipe.swift
 //  Makuli
 //
-//  Created by Ian   on 22/06/2025.
+//  Created by Ian on 2025-01-13.
 //
+//  Production-ready recipe model for Supabase database.
+//
+
 import Foundation
 
-/// Represents a cooking recipe, including ingredients, steps, and metadata.
-struct Recipe: Identifiable, Hashable {
-    let id: UUID
+// MARK: - Core Recipe Model
+
+struct Recipe: Identifiable, Codable {
+    let id: String
     let title: String
-    let cookTime: String
-    let servings: Int
-    let imageName: String?
-    let ingredients: [Ingredient]
+    let cookTime: String?
+    let prepTime: Int?
+    let servings: Int?
+    let calories: Int?
+    let imageUrl: String?
+    let ingredients: [String]
     let steps: [String]
     let substitutions: [String]?
     let tags: [String]
+    let difficulty: String? // "easy", "medium", "hard"
+    let cuisineType: String?
+    let costEstimate: Double?
+    let createdAt: Date
+    let updatedAt: Date
+    let createdBy: String?
+    let isPublic: Bool
+    let rating: Double
+    let ratingCount: Int
     
-    /// Custom initializer that allows specifying an ID (default is a new UUID).
-    init(id: UUID = UUID(), title: String, cookTime: String, servings: Int, imageName: String?, ingredients: [Ingredient], steps: [String], substitutions: [String]?, tags: [String] = []) {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case cookTime = "cook_time"
+        case prepTime = "prep_time"
+        case servings
+        case calories
+        case imageUrl = "image_url"
+        case ingredients
+        case steps
+        case substitutions
+        case tags
+        case difficulty
+        case cuisineType = "cuisine_type"
+        case costEstimate = "cost_estimate"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case createdBy = "created_by"
+        case isPublic = "is_public"
+        case rating
+        case ratingCount = "rating_count"
+    }
+    
+    // MARK: - Initializers
+    
+    /// Memberwise initializer for creating Recipe objects
+    init(
+        id: String,
+        title: String,
+        cookTime: String? = nil,
+        prepTime: Int? = nil,
+        servings: Int? = nil,
+        calories: Int? = nil,
+        imageUrl: String? = nil,
+        ingredients: [String],
+        steps: [String],
+        substitutions: [String]? = nil,
+        tags: [String],
+        difficulty: String? = nil,
+        cuisineType: String? = nil,
+        costEstimate: Double? = nil,
+        createdAt: Date,
+        updatedAt: Date,
+        createdBy: String? = nil,
+        isPublic: Bool,
+        rating: Double,
+        ratingCount: Int
+    ) {
         self.id = id
         self.title = title
         self.cookTime = cookTime
+        self.prepTime = prepTime
         self.servings = servings
-        self.imageName = imageName
+        self.calories = calories
+        self.imageUrl = imageUrl
         self.ingredients = ingredients
         self.steps = steps
         self.substitutions = substitutions
         self.tags = tags
+        self.difficulty = difficulty
+        self.cuisineType = cuisineType
+        self.costEstimate = costEstimate
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.createdBy = createdBy
+        self.isPublic = isPublic
+        self.rating = rating
+        self.ratingCount = ratingCount
     }
     
-    /// Custom Hashable implementation based on the recipe's ID.
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
+    // MARK: - Custom Decoding
     
-    /// Custom Equatable implementation based on the recipe's ID.
-    static func == (lhs: Recipe, rhs: Recipe) -> Bool {
-        return lhs.id == rhs.id
-    }
-}
-
-
-
-// **MARK: - Mock Data Extensions**
-// Provides mock recipes for previews and testing.
-extension Recipe {
-    
-    static func enhancedMockRecipes() -> [Recipe] {
-        return [
-            Recipe(
-                id: UUID(),
-                title: "Matoke with Beans",
-                cookTime: "25 mins",
-                servings: 2,
-                imageName: "🍌",
-                ingredients: [
-                    Ingredient(name: "Ripe bananas", quantity: "2", category: "Fruits", emoji: "🍌"),
-                    Ingredient(name: "Red beans", quantity: "1/2 cup", category: "Legumes", emoji: "🫘"),
-                    Ingredient(name: "Onion", quantity: "1", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
-                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
-                ],
-                steps: [
-                    "Peel and chop the bananas into small pieces.",
-                    "Boil the beans until they are soft.",
-                    "In a separate pot, sauté the onions until golden brown.",
-                    "Add the bananas and beans to the pot with the onions. Stir well.",
-                    "Cook for about 15 minutes, or until the bananas are tender."
-                ],
-                substitutions: [
-                    "Use ndengu instead of red beans",
-                    "Sweet potatoes can replace bananas for variety"
-                ],
-                tags: ["Traditional", "High-Protein", "Quick"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Nyama Choma",
-                cookTime: "60 mins",
-                servings: 4,
-                imageName: "🥩",
-                ingredients: [
-                    Ingredient(name: "Beef chunks", quantity: "1 kg", category: "Meat", emoji: "🥩"),
-                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂"),
-                    Ingredient(name: "Black pepper", quantity: "1 tsp", category: "Spices", emoji: "🌶️"),
-                    Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
-                    Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒")
-                ],
-                steps: [
-                    "Cut the beef into medium-sized chunks.",
-                    "Season with salt, pepper, minced garlic, and ginger.",
-                    "Let it marinate for at least 30 minutes.",
-                    "Thread the meat onto skewers if desired.",
-                    "Grill over medium-high heat, turning occasionally.",
-                    "Cook until well done and slightly charred on the outside.",
-                    "Serve hot with ugali and kachumbari."
-                ],
-                substitutions: [
-                    "Can use goat meat instead of beef",
-                    "Add rosemary for extra flavor"
-                ],
-                tags: ["Traditional", "High-Protein"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Pilau",
-                cookTime: "75 mins",
-                servings: 6,
-                imageName: "🍚",
-                ingredients: [
-                    Ingredient(name: "Basmati rice", quantity: "2 cups", category: "Grains", emoji: "🍚"),
-                    Ingredient(name: "Beef or chicken", quantity: "500g", category: "Meat", emoji: "🥩"),
-                    Ingredient(name: "Onions", quantity: "2 large", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
-                    Ingredient(name: "Pilau masala", quantity: "2 tbsp", category: "Spices", emoji: "🌶️"),
-                    Ingredient(name: "Garlic", quantity: "4 cloves", category: "Spices", emoji: "🧄"),
-                    Ingredient(name: "Ginger", quantity: "1 inch piece", category: "Spices", emoji: "🫚"),
-                    Ingredient(name: "Beef stock", quantity: "4 cups", category: "Liquids", emoji: "🍲"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒")
-                ],
-                steps: [
-                    "Wash and soak the rice for 30 minutes.",
-                    "In a heavy-bottomed pot, heat oil and brown the meat.",
-                    "Add sliced onions and cook until golden brown.",
-                    "Add garlic, ginger, and pilau masala. Cook for 2 minutes.",
-                    "Add tomatoes and cook until soft.",
-                    "Add the soaked rice and stir gently.",
-                    "Pour in hot stock, bring to boil, then simmer covered for 20 minutes.",
-                    "Let it rest for 10 minutes before serving."
-                ],
-                substitutions: [
-                    "Use coconut milk instead of some stock for richer flavor",
-                    "Add raisins and cashews for festive occasions"
-                ],
-                tags: ["Traditional", "High-Protein"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Mukimo",
-                cookTime: "55 mins",
-                servings: 4,
-                imageName: "🥔",
-                ingredients: [
-                    Ingredient(name: "Potatoes", quantity: "4 large", category: "Vegetables", emoji: "🥔"),
-                    Ingredient(name: "Green maize", quantity: "2 cups", category: "Vegetables", emoji: "🌽"),
-                    Ingredient(name: "Pumpkin leaves or spinach", quantity: "2 cups", category: "Vegetables", emoji: "🥬"),
-                    Ingredient(name: "Green peas", quantity: "1 cup", category: "Vegetables", emoji: "🟢"),
-                    Ingredient(name: "Onion", quantity: "1 large", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒"),
-                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
-                ],
-                steps: [
-                    "Peel and chop potatoes into chunks.",
-                    "Boil potatoes, green maize, and green peas together until tender.",
-                    "In the last 5 minutes, add the green vegetables.",
-                    "Drain the vegetables, reserving some cooking liquid.",
-                    "Mash everything together, adding cooking liquid as needed.",
-                    "In a separate pan, fry sliced onions until golden.",
-                    "Mix the fried onions into the mukimo.",
-                    "Season with salt and serve hot."
-                ],
-                substitutions: [
-                    "Use sweet potatoes instead of regular potatoes",
-                    "Kale can replace pumpkin leaves"
-                ],
-                tags: ["Traditional", "Healthy", "Budget"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Chapati na Beans",
-                cookTime: "35 mins",
-                servings: 4,
-                imageName: "🫓",
-                ingredients: [
-                    Ingredient(name: "All-purpose flour", quantity: "2 cups", category: "Grains", emoji: "🌾"),
-                    Ingredient(name: "Water", quantity: "3/4 cup", category: "Liquids", emoji: "💧"),
-                    Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp + extra for cooking", category: "Oils", emoji: "🫒"),
-                    Ingredient(name: "Cooked beans", quantity: "2 cups", category: "Legumes", emoji: "🫘"),
-                    Ingredient(name: "Onion", quantity: "1", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
-                    Ingredient(name: "Garlic", quantity: "2 cloves", category: "Spices", emoji: "🧄")
-                ],
-                steps: [
-                    "Mix flour and salt, add water and oil to form soft dough.",
-                    "Knead well and let rest for 20 minutes.",
-                    "Meanwhile, prepare beans by sautéing onions, garlic, and tomatoes.",
-                    "Add cooked beans and simmer for 10 minutes.",
-                    "Roll out chapati dough into thin circles.",
-                    "Cook chapati on hot pan, brushing with oil until golden.",
-                    "Serve hot chapati with the bean stew."
-                ],
-                substitutions: [
-                    "Use whole wheat flour for healthier option",
-                    "Add coconut milk to beans for richer flavor"
-                ],
-                tags: ["Budget", "High-Protein"]
-            ),
-            
-            
-            Recipe(
-                id: UUID(),
-                title: "Sukuma Wiki",
-                cookTime: "15 mins",
-                servings: 3,
-                imageName: "🥬",
-                ingredients: [
-                    Ingredient(name: "Sukuma wiki (collard greens)", quantity: "1 bunch", category: "Vegetables", emoji: "🥬"),
-                    Ingredient(name: "Onion", quantity: "1 medium", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Tomatoes", quantity: "2", category: "Vegetables", emoji: "🍅"),
-                    Ingredient(name: "Garlic", quantity: "3 cloves", category: "Spices", emoji: "🧄"),
-                    Ingredient(name: "Cooking oil", quantity: "2 tbsp", category: "Oils", emoji: "🫒"),
-                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
-                ],
-                steps: [
-                    "Wash and chop the sukuma wiki into strips.",
-                    "Sauté sliced onions until translucent.",
-                    "Add minced garlic and cook for 1 minute.",
-                    "Add chopped tomatoes and cook until soft.",
-                    "Add sukuma wiki and stir well.",
-                    "Cook for 5-7 minutes until tender.",
-                    "Season with salt and serve."
-                ],
-                substitutions: [
-                    "Can use spinach instead of sukuma wiki",
-                    "Add carrots for extra color and nutrition"
-                ],
-                tags: ["Quick", "Healthy", "Budget"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Ugali",
-                cookTime: "20 mins",
-                servings: 4,
-                imageName: "🌽",
-                ingredients: [
-                    Ingredient(name: "Maize flour (unga)", quantity: "2 cups", category: "Grains", emoji: "🌽"),
-                    Ingredient(name: "Water", quantity: "3 cups", category: "Liquids", emoji: "💧"),
-                    Ingredient(name: "Salt", quantity: "1/2 tsp", category: "Spices", emoji: "🧂")
-                ],
-                steps: [
-                    "Bring water to boil in a heavy-bottomed pot.",
-                    "Add salt to the boiling water.",
-                    "Gradually add maize flour while stirring continuously.",
-                    "Reduce heat and continue stirring to avoid lumps.",
-                    "Cook for 10-15 minutes, stirring frequently.",
-                    "The ugali is ready when it pulls away from the sides.",
-                    "Serve hot with your favorite stew or vegetables."
-                ],
-                substitutions: [
-                    "Can mix with millet flour for variety",
-                    "Add a bit of butter for richer taste"
-                ],
-                tags: ["Quick", "Traditional", "Budget"]
-            ),
-            
-            Recipe(
-                id: UUID(),
-                title: "Githeri",
-                cookTime: "90 mins",
-                servings: 6,
-                imageName: "🌽",
-                ingredients: [
-                    Ingredient(name: "Maize (dry corn)", quantity: "1 cup", category: "Grains", emoji: "🌽"),
-                    Ingredient(name: "Beans", quantity: "1 cup", category: "Legumes", emoji: "🫘"),
-                    Ingredient(name: "Onions", quantity: "2", category: "Vegetables", emoji: "🧅"),
-                    Ingredient(name: "Tomatoes", quantity: "3", category: "Vegetables", emoji: "🍅"),
-                    Ingredient(name: "Carrots", quantity: "2", category: "Vegetables", emoji: "🥕"),
-                    Ingredient(name: "Cooking oil", quantity: "3 tbsp", category: "Oils", emoji: "🫒"),
-                    Ingredient(name: "Salt", quantity: "To taste", category: "Spices", emoji: "🧂")
-                ],
-                steps: [
-                    "Soak maize and beans overnight.",
-                    "Boil maize and beans together until tender (about 1 hour).",
-                    "In a separate pan, sauté onions until golden.",
-                    "Add tomatoes and cook until soft.",
-                    "Add diced carrots and cook for 5 minutes.",
-                    "Add the cooked maize and beans.",
-                    "Simmer together for 15-20 minutes.",
-                    "Season with salt and serve hot."
-                ],
-                substitutions: [
-                    "Add green peas for extra color",
-                    "Can add meat for a heartier meal"
-                ],
-                tags: ["Traditional", "High-Protein", "Budget"]
-            )
-        ]
-    }
-    
-    static var nyamaChomaRecipe: Recipe? {
-        enhancedMockRecipes().first { $0.title == "Nyama Choma" }
-    }
-    static var pilauRecipe: Recipe? {
-        enhancedMockRecipes().first { $0.title == "Pilau" }
-    }
-    static var sampleRecipe: Recipe? {
-        enhancedMockRecipes().first { $0.title == "Matoke with Beans" }
-    }
-    static var mukimoRecipe: Recipe? {
-        enhancedMockRecipes().first { $0.title == "Mukimo" }
-    }
-    static var chapatiRecipe: Recipe? {
-        enhancedMockRecipes().first { $0.title == "Chapati na Beans" }
-    }
-}
-
-// Helper extension for cook time conversion
-extension Recipe {
-    var cookTimeInMinutes: Int {
-        let timeString = cookTime.lowercased()
-        if let range = timeString.range(of: #"\d+"#, options: .regularExpression) {
-            return Int(String(timeString[range])) ?? 0
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode simple fields
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        cookTime = try container.decodeIfPresent(String.self, forKey: .cookTime)
+        prepTime = try container.decodeIfPresent(Int.self, forKey: .prepTime)
+        servings = try container.decodeIfPresent(Int.self, forKey: .servings)
+        calories = try container.decodeIfPresent(Int.self, forKey: .calories)
+        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
+        difficulty = try container.decodeIfPresent(String.self, forKey: .difficulty)
+        cuisineType = try container.decodeIfPresent(String.self, forKey: .cuisineType)
+        costEstimate = try container.decodeIfPresent(Double.self, forKey: .costEstimate)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        createdBy = try container.decodeIfPresent(String.self, forKey: .createdBy)
+        isPublic = try container.decode(Bool.self, forKey: .isPublic)
+        rating = try container.decode(Double.self, forKey: .rating)
+        ratingCount = try container.decode(Int.self, forKey: .ratingCount)
+        
+        // Custom decoding for ingredients array
+        do {
+            ingredients = try container.decode([String].self, forKey: .ingredients)
+        } catch {
+            if let ingredientsString = try? container.decodeIfPresent(String.self, forKey: .ingredients) {
+                if ingredientsString.isEmpty {
+                    ingredients = []
+                } else {
+                    ingredients = ingredientsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                }
+            } else {
+                ingredients = []
+            }
         }
-        return 0
+        
+        // Custom decoding for steps array
+        do {
+            steps = try container.decode([String].self, forKey: .steps)
+        } catch {
+            if let stepsString = try? container.decodeIfPresent(String.self, forKey: .steps) {
+                if stepsString.isEmpty {
+                    steps = []
+                } else {
+                    steps = stepsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                }
+            } else {
+                steps = []
+            }
+        }
+        
+        // Custom decoding for substitutions array (optional)
+        do {
+            substitutions = try container.decodeIfPresent([String].self, forKey: .substitutions)
+        } catch {
+            if let substitutionsString = try? container.decodeIfPresent(String.self, forKey: .substitutions) {
+                if substitutionsString.isEmpty {
+                    substitutions = []
+                } else {
+                    substitutions = substitutionsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                }
+            } else {
+                substitutions = nil
+            }
+        }
+        
+        // Custom decoding for tags array
+        do {
+            tags = try container.decode([String].self, forKey: .tags)
+        } catch {
+            if let tagsString = try? container.decodeIfPresent(String.self, forKey: .tags) {
+                if tagsString.isEmpty {
+                    tags = []
+                } else {
+                    tags = tagsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                }
+            } else {
+                tags = []
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    /// Get cooking time in minutes for calculations
+    var cookTimeInMinutes: Int {
+        guard let cookTime = cookTime else { return 30 }
+        
+        // Extract number from strings like "25 mins", "1 hour", etc.
+        let components = cookTime.components(separatedBy: .whitespaces)
+        if let firstNumber = components.first, let minutes = Int(firstNumber) {
+            // Check if it contains "hour" to convert
+            if cookTime.lowercased().contains("hour") {
+                return minutes * 60
+            }
+            return minutes
+        }
+        return 30 // Default fallback
+    }
+    
+    /// Total time including prep and cook time
+    var totalTimeInMinutes: Int {
+        return (prepTime ?? 0) + cookTimeInMinutes
+    }
+    
+    /// Formatted time display
+    var formattedTime: String {
+        if totalTimeInMinutes < 60 {
+            return "\(totalTimeInMinutes) mins"
+        } else {
+            let hours = totalTimeInMinutes / 60
+            let minutes = totalTimeInMinutes % 60
+            if minutes == 0 {
+                return "\(hours) hour\(hours > 1 ? "s" : "")"
+            } else {
+                return "\(hours)h \(minutes)m"
+            }
+        }
+    }
+    
+    /// Check if recipe is quick (under 30 minutes)
+    var isQuick: Bool {
+        return totalTimeInMinutes <= 30
+    }
+    
+    /// Check if recipe is healthy (based on tags and calories)
+    var isHealthy: Bool {
+        let healthyTags = ["healthy", "low-fat", "high-protein", "vegetarian", "vegan"]
+        let hasHealthyTags = tags.contains { tag in
+            healthyTags.contains(tag.lowercased())
+        }
+        
+        let isLowCalorie = (calories ?? 600) <= 500
+        
+        return hasHealthyTags || isLowCalorie
+    }
+    
+    /// Difficulty display
+    var difficultyDisplay: String {
+        switch difficulty?.lowercased() {
+        case "easy": return "Easy"
+        case "medium": return "Medium"
+        case "hard": return "Hard"
+        default: return "Medium"
+        }
+    }
+    
+    /// Rating display with stars
+    var ratingDisplay: String {
+        let fullStars = Int(rating)
+        let hasHalfStar = rating - Double(fullStars) >= 0.5
+        
+        var stars = String(repeating: "★", count: fullStars)
+        if hasHalfStar {
+            stars += "☆"
+        }
+        
+        return "\(stars) (\(ratingCount))"
+    }
+}
+
+// MARK: - Request Models
+
+struct CreateRecipeRequest: Codable {
+    let title: String
+    let cookTime: String?
+    let prepTime: Int?
+    let servings: Int?
+    let calories: Int?
+    let imageUrl: String?
+    let ingredients: [String]
+    let steps: [String]
+    let substitutions: [String]?
+    let tags: [String]
+    let difficulty: String?
+    let cuisineType: String?
+    let costEstimate: Double?
+    let isPublic: Bool
+    let createdBy: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case title
+        case cookTime = "cook_time"
+        case prepTime = "prep_time"
+        case servings
+        case calories
+        case imageUrl = "image_url"
+        case ingredients
+        case steps
+        case substitutions
+        case tags
+        case difficulty
+        case cuisineType = "cuisine_type"
+        case costEstimate = "cost_estimate"
+        case isPublic = "is_public"
+        case createdBy = "created_by"
+    }
+    
+    // MARK: - Initializers
+    
+    init(
+        title: String,
+        cookTime: String? = nil,
+        prepTime: Int? = nil,
+        servings: Int? = nil,
+        calories: Int? = nil,
+        imageUrl: String? = nil,
+        ingredients: [String],
+        steps: [String],
+        substitutions: [String]? = nil,
+        tags: [String],
+        difficulty: String? = nil,
+        cuisineType: String? = nil,
+        costEstimate: Double? = nil,
+        isPublic: Bool = true,
+        createdBy: String? = nil
+    ) {
+        self.title = title
+        self.cookTime = cookTime
+        self.prepTime = prepTime
+        self.servings = servings
+        self.calories = calories
+        self.imageUrl = imageUrl
+        self.ingredients = ingredients
+        self.steps = steps
+        self.substitutions = substitutions
+        self.tags = tags
+        self.difficulty = difficulty
+        self.cuisineType = cuisineType
+        self.costEstimate = costEstimate
+        self.isPublic = isPublic
+        self.createdBy = createdBy
+    }
+}
+
+// MARK: - Enums
+
+enum RecipeDifficulty: String, CaseIterable {
+    case easy = "easy"
+    case medium = "medium"
+    case hard = "hard"
+    
+    var displayName: String {
+        switch self {
+        case .easy: return "Easy"
+        case .medium: return "Medium"
+        case .hard: return "Hard"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .easy: return "🟢"
+        case .medium: return "🟡"
+        case .hard: return "🔴"
+        }
+    }
+}
+
+enum CuisineType: String, CaseIterable {
+    case american = "american"
+    case italian = "italian"
+    case mexican = "mexican"
+    case asian = "asian"
+    case mediterranean = "mediterranean"
+    case indian = "indian"
+    case french = "french"
+    case thai = "thai"
+    case chinese = "chinese"
+    case japanese = "japanese"
+    case middle_eastern = "middle_eastern"
+    case other = "other"
+    
+    var displayName: String {
+        switch self {
+        case .american: return "American"
+        case .italian: return "Italian"
+        case .mexican: return "Mexican"
+        case .asian: return "Asian"
+        case .mediterranean: return "Mediterranean"
+        case .indian: return "Indian"
+        case .french: return "French"
+        case .thai: return "Thai"
+        case .chinese: return "Chinese"
+        case .japanese: return "Japanese"
+        case .middle_eastern: return "Middle Eastern"
+        case .other: return "Other"
+        }
+    }
+    
+    var flag: String {
+        switch self {
+        case .american: return "🇺🇸"
+        case .italian: return "🇮🇹"
+        case .mexican: return "🇲🇽"
+        case .asian: return "🌏"
+        case .mediterranean: return "🇬🇷"
+        case .indian: return "🇮🇳"
+        case .french: return "🇫🇷"
+        case .thai: return "🇹🇭"
+        case .chinese: return "🇨🇳"
+        case .japanese: return "🇯🇵"
+        case .middle_eastern: return "🏛️"
+        case .other: return "🌍"
+        }
+    }
+}
+
+// MARK: - Recipe Categories
+
+enum RecipeTag: String, CaseIterable {
+    case healthy = "healthy"
+    case quick = "quick"
+    case vegetarian = "vegetarian"
+    case vegan = "vegan"
+    case glutenFree = "gluten-free"
+    case lowCarb = "low-carb"
+    case highProtein = "high-protein"
+    case keto = "keto"
+    case paleo = "paleo"
+    case mediterranean = "mediterranean"
+    case comfort = "comfort"
+    case spicy = "spicy"
+    case sweet = "sweet"
+    case familyFriendly = "family-friendly"
+    case budgetFriendly = "budget-friendly"
+    case mealPrep = "meal-prep"
+    
+    var displayName: String {
+        switch self {
+        case .healthy: return "Healthy"
+        case .quick: return "Quick"
+        case .vegetarian: return "Vegetarian"
+        case .vegan: return "Vegan"
+        case .glutenFree: return "Gluten Free"
+        case .lowCarb: return "Low Carb"
+        case .highProtein: return "High Protein"
+        case .keto: return "Keto"
+        case .paleo: return "Paleo"
+        case .mediterranean: return "Mediterranean"
+        case .comfort: return "Comfort Food"
+        case .spicy: return "Spicy"
+        case .sweet: return "Sweet"
+        case .familyFriendly: return "Family Friendly"
+        case .budgetFriendly: return "Budget Friendly"
+        case .mealPrep: return "Meal Prep"
+        }
+    }
+    
+    var color: String {
+        switch self {
+        case .healthy: return "green"
+        case .quick: return "orange"
+        case .vegetarian, .vegan: return "green"
+        case .glutenFree, .lowCarb, .keto, .paleo: return "blue"
+        case .highProtein: return "red"
+        case .mediterranean: return "blue"
+        case .comfort: return "brown"
+        case .spicy: return "red"
+        case .sweet: return "pink"
+        case .familyFriendly: return "purple"
+        case .budgetFriendly: return "green"
+        case .mealPrep: return "gray"
+        }
+    }
+}
+
+// MARK: - Extensions
+
+extension Recipe {
+    /// Check if recipe matches search criteria
+    func matches(searchText: String) -> Bool {
+        let lowercasedSearch = searchText.lowercased()
+        
+        return title.lowercased().contains(lowercasedSearch) ||
+               ingredients.contains { $0.lowercased().contains(lowercasedSearch) } ||
+               tags.contains { $0.lowercased().contains(lowercasedSearch) } ||
+               (cuisineType?.lowercased().contains(lowercasedSearch) ?? false)
+    }
+    
+    /// Check if recipe has specific tag
+    func hasTag(_ tag: RecipeTag) -> Bool {
+        return tags.contains(tag.rawValue)
+    }
+    
+    /// Check if recipe is suitable for diet
+    func suitableFor(diet: String) -> Bool {
+        switch diet.lowercased() {
+        case "vegetarian":
+            return hasTag(.vegetarian) || hasTag(.vegan)
+        case "vegan":
+            return hasTag(.vegan)
+        case "keto":
+            return hasTag(.keto) || hasTag(.lowCarb)
+        case "paleo":
+            return hasTag(.paleo)
+        case "mediterranean":
+            return hasTag(.mediterranean)
+        case "gluten_free":
+            return hasTag(.glutenFree)
+        default:
+            return true
+        }
+    }
+    
+    /// Get estimated cost display
+    var costDisplay: String {
+        guard let cost = costEstimate else { return "N/A" }
+        return String(format: "$%.2f", cost)
+    }
+    
+    /// Get calories display
+    var caloriesDisplay: String {
+        guard let calories = calories else { return "N/A" }
+        return "\(calories) cal"
+    }
+    
+    /// Get servings display
+    var servingsDisplay: String {
+        guard let servings = servings else { return "N/A" }
+        return "\(servings) serving\(servings > 1 ? "s" : "")"
+    }
+    
+    // MARK: - Mock Data (Minimal for SwiftUI Previews)
+    static func mockRecipe() -> Recipe {
+        return Recipe(
+            id: "mock-recipe-1",
+            title: "Sample Recipe",
+            cookTime: "30 mins",
+            prepTime: 15,
+            servings: 4,
+            calories: 350,
+            imageUrl: nil,
+            ingredients: ["Sample ingredient 1", "Sample ingredient 2"],
+            steps: ["Sample step 1", "Sample step 2"],
+            substitutions: ["Sample substitution"],
+            tags: ["healthy", "quick"],
+            difficulty: "medium",
+            cuisineType: "american",
+            costEstimate: 15.99,
+            createdAt: Date(),
+            updatedAt: Date(),
+            createdBy: "MockUser",
+            isPublic: true,
+            rating: 4.5,
+            ratingCount: 10
+        )
+    }
+    
+    // For backward compatibility
+    static func enhancedMockRecipes() -> [Recipe] {
+        return [mockRecipe()]
     }
 }

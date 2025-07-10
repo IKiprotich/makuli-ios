@@ -143,15 +143,26 @@ struct GeneratedMeal: Codable {
         }
         
         return Recipe(
-            id: UUID(),
+            id: UUID().uuidString,
             title: name,
             cookTime: "\(cookingTime) mins",
+            prepTime: 10,
             servings: 4,
-            imageName: "🍽️",
-            ingredients: recipeIngredients,
+            calories: 400,
+            imageUrl: nil,
+            ingredients: ingredients, // Use string ingredients
             steps: instructions,
             substitutions: [],
-            tags: [difficulty.capitalized, "AI Generated"]
+            tags: [difficulty.capitalized, "AI Generated"],
+            difficulty: difficulty,
+            cuisineType: "Western",
+            costEstimate: estimatedCost,
+            createdAt: Date(),
+            updatedAt: Date(),
+            createdBy: "AI",
+            isPublic: true,
+            rating: 4.0,
+            ratingCount: 1
         )
     }
     

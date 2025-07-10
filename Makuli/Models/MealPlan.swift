@@ -17,12 +17,7 @@ struct MealPlan {
     let backgroundColor: String
 }
 
-enum MealType: String, CaseIterable{
-    case breakfast = "Breakfast"
-    case lunch = "Lunch"
-    case dinner = "Dinner"
-    case snack = "Snack"
-}
+// MealType enum moved to Plan.swift to avoid duplicate declarations
 
 enum Difficulty: String, CaseIterable{
     case easy = "Easy"
