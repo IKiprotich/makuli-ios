@@ -9,280 +9,878 @@
 
 import Foundation
 
-// MARK: - Core UserProfile Model
-
+/**
+ * UserProfile Model
+ * 
+ * Represents extended user profile information and preferences.
+ * This model contains additional user data beyond basic authentication information.
+ * 
+ * Key Features:
+ * - Extended user preferences and settings
+ * - Fitness and health tracking data
+ * - Meal planning preferences and history
+ * - Achievement and progress tracking
+ * - Notification and privacy settings
+ * 
+ * Database Relationships:
+ * - Belongs to a User (one-to-one relationship)
+ * - Can have multiple progress metrics
+ * - Can have multiple achievements
+ */
 struct UserProfile: Identifiable, Codable {
+    /// Unique identifier for the user profile
     let id: String
-    var name: String?
-    var email: String
-    var age: Int?
-    var gender: String?
-    var goal: String?
-    var diet: String?
-    var budget: String?
-    var isPremium: Bool
-    var subscriptionRenewal: Date?
-    var profileImageUrl: String?
-    let createdAt: Date
-    var updatedAt: Date
-    var isOnboardingCompleted: Bool
     
-    // Subscription tracking from production schema
-    var subscriptionType: String // "free", "monthly", "yearly"
-    var plansCreatedThisMonth: Int
-    var aiGenerationsThisMonth: Int
-    var lastPlanReset: Date
+    /// Reference to the user this profile belongs to
+    let userId: String
+    
+    /// User's profile picture URL
+    let profilePictureUrl: String?
+    
+    /// User's bio or description
+    let bio: String?
+    
+    /// User's location/city
+    let location: String?
+    
+    /// User's preferred language
+    let preferredLanguage: String
+    
+    /// User's timezone
+    let timezone: String
+    
+    /// User's preferred measurement system (Metric, Imperial)
+    let measurementSystem: String
+    
+    /// User's preferred currency
+    let preferredCurrency: String
+    
+    /// User's notification preferences
+    let notificationPreferences: NotificationPreferences
+    
+    /// User's privacy settings
+    let privacySettings: PrivacySettings
+    
+    /// User's fitness goals and targets
+    let fitnessGoals: FitnessGoals
+    
+    /// User's meal planning preferences
+    let mealPlanningPreferences: MealPlanningPreferences
+    
+    /// User's dietary restrictions and preferences
+    let dietaryPreferences: DietaryPreferences
+    
+    /// User's cooking experience and preferences
+    let cookingPreferences: CookingPreferences
+    
+    /// User's budget and cost preferences
+    let budgetPreferences: BudgetPreferences
+    
+    /// User's achievement and progress data
+    let achievements: [Achievement]
+    
+    /// User's progress metrics over time
+    let progressMetrics: [ProgressMetrics]
+    
+    /// Timestamp when the profile was created
+    let createdAt: Date
+    
+    /// Timestamp when the profile was last updated
+    let updatedAt: Date
+    
+    // MARK: - Coding Keys
     
     enum CodingKeys: String, CodingKey {
         case id
-        case name
-        case email
-        case age
-        case gender
-        case goal
-        case diet
-        case budget
-        case isPremium = "is_premium"
-        case subscriptionRenewal = "subscription_renewal"
-        case profileImageUrl = "profile_image_url"
+        case userId = "user_id"
+        case profilePictureUrl = "profile_picture_url"
+        case bio
+        case location
+        case preferredLanguage = "preferred_language"
+        case timezone
+        case measurementSystem = "measurement_system"
+        case preferredCurrency = "preferred_currency"
+        case notificationPreferences = "notification_preferences"
+        case privacySettings = "privacy_settings"
+        case fitnessGoals = "fitness_goals"
+        case mealPlanningPreferences = "meal_planning_preferences"
+        case dietaryPreferences = "dietary_preferences"
+        case cookingPreferences = "cooking_preferences"
+        case budgetPreferences = "budget_preferences"
+        case achievements
+        case progressMetrics = "progress_metrics"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
-        case isOnboardingCompleted = "is_onboarding_completed"
-        case subscriptionType = "subscription_type"
-        case plansCreatedThisMonth = "plans_created_this_month"
-        case aiGenerationsThisMonth = "ai_generations_this_month"
-        case lastPlanReset = "last_plan_reset"
     }
     
-    // MARK: - Initializers
-    
-    init(
-        id: String,
-        name: String? = nil,
-        email: String,
-        age: Int? = nil,
-        gender: String? = nil,
-        goal: String? = nil,
-        diet: String? = nil,
-        budget: String? = nil,
-        isPremium: Bool = false,
-        subscriptionRenewal: Date? = nil,
-        profileImageUrl: String? = nil,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-        isOnboardingCompleted: Bool = false,
-        subscriptionType: String = "free",
-        plansCreatedThisMonth: Int = 0,
-        aiGenerationsThisMonth: Int = 0,
-        lastPlanReset: Date = Date()
-    ) {
-        self.id = id
-        self.name = name
-        self.email = email
-        self.age = age
-        self.gender = gender
-        self.goal = goal
-        self.diet = diet
-        self.budget = budget
-        self.isPremium = isPremium
-        self.subscriptionRenewal = subscriptionRenewal
-        self.profileImageUrl = profileImageUrl
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.isOnboardingCompleted = isOnboardingCompleted
-        self.subscriptionType = subscriptionType
-        self.plansCreatedThisMonth = plansCreatedThisMonth
-        self.aiGenerationsThisMonth = aiGenerationsThisMonth
-        self.lastPlanReset = lastPlanReset
-    }
-    
-    // MARK: - Custom Decoding
+    // MARK: - Custom Decoder
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode regular fields
         id = try container.decode(String.self, forKey: .id)
-        name = try container.decodeIfPresent(String.self, forKey: .name)
-        email = try container.decode(String.self, forKey: .email)
-        age = try container.decodeIfPresent(Int.self, forKey: .age)
-        gender = try container.decodeIfPresent(String.self, forKey: .gender)
-        goal = try container.decodeIfPresent(String.self, forKey: .goal)
-        diet = try container.decodeIfPresent(String.self, forKey: .diet)
-        budget = try container.decodeIfPresent(String.self, forKey: .budget)
-        isPremium = try container.decode(Bool.self, forKey: .isPremium)
-        profileImageUrl = try container.decodeIfPresent(String.self, forKey: .profileImageUrl)
-        isOnboardingCompleted = try container.decode(Bool.self, forKey: .isOnboardingCompleted)
-        subscriptionType = try container.decode(String.self, forKey: .subscriptionType)
-        plansCreatedThisMonth = try container.decode(Int.self, forKey: .plansCreatedThisMonth)
-        aiGenerationsThisMonth = try container.decode(Int.self, forKey: .aiGenerationsThisMonth)
+        userId = try container.decode(String.self, forKey: .userId)
+        profilePictureUrl = try container.decodeIfPresent(String.self, forKey: .profilePictureUrl)
+        bio = try container.decodeIfPresent(String.self, forKey: .bio)
+        location = try container.decodeIfPresent(String.self, forKey: .location)
+        preferredLanguage = try container.decode(String.self, forKey: .preferredLanguage)
+        timezone = try container.decode(String.self, forKey: .timezone)
+        measurementSystem = try container.decode(String.self, forKey: .measurementSystem)
+        preferredCurrency = try container.decode(String.self, forKey: .preferredCurrency)
+        notificationPreferences = try container.decode(NotificationPreferences.self, forKey: .notificationPreferences)
+        privacySettings = try container.decode(PrivacySettings.self, forKey: .privacySettings)
+        fitnessGoals = try container.decode(FitnessGoals.self, forKey: .fitnessGoals)
+        mealPlanningPreferences = try container.decode(MealPlanningPreferences.self, forKey: .mealPlanningPreferences)
+        dietaryPreferences = try container.decode(DietaryPreferences.self, forKey: .dietaryPreferences)
+        cookingPreferences = try container.decode(CookingPreferences.self, forKey: .cookingPreferences)
+        budgetPreferences = try container.decode(BudgetPreferences.self, forKey: .budgetPreferences)
+        achievements = try container.decode([Achievement].self, forKey: .achievements)
+        progressMetrics = try container.decode([ProgressMetrics].self, forKey: .progressMetrics)
         
-        // Decode dates with fallback handling
-        let iso8601Formatter = ISO8601DateFormatter()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
+        // Handle date decoding with ISO8601 format
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        // Decode created_at
         if let createdAtString = try? container.decode(String.self, forKey: .createdAt) {
-            if let date = iso8601Formatter.date(from: createdAtString) {
-                createdAt = date
-            } else if let date = dateFormatter.date(from: createdAtString) {
-                createdAt = date
-            } else {
-                createdAt = Date()
-            }
+            createdAt = dateFormatter.date(from: createdAtString) ?? Date()
         } else {
-            createdAt = try container.decode(Date.self, forKey: .createdAt)
+            createdAt = Date()
         }
         
-        // Decode updated_at
         if let updatedAtString = try? container.decode(String.self, forKey: .updatedAt) {
-            if let date = iso8601Formatter.date(from: updatedAtString) {
-                updatedAt = date
-            } else if let date = dateFormatter.date(from: updatedAtString) {
-                updatedAt = date
-            } else {
-                updatedAt = Date()
-            }
+            updatedAt = dateFormatter.date(from: updatedAtString) ?? Date()
         } else {
-            updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        }
-        
-        // Decode subscription_renewal
-        do {
-            if let renewalString = try container.decodeIfPresent(String.self, forKey: .subscriptionRenewal) {
-                if let date = iso8601Formatter.date(from: renewalString) {
-                    subscriptionRenewal = date
-                } else if let date = dateFormatter.date(from: renewalString) {
-                    subscriptionRenewal = date
-                } else {
-                    subscriptionRenewal = nil
-                }
-            } else {
-                subscriptionRenewal = nil
-            }
-        } catch {
-            // Fallback to Date decoding
-            subscriptionRenewal = try? container.decodeIfPresent(Date.self, forKey: .subscriptionRenewal) ?? nil
-        }
-        
-        // Decode last_plan_reset with special handling for DATE format
-        if let resetString = try? container.decode(String.self, forKey: .lastPlanReset) {
-            if let date = dateFormatter.date(from: resetString) {
-                lastPlanReset = date
-            } else if let date = iso8601Formatter.date(from: resetString) {
-                lastPlanReset = date
-            } else {
-                lastPlanReset = Date()
-            }
-        } else {
-            lastPlanReset = try container.decode(Date.self, forKey: .lastPlanReset)
+            updatedAt = Date()
         }
     }
     
-    // MARK: - Custom Encoding
+    // MARK: - Convenience Initializer
     
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try container.encode(id, forKey: .id)
-        try container.encodeIfPresent(name, forKey: .name)
-        try container.encode(email, forKey: .email)
-        try container.encodeIfPresent(age, forKey: .age)
-        try container.encodeIfPresent(gender, forKey: .gender)
-        try container.encodeIfPresent(goal, forKey: .goal)
-        try container.encodeIfPresent(diet, forKey: .diet)
-        try container.encodeIfPresent(budget, forKey: .budget)
-        try container.encode(isPremium, forKey: .isPremium)
-        try container.encodeIfPresent(profileImageUrl, forKey: .profileImageUrl)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(updatedAt, forKey: .updatedAt)
-        try container.encode(isOnboardingCompleted, forKey: .isOnboardingCompleted)
-        try container.encode(subscriptionType, forKey: .subscriptionType)
-        try container.encode(plansCreatedThisMonth, forKey: .plansCreatedThisMonth)
-        try container.encode(aiGenerationsThisMonth, forKey: .aiGenerationsThisMonth)
-        try container.encode(lastPlanReset, forKey: .lastPlanReset)
-        try container.encodeIfPresent(subscriptionRenewal, forKey: .subscriptionRenewal)
+    /**
+     * Creates a new UserProfile instance
+     * 
+     * - Parameters:
+     *   - id: Unique identifier
+     *   - userId: Reference to the user
+     *   - profilePictureUrl: Optional profile picture URL
+     *   - bio: Optional bio text
+     *   - location: Optional location
+     *   - preferredLanguage: Preferred language
+     *   - timezone: User's timezone
+     *   - measurementSystem: Preferred measurement system
+     *   - preferredCurrency: Preferred currency
+     *   - notificationPreferences: Notification settings
+     *   - privacySettings: Privacy settings
+     *   - fitnessGoals: Fitness goals
+     *   - mealPlanningPreferences: Meal planning preferences
+     *   - dietaryPreferences: Dietary preferences
+     *   - cookingPreferences: Cooking preferences
+     *   - budgetPreferences: Budget preferences
+     *   - achievements: Array of achievements
+     *   - progressMetrics: Array of progress metrics
+     *   - createdAt: Creation timestamp
+     *   - updatedAt: Last update timestamp
+     */
+    init(id: String, userId: String, profilePictureUrl: String?, bio: String?, location: String?, preferredLanguage: String, timezone: String, measurementSystem: String, preferredCurrency: String, notificationPreferences: NotificationPreferences, privacySettings: PrivacySettings, fitnessGoals: FitnessGoals, mealPlanningPreferences: MealPlanningPreferences, dietaryPreferences: DietaryPreferences, cookingPreferences: CookingPreferences, budgetPreferences: BudgetPreferences, achievements: [Achievement], progressMetrics: [ProgressMetrics], createdAt: Date, updatedAt: Date) {
+        self.id = id
+        self.userId = userId
+        self.profilePictureUrl = profilePictureUrl
+        self.bio = bio
+        self.location = location
+        self.preferredLanguage = preferredLanguage
+        self.timezone = timezone
+        self.measurementSystem = measurementSystem
+        self.preferredCurrency = preferredCurrency
+        self.notificationPreferences = notificationPreferences
+        self.privacySettings = privacySettings
+        self.fitnessGoals = fitnessGoals
+        self.mealPlanningPreferences = mealPlanningPreferences
+        self.dietaryPreferences = dietaryPreferences
+        self.cookingPreferences = cookingPreferences
+        self.budgetPreferences = budgetPreferences
+        self.achievements = achievements
+        self.progressMetrics = progressMetrics
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
-
+    
     // MARK: - Computed Properties
     
-    /// Check if user has premium subscription
-    var hasPremiumAccess: Bool {
-        guard isPremium else { return false }
+    /**
+     * Validated profile picture URL that can be safely loaded
+     * 
+     * - Returns: URL if valid, nil otherwise
+     */
+    var validProfilePictureUrl: URL? {
+        guard let profilePictureUrl = profilePictureUrl, !profilePictureUrl.isEmpty else { return nil }
+        return URL(string: profilePictureUrl)
+    }
+    
+    /**
+     * Display name for the profile
+     * 
+     * - Returns: Location if available, otherwise "Location not set"
+     */
+    var displayLocation: String {
+        return location ?? "Location not set"
+    }
+    
+    /**
+     * Display bio for the profile
+     * 
+     * - Returns: Bio if available, otherwise "No bio available"
+     */
+    var displayBio: String {
+        return bio ?? "No bio available"
+    }
+    
+    /**
+     * Whether the profile has a bio
+     * 
+     * - Returns: True if bio is not empty
+     */
+    var hasBio: Bool {
+        return bio != nil && !bio!.isEmpty
+    }
+    
+    /**
+     * Whether the profile has a location
+     * 
+     * - Returns: True if location is set
+     */
+    var hasLocation: Bool {
+        return location != nil && !location!.isEmpty
+    }
+    
+    /**
+     * Whether the profile has a profile picture
+     * 
+     * - Returns: True if profile picture URL is set
+     */
+    var hasProfilePicture: Bool {
+        return profilePictureUrl != nil && !profilePictureUrl!.isEmpty
+    }
+    
+    /**
+     * Total number of achievements earned
+     * 
+     * - Returns: Count of earned achievements
+     */
+    var totalAchievements: Int {
+        return achievements.count
+    }
+    
+    /**
+     * Latest progress metrics
+     * 
+     * - Returns: Most recent progress metrics or nil
+     */
+    var latestProgressMetrics: ProgressMetrics? {
+        return progressMetrics.max { $0.date < $1.date }
+    }
+    
+    // MARK: - Helper Methods
+    
+    /**
+     * Gets achievements by category
+     * 
+     * - Parameter category: The achievement category to filter by
+     * - Returns: Array of achievements in the specified category
+     */
+    func achievementsByCategory(_ category: String) -> [Achievement] {
+        return achievements.filter { $0.category.lowercased() == category.lowercased() }
+    }
+    
+    /**
+     * Gets progress metrics for a specific date range
+     * 
+     * - Parameters:
+     *   - startDate: Start date for the range
+     *   - endDate: End date for the range
+     * - Returns: Array of progress metrics within the date range
+     */
+    func progressMetricsForDateRange(startDate: Date, endDate: Date) -> [ProgressMetrics] {
+        return progressMetrics.filter { $0.date >= startDate && $0.date <= endDate }
+    }
+    
+    /**
+     * Creates a copy of this profile with updated bio
+     * 
+     * - Parameter newBio: New bio text
+     * - Returns: New UserProfile instance with updated bio
+     */
+    func withBio(_ newBio: String?) -> UserProfile {
+        return UserProfile(
+            id: id,
+            userId: userId,
+            profilePictureUrl: profilePictureUrl,
+            bio: newBio,
+            location: location,
+            preferredLanguage: preferredLanguage,
+            timezone: timezone,
+            measurementSystem: measurementSystem,
+            preferredCurrency: preferredCurrency,
+            notificationPreferences: notificationPreferences,
+            privacySettings: privacySettings,
+            fitnessGoals: fitnessGoals,
+            mealPlanningPreferences: mealPlanningPreferences,
+            dietaryPreferences: dietaryPreferences,
+            cookingPreferences: cookingPreferences,
+            budgetPreferences: budgetPreferences,
+            achievements: achievements,
+            progressMetrics: progressMetrics,
+            createdAt: createdAt,
+            updatedAt: Date()
+        )
+    }
+    
+    /**
+     * Creates a copy of this profile with updated location
+     * 
+     * - Parameter newLocation: New location
+     * - Returns: New UserProfile instance with updated location
+     */
+    func withLocation(_ newLocation: String?) -> UserProfile {
+        return UserProfile(
+            id: id,
+            userId: userId,
+            profilePictureUrl: profilePictureUrl,
+            bio: bio,
+            location: newLocation,
+            preferredLanguage: preferredLanguage,
+            timezone: timezone,
+            measurementSystem: measurementSystem,
+            preferredCurrency: preferredCurrency,
+            notificationPreferences: notificationPreferences,
+            privacySettings: privacySettings,
+            fitnessGoals: fitnessGoals,
+            mealPlanningPreferences: mealPlanningPreferences,
+            dietaryPreferences: dietaryPreferences,
+            cookingPreferences: cookingPreferences,
+            budgetPreferences: budgetPreferences,
+            achievements: achievements,
+            progressMetrics: progressMetrics,
+            createdAt: createdAt,
+            updatedAt: Date()
+        )
+    }
+}
+
+/**
+ * NotificationPreferences Model
+ * 
+ * Represents user's notification preferences and settings.
+ */
+struct NotificationPreferences: Codable {
+    /// Whether meal reminders are enabled
+    let mealReminders: Bool
+    
+    /// Whether grocery list reminders are enabled
+    let groceryReminders: Bool
+    
+    /// Whether achievement notifications are enabled
+    let achievementNotifications: Bool
+    
+    /// Whether weekly progress reports are enabled
+    let weeklyReports: Bool
+    
+    /// Whether new recipe notifications are enabled
+    let newRecipeNotifications: Bool
+    
+    /// Preferred notification time (24-hour format)
+    let preferredNotificationTime: String
+    
+    /// Whether push notifications are enabled
+    let pushNotificationsEnabled: Bool
+    
+    /// Whether email notifications are enabled
+    let emailNotificationsEnabled: Bool
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case mealReminders = "meal_reminders"
+        case groceryReminders = "grocery_reminders"
+        case achievementNotifications = "achievement_notifications"
+        case weeklyReports = "weekly_reports"
+        case newRecipeNotifications = "new_recipe_notifications"
+        case preferredNotificationTime = "preferred_notification_time"
+        case pushNotificationsEnabled = "push_notifications_enabled"
+        case emailNotificationsEnabled = "email_notifications_enabled"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new NotificationPreferences instance
+     * 
+     * - Parameters:
+     *   - mealReminders: Whether meal reminders are enabled
+     *   - groceryReminders: Whether grocery reminders are enabled
+     *   - achievementNotifications: Whether achievement notifications are enabled
+     *   - weeklyReports: Whether weekly reports are enabled
+     *   - newRecipeNotifications: Whether new recipe notifications are enabled
+     *   - preferredNotificationTime: Preferred notification time
+     *   - pushNotificationsEnabled: Whether push notifications are enabled
+     *   - emailNotificationsEnabled: Whether email notifications are enabled
+     */
+    init(mealReminders: Bool, groceryReminders: Bool, achievementNotifications: Bool, weeklyReports: Bool, newRecipeNotifications: Bool, preferredNotificationTime: String, pushNotificationsEnabled: Bool, emailNotificationsEnabled: Bool) {
+        self.mealReminders = mealReminders
+        self.groceryReminders = groceryReminders
+        self.achievementNotifications = achievementNotifications
+        self.weeklyReports = weeklyReports
+        self.newRecipeNotifications = newRecipeNotifications
+        self.preferredNotificationTime = preferredNotificationTime
+        self.pushNotificationsEnabled = pushNotificationsEnabled
+        self.emailNotificationsEnabled = emailNotificationsEnabled
+    }
+}
+
+/**
+ * PrivacySettings Model
+ * 
+ * Represents user's privacy settings and preferences.
+ */
+struct PrivacySettings: Codable {
+    /// Whether profile is public
+    let isProfilePublic: Bool
+    
+    /// Whether meal plans are visible to others
+    let mealPlansVisible: Bool
+    
+    /// Whether progress is shared with friends
+    let progressSharingEnabled: Bool
+    
+    /// Whether achievements are public
+    let achievementsPublic: Bool
+    
+    /// Whether location is shared
+    let locationSharingEnabled: Bool
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case isProfilePublic = "is_profile_public"
+        case mealPlansVisible = "meal_plans_visible"
+        case progressSharingEnabled = "progress_sharing_enabled"
+        case achievementsPublic = "achievements_public"
+        case locationSharingEnabled = "location_sharing_enabled"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new PrivacySettings instance
+     * 
+     * - Parameters:
+     *   - isProfilePublic: Whether profile is public
+     *   - mealPlansVisible: Whether meal plans are visible
+     *   - progressSharingEnabled: Whether progress sharing is enabled
+     *   - achievementsPublic: Whether achievements are public
+     *   - locationSharingEnabled: Whether location sharing is enabled
+     */
+    init(isProfilePublic: Bool, mealPlansVisible: Bool, progressSharingEnabled: Bool, achievementsPublic: Bool, locationSharingEnabled: Bool) {
+        self.isProfilePublic = isProfilePublic
+        self.mealPlansVisible = mealPlansVisible
+        self.progressSharingEnabled = progressSharingEnabled
+        self.achievementsPublic = achievementsPublic
+        self.locationSharingEnabled = locationSharingEnabled
+    }
+}
+
+/**
+ * FitnessGoals Model
+ * 
+ * Represents user's fitness goals and targets.
+ */
+struct FitnessGoals: Codable {
+    /// Target weight in kilograms
+    let targetWeight: Double?
+    
+    /// Target daily calorie intake
+    let targetCalories: Int?
+    
+    /// Target protein intake in grams
+    let targetProtein: Double?
+    
+    /// Target carbohydrate intake in grams
+    let targetCarbohydrates: Double?
+    
+    /// Target fat intake in grams
+    let targetFat: Double?
+    
+    /// Weekly workout goal in minutes
+    let weeklyWorkoutMinutes: Int?
+    
+    /// Target steps per day
+    let targetStepsPerDay: Int?
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case targetWeight = "target_weight"
+        case targetCalories = "target_calories"
+        case targetProtein = "target_protein"
+        case targetCarbohydrates = "target_carbohydrates"
+        case targetFat = "target_fat"
+        case weeklyWorkoutMinutes = "weekly_workout_minutes"
+        case targetStepsPerDay = "target_steps_per_day"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new FitnessGoals instance
+     * 
+     * - Parameters:
+     *   - targetWeight: Target weight in kilograms
+     *   - targetCalories: Target daily calorie intake
+     *   - targetProtein: Target protein intake in grams
+     *   - targetCarbohydrates: Target carbohydrate intake in grams
+     *   - targetFat: Target fat intake in grams
+     *   - weeklyWorkoutMinutes: Weekly workout goal in minutes
+     *   - targetStepsPerDay: Target steps per day
+     */
+    init(targetWeight: Double?, targetCalories: Int?, targetProtein: Double?, targetCarbohydrates: Double?, targetFat: Double?, weeklyWorkoutMinutes: Int?, targetStepsPerDay: Int?) {
+        self.targetWeight = targetWeight
+        self.targetCalories = targetCalories
+        self.targetProtein = targetProtein
+        self.targetCarbohydrates = targetCarbohydrates
+        self.targetFat = targetFat
+        self.weeklyWorkoutMinutes = weeklyWorkoutMinutes
+        self.targetStepsPerDay = targetStepsPerDay
+    }
+}
+
+/**
+ * MealPlanningPreferences Model
+ * 
+ * Represents user's meal planning preferences and settings.
+ */
+struct MealPlanningPreferences: Codable {
+    /// Preferred number of meals per day
+    let mealsPerDay: Int
+    
+    /// Preferred meal prep time in minutes
+    let preferredPrepTime: Int
+    
+    /// Whether to include snacks
+    let includeSnacks: Bool
+    
+    /// Preferred cuisine types
+    let preferredCuisines: [String]
+    
+    /// Whether to rotate meals
+    let rotateMeals: Bool
+    
+    /// Whether to include leftovers
+    let includeLeftovers: Bool
+    
+    /// Preferred meal complexity (Easy, Medium, Hard)
+    let preferredComplexity: String
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case mealsPerDay = "meals_per_day"
+        case preferredPrepTime = "preferred_prep_time"
+        case includeSnacks = "include_snacks"
+        case preferredCuisines = "preferred_cuisines"
+        case rotateMeals = "rotate_meals"
+        case includeLeftovers = "include_leftovers"
+        case preferredComplexity = "preferred_complexity"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new MealPlanningPreferences instance
+     * 
+     * - Parameters:
+     *   - mealsPerDay: Preferred number of meals per day
+     *   - preferredPrepTime: Preferred meal prep time in minutes
+     *   - includeSnacks: Whether to include snacks
+     *   - preferredCuisines: Array of preferred cuisine types
+     *   - rotateMeals: Whether to rotate meals
+     *   - includeLeftovers: Whether to include leftovers
+     *   - preferredComplexity: Preferred meal complexity
+     */
+    init(mealsPerDay: Int, preferredPrepTime: Int, includeSnacks: Bool, preferredCuisines: [String], rotateMeals: Bool, includeLeftovers: Bool, preferredComplexity: String) {
+        self.mealsPerDay = mealsPerDay
+        self.preferredPrepTime = preferredPrepTime
+        self.includeSnacks = includeSnacks
+        self.preferredCuisines = preferredCuisines
+        self.rotateMeals = rotateMeals
+        self.includeLeftovers = includeLeftovers
+        self.preferredComplexity = preferredComplexity
+    }
+}
+
+/**
+ * DietaryPreferences Model
+ * 
+ * Represents user's dietary preferences and restrictions.
+ */
+struct DietaryPreferences: Codable {
+    /// Dietary restrictions (e.g., ["Vegetarian", "Gluten-Free"])
+    let restrictions: [String]
+    
+    /// Allergies and intolerances
+    let allergies: [String]
+    
+    /// Favorite ingredients
+    let favoriteIngredients: [String]
+    
+    /// Disliked ingredients
+    let dislikedIngredients: [String]
+    
+    /// Whether to avoid certain ingredients
+    let avoidIngredients: [String]
+    
+    /// Preferred cooking methods
+    let preferredCookingMethods: [String]
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case restrictions
+        case allergies
+        case favoriteIngredients = "favorite_ingredients"
+        case dislikedIngredients = "disliked_ingredients"
+        case avoidIngredients = "avoid_ingredients"
+        case preferredCookingMethods = "preferred_cooking_methods"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new DietaryPreferences instance
+     * 
+     * - Parameters:
+     *   - restrictions: Array of dietary restrictions
+     *   - allergies: Array of allergies and intolerances
+     *   - favoriteIngredients: Array of favorite ingredients
+     *   - dislikedIngredients: Array of disliked ingredients
+     *   - avoidIngredients: Array of ingredients to avoid
+     *   - preferredCookingMethods: Array of preferred cooking methods
+     */
+    init(restrictions: [String], allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], avoidIngredients: [String], preferredCookingMethods: [String]) {
+        self.restrictions = restrictions
+        self.allergies = allergies
+        self.favoriteIngredients = favoriteIngredients
+        self.dislikedIngredients = dislikedIngredients
+        self.avoidIngredients = avoidIngredients
+        self.preferredCookingMethods = preferredCookingMethods
+    }
+}
+
+/**
+ * CookingPreferences Model
+ * 
+ * Represents user's cooking preferences and experience level.
+ */
+struct CookingPreferences: Codable {
+    /// Cooking skill level (Beginner, Intermediate, Advanced)
+    let skillLevel: String
+    
+    /// Preferred cooking time in minutes
+    let preferredCookingTime: Int
+    
+    /// Whether to use kitchen appliances
+    let useAppliances: Bool
+    
+    /// Preferred cooking methods
+    let preferredMethods: [String]
+    
+    /// Whether to use pre-made ingredients
+    let usePreMadeIngredients: Bool
+    
+    /// Whether to batch cook
+    let batchCooking: Bool
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case skillLevel = "skill_level"
+        case preferredCookingTime = "preferred_cooking_time"
+        case useAppliances = "use_appliances"
+        case preferredMethods = "preferred_methods"
+        case usePreMadeIngredients = "use_pre_made_ingredients"
+        case batchCooking = "batch_cooking"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new CookingPreferences instance
+     * 
+     * - Parameters:
+     *   - skillLevel: Cooking skill level
+     *   - preferredCookingTime: Preferred cooking time in minutes
+     *   - useAppliances: Whether to use kitchen appliances
+     *   - preferredMethods: Array of preferred cooking methods
+     *   - usePreMadeIngredients: Whether to use pre-made ingredients
+     *   - batchCooking: Whether to batch cook
+     */
+    init(skillLevel: String, preferredCookingTime: Int, useAppliances: Bool, preferredMethods: [String], usePreMadeIngredients: Bool, batchCooking: Bool) {
+        self.skillLevel = skillLevel
+        self.preferredCookingTime = preferredCookingTime
+        self.useAppliances = useAppliances
+        self.preferredMethods = preferredMethods
+        self.usePreMadeIngredients = usePreMadeIngredients
+        self.batchCooking = batchCooking
+    }
+}
+
+/**
+ * BudgetPreferences Model
+ * 
+ * Represents user's budget preferences and cost constraints.
+ */
+struct BudgetPreferences: Codable {
+    /// Weekly budget for groceries
+    let weeklyBudget: Double?
+    
+    /// Monthly budget for groceries
+    let monthlyBudget: Double?
+    
+    /// Preferred price range per meal
+    let preferredMealPrice: Double?
+    
+    /// Whether to prioritize budget-friendly recipes
+    let prioritizeBudget: Bool
+    
+    /// Whether to include premium ingredients
+    let includePremiumIngredients: Bool
+    
+    /// Whether to suggest budget alternatives
+    let suggestAlternatives: Bool
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case weeklyBudget = "weekly_budget"
+        case monthlyBudget = "monthly_budget"
+        case preferredMealPrice = "preferred_meal_price"
+        case prioritizeBudget = "prioritize_budget"
+        case includePremiumIngredients = "include_premium_ingredients"
+        case suggestAlternatives = "suggest_alternatives"
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new BudgetPreferences instance
+     * 
+     * - Parameters:
+     *   - weeklyBudget: Weekly budget for groceries
+     *   - monthlyBudget: Monthly budget for groceries
+     *   - preferredMealPrice: Preferred price range per meal
+     *   - prioritizeBudget: Whether to prioritize budget-friendly recipes
+     *   - includePremiumIngredients: Whether to include premium ingredients
+     *   - suggestAlternatives: Whether to suggest budget alternatives
+     */
+    init(weeklyBudget: Double?, monthlyBudget: Double?, preferredMealPrice: Double?, prioritizeBudget: Bool, includePremiumIngredients: Bool, suggestAlternatives: Bool) {
+        self.weeklyBudget = weeklyBudget
+        self.monthlyBudget = monthlyBudget
+        self.preferredMealPrice = preferredMealPrice
+        self.prioritizeBudget = prioritizeBudget
+        self.includePremiumIngredients = includePremiumIngredients
+        self.suggestAlternatives = suggestAlternatives
+    }
+}
+
+/**
+ * Achievement Model
+ * 
+ * Represents a user achievement or milestone.
+ */
+struct Achievement: Codable {
+    /// Unique identifier for the achievement
+    let id: String
+    
+    /// Achievement title
+    let title: String
+    
+    /// Achievement description
+    let description: String
+    
+    /// Achievement category
+    let category: String
+    
+    /// Achievement icon or emoji
+    let icon: String
+    
+    /// Whether the achievement has been earned
+    let isEarned: Bool
+    
+    /// Date when the achievement was earned
+    let earnedAt: Date?
+    
+    /// Achievement points or value
+    let points: Int
+    
+    // MARK: - Coding Keys
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case description
+        case category
+        case icon
+        case isEarned = "is_earned"
+        case earnedAt = "earned_at"
+        case points
+    }
+    
+    // MARK: - Custom Decoder
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        if let renewalDate = subscriptionRenewal {
-            return Date() < renewalDate
-        }
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
+        category = try container.decode(String.self, forKey: .category)
+        icon = try container.decode(String.self, forKey: .icon)
+        isEarned = try container.decode(Bool.self, forKey: .isEarned)
+        points = try container.decode(Int.self, forKey: .points)
         
-        return false
-    }
-    
-    /// Check if user can create more plans this month
-    var canCreateMorePlans: Bool {
-        if hasPremiumAccess {
-            return plansCreatedThisMonth < Configuration.maxPlansPerUser
-        } else {
-            return plansCreatedThisMonth < Configuration.freePlanLimits.maxPlansPerMonth
-        }
-    }
-    
-    /// Check if user can use AI generation
-    var canUseAIGeneration: Bool {
-        if hasPremiumAccess {
-            return true // Unlimited for premium
-        } else {
-            return aiGenerationsThisMonth < Configuration.freePlanLimits.maxAIGenerationsPerMonth
-        }
-    }
-    
-    /// Days until subscription renewal
-    var daysUntilRenewal: Int? {
-        guard let renewalDate = subscriptionRenewal else { return nil }
+        // Handle date decoding with ISO8601 format
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: Date(), to: renewalDate).day
-        return max(days ?? 0, 0)
-    }
-    
-    /// User's display name
-    var displayName: String {
-        return name?.isEmpty == false ? name! : "User"
-    }
-    
-    /// Check if profile is complete
-    var isProfileComplete: Bool {
-        return name != nil && 
-               age != nil && 
-               gender != nil && 
-               goal != nil && 
-               budget != nil &&
-               diet != nil
-    }
-    
-    /// Get subscription display name
-    var subscriptionDisplayName: String {
-        switch subscriptionType {
-        case "free": return "Free Plan"
-        case "monthly": return "Monthly Premium"
-        case "yearly": return "Yearly Premium"
-        default: return "Free Plan"
-        }
-    }
-    
-    /// Get plans remaining this month
-    var plansRemainingThisMonth: Int {
-        let maxPlans = hasPremiumAccess ? Configuration.maxPlansPerUser : Configuration.freePlanLimits.maxPlansPerMonth
-        return max(maxPlans - plansCreatedThisMonth, 0)
-    }
-    
-    /// Get AI generations remaining this month
-    var aiGenerationsRemainingThisMonth: Int {
-        if hasPremiumAccess {
-            return Int.max // Unlimited
+        if let earnedAtString = try? container.decode(String.self, forKey: .earnedAt) {
+            earnedAt = dateFormatter.date(from: earnedAtString)
         } else {
-            return max(Configuration.freePlanLimits.maxAIGenerationsPerMonth - aiGenerationsThisMonth, 0)
+            earnedAt = nil
         }
+    }
+    
+    // MARK: - Convenience Initializer
+    
+    /**
+     * Creates a new Achievement instance
+     * 
+     * - Parameters:
+     *   - id: Unique identifier
+     *   - title: Achievement title
+     *   - description: Achievement description
+     *   - category: Achievement category
+     *   - icon: Achievement icon
+     *   - isEarned: Whether achievement is earned
+     *   - earnedAt: Date when earned
+     *   - points: Achievement points
+     */
+    init(id: String, title: String, description: String, category: String, icon: String, isEarned: Bool, earnedAt: Date?, points: Int) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.category = category
+        self.icon = icon
+        self.isEarned = isEarned
+        self.earnedAt = earnedAt
+        self.points = points
     }
 }
 
