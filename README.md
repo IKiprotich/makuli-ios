@@ -36,8 +36,8 @@ A SwiftUI meal planning app with AI-powered meal generation and template-based p
 
 ```
 Makuli/
-├── docs/                 # 📚 Documentation
-├── Makuli/              # 📱 iOS App Source
+├── docs/                 # Documentation
+├── Makuli/              # iOS App Source
 │   ├── Models/          # Data models
 │   ├── Views/           # SwiftUI views  
 │   ├── ViewModels/      # State management
