@@ -368,7 +368,7 @@ struct SelectableTemplateCard: View {
     let isSelected: Bool
     let onSelect: () -> Void
     
-    var body: some View {
+    var body: some View { 
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
