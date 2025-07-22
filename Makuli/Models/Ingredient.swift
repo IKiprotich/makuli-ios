@@ -57,6 +57,9 @@ struct Ingredient: Identifiable, Codable {
     /// Whether this ingredient is a garnish
     let isGarnish: Bool
     
+    /// Whether this ingredient has been completed/checked off
+    var isCompleted: Bool
+    
     /// Nutritional information per serving
     let nutrition: IngredientNutrition?
     
@@ -85,6 +88,7 @@ struct Ingredient: Identifiable, Codable {
         case notes
         case isOptional = "is_optional"
         case isGarnish = "is_garnish"
+        case isCompleted = "is_completed"
         case nutrition
         case allergens
         case substitutions
@@ -107,6 +111,7 @@ struct Ingredient: Identifiable, Codable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         isOptional = try container.decode(Bool.self, forKey: .isOptional)
         isGarnish = try container.decode(Bool.self, forKey: .isGarnish)
+        isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
         nutrition = try container.decodeIfPresent(IngredientNutrition.self, forKey: .nutrition)
         allergens = try container.decode([String].self, forKey: .allergens)
         substitutions = try container.decode([IngredientSubstitution].self, forKey: .substitutions)
@@ -150,7 +155,7 @@ struct Ingredient: Identifiable, Codable {
      *   - createdAt: Creation timestamp
      *   - updatedAt: Last update timestamp
      */
-    init(id: String, recipeId: String, name: String, quantity: Double, unit: String, category: String, preparation: String?, notes: String?, isOptional: Bool, isGarnish: Bool, nutrition: IngredientNutrition?, allergens: [String], substitutions: [IngredientSubstitution], createdAt: Date, updatedAt: Date) {
+    init(id: String, recipeId: String, name: String, quantity: Double, unit: String, category: String, preparation: String?, notes: String?, isOptional: Bool, isGarnish: Bool, isCompleted: Bool, nutrition: IngredientNutrition?, allergens: [String], substitutions: [IngredientSubstitution], createdAt: Date, updatedAt: Date) {
         self.id = id
         self.recipeId = recipeId
         self.name = name
@@ -161,6 +166,7 @@ struct Ingredient: Identifiable, Codable {
         self.notes = notes
         self.isOptional = isOptional
         self.isGarnish = isGarnish
+        self.isCompleted = isCompleted
         self.nutrition = nutrition
         self.allergens = allergens
         self.substitutions = substitutions
@@ -286,6 +292,7 @@ struct Ingredient: Identifiable, Codable {
             notes: notes,
             isOptional: isOptional,
             isGarnish: isGarnish,
+            isCompleted: isCompleted,
             nutrition: nutrition,
             allergens: allergens,
             substitutions: substitutions,
@@ -312,6 +319,7 @@ struct Ingredient: Identifiable, Codable {
             notes: notes,
             isOptional: isOptional,
             isGarnish: isGarnish,
+            isCompleted: isCompleted,
             nutrition: nutrition,
             allergens: allergens,
             substitutions: substitutions,

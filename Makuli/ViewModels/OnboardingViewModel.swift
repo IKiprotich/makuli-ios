@@ -318,6 +318,7 @@ class OnboardingViewModel: ObservableObject {
             
             let updatedProfile = UserProfile(
                 id: userId,
+                userId: userId,
                 name: name.trimmingCharacters(in: .whitespacesAndNewlines),
                 email: user.email,
                 age: Int(age) ?? 25,
@@ -326,15 +327,82 @@ class OnboardingViewModel: ObservableObject {
                 diet: extractDietCategory(from: selectedDiet),
                 budget: extractBudgetCategory(from: selectedBudget),
                 isPremium: false,
-                subscriptionRenewal: nil,
-                profileImageUrl: nil,
-                createdAt: Date(),
-                updatedAt: Date(),
                 isOnboardingCompleted: true,
                 subscriptionType: "free",
+                subscriptionRenewal: nil,
                 plansCreatedThisMonth: 0,
                 aiGenerationsThisMonth: 0,
-                lastPlanReset: Date()
+                lastPlanReset: Date(),
+                profilePictureUrl: nil,
+                bio: nil,
+                location: nil,
+                preferredLanguage: "en",
+                timezone: "UTC",
+                measurementSystem: "metric",
+                preferredCurrency: "USD",
+                notificationPreferences: NotificationPreferences(
+                    mealReminders: true,
+                    groceryReminders: true,
+                    achievementNotifications: true,
+                    weeklyReports: true,
+                    newRecipeNotifications: true,
+                    preferredNotificationTime: "18:00",
+                    pushNotificationsEnabled: true,
+                    emailNotificationsEnabled: true
+                ),
+                privacySettings: PrivacySettings(
+                    isProfilePublic: false,
+                    mealPlansVisible: false,
+                    progressSharingEnabled: false,
+                    achievementsPublic: false,
+                    locationSharingEnabled: false
+                ),
+                fitnessGoals: FitnessGoals(
+                    targetWeight: nil,
+                    targetCalories: nil,
+                    targetProtein: nil,
+                    targetCarbohydrates: nil,
+                    targetFat: nil,
+                    weeklyWorkoutMinutes: nil,
+                    targetStepsPerDay: nil
+                ),
+                mealPlanningPreferences: MealPlanningPreferences(
+                    mealsPerDay: 3,
+                    preferredPrepTime: 30,
+                    includeSnacks: false,
+                    preferredCuisines: ["american", "italian"],
+                    rotateMeals: true,
+                    includeLeftovers: true,
+                    preferredComplexity: "balanced"
+                ),
+                dietaryPreferences: DietaryPreferences(
+                    restrictions: [],
+                    allergies: [],
+                    favoriteIngredients: [],
+                    dislikedIngredients: [],
+                    avoidIngredients: [],
+                    preferredCookingMethods: ["stovetop", "baking"]
+                ),
+                cookingPreferences: CookingPreferences(
+                    skillLevel: "beginner",
+                    preferredCookingTime: 30,
+                    useAppliances: true,
+                    preferredMethods: ["stovetop", "baking"],
+                    usePreMadeIngredients: false,
+                    batchCooking: false
+                ),
+                budgetPreferences: BudgetPreferences(
+                    weeklyBudget: 75.0,
+                    monthlyBudget: 300.0,
+                    preferredMealPrice: 8.0,
+                    prioritizeBudget: true,
+                    includePremiumIngredients: false,
+                    suggestAlternatives: true
+                ),
+                achievements: [],
+                progressMetrics: [],
+                createdAt: Date(),
+                updatedAt: Date()
             )
             
             try await supabaseManager.updateUserProfile(updatedProfile)
@@ -342,17 +410,27 @@ class OnboardingViewModel: ObservableObject {
             // Update auth view model with completed profile
             authViewModel.user = User(
                 id: updatedProfile.id,
-                name: updatedProfile.name ?? "Name",
-                email: updatedProfile.email,
+                email: updatedProfile.email ?? "",
+                fullName: updatedProfile.name ?? "Name",
+                profilePictureUrl: updatedProfile.profilePictureUrl,
                 age: updatedProfile.age ?? 25,
                 gender: updatedProfile.gender ?? "",
-                goal: updatedProfile.goal ?? "",
-                diet: updatedProfile.diet ?? "",
-                budget: updatedProfile.budget ?? "",
-                isPremium: false,
-                subscriptionRenewalDate: nil,
-                profileImageURL: updatedProfile.profileImageUrl,
-                isOnboardingCompleted: true
+                height: 170.0, // Default height
+                weight: 70.0, // Default weight
+                activityLevel: "Moderately Active", // Default activity level
+                fitnessGoal: updatedProfile.goal ?? "",
+                dietaryPreferences: [updatedProfile.diet ?? "Balanced"],
+                budgetRange: updatedProfile.budget ?? "Medium",
+                preferredCuisines: [],
+                cookingSkillLevel: "Beginner",
+                preferredPrepTime: 30,
+                preferredServings: 2,
+                allergies: [],
+                favoriteIngredients: [],
+                dislikedIngredients: [],
+                hasCompletedOnboarding: true,
+                createdAt: Date(),
+                updatedAt: Date()
             )
             
             completionSuccess = true

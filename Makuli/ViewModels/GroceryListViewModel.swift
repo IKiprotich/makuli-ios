@@ -33,19 +33,19 @@ class GroceryListViewModel: ObservableObject {
     }
     
     /// Number of checked items
-    var checkedItems: Int {
-        return groceries.filter { $0.isChecked }.count
+    var checkedItemsCount: Int {
+        return groceries.filter { $0.isCompleted }.count
     }
     
     /// Completion percentage
     var completionPercentage: Double {
         guard totalItems > 0 else { return 0.0 }
-        return Double(checkedItems) / Double(totalItems) * 100.0
+        return Double(checkedItemsCount) / Double(totalItems) * 100.0
     }
     
     /// Total estimated cost
     var totalCost: Double {
-        return groceries.reduce(0) { $0 + ($1.estimatedCost ?? 0) }
+        return groceries.reduce(0.0) { $0 + ($1.estimatedPrice ?? 0) }
     }
     
     /// Available categories
@@ -56,12 +56,12 @@ class GroceryListViewModel: ObservableObject {
     
     /// Unchecked items (still need to buy)
     var uncheckedItems: [GroceryItem] {
-        return groceries.filter { !$0.isChecked }
+        return groceries.filter { !$0.isCompleted }
     }
     
     /// Checked items (already purchased)
     var checkedItemsList: [GroceryItem] {
-        return groceries.filter { $0.isChecked }
+        return groceries.filter { $0.isCompleted }
     }
     
     // MARK: - Public Methods
@@ -111,8 +111,7 @@ class GroceryListViewModel: ObservableObject {
         do {
             Logger.info("Toggling grocery item: \(itemId)")
             if let index = groceries.firstIndex(where: { $0.id == itemId }) {
-                groceries[index].isChecked.toggle()
-                groceries[index].checkedAt = groceries[index].isChecked ? Date() : nil
+                groceries[index].isCompleted.toggle()
                 // Persist change
                 try await supabaseManager.updateGroceryItem(groceries[index])
             }
@@ -134,20 +133,21 @@ class GroceryListViewModel: ObservableObject {
     ) async -> Bool {
         do {
             Logger.info("Adding custom grocery item: \(name)")
-            let customItem = GroceryItem(
-                id: UUID().uuidString,
+            let newItem = GroceryItem(
                 userId: userId,
-                planId: selectedPlanId,
                 name: name,
-                quantity: quantity,
+                quantity: Double(quantity) ?? 1.0,
+                unit: "pieces",
                 category: category,
-                emoji: "🛒",
-                isChecked: false,
-                checkedAt: nil,
-                estimatedCost: estimatedCost
+                priority: "Medium",
+                isCompleted: false,
+                notes: nil,
+                estimatedPrice: estimatedCost,
+                recipeId: nil,
+                planId: selectedPlanId
             )
-            try await supabaseManager.updateGroceryItem(customItem)
-            self.groceries.append(customItem)
+            try await supabaseManager.updateGroceryItem(newItem)
+            self.groceries.append(newItem)
             Logger.info("Successfully added custom item")
             return true
         } catch {
@@ -170,7 +170,7 @@ class GroceryListViewModel: ObservableObject {
         do {
             Logger.info("Updating quantity for item: \(itemId)")
             if let index = groceries.firstIndex(where: { $0.id == itemId }) {
-                groceries[index].quantity = newQuantity
+                groceries[index].quantity = Double(newQuantity) ?? 1.0
                 try await supabaseManager.updateGroceryItem(groceries[index])
             }
             return true
@@ -200,7 +200,7 @@ class GroceryListViewModel: ObservableObject {
             if !categoryItems.isEmpty {
                 shareText += "\(category.uppercased()):\n"
                 for item in categoryItems.sorted(by: { $0.name < $1.name }) {
-                    let checkmark = item.isChecked ? "✅" : "⬜"
+                    let checkmark = item.isCompleted ? "✅" : "⬜"
                     shareText += "\(checkmark) \(item.quantity) \(item.name)\n"
                 }
                 shareText += "\n"
@@ -221,7 +221,7 @@ class GroceryListViewModel: ObservableObject {
         return GroceryListExport(
             items: groceries,
             totalItems: totalItems,
-            checkedItems: checkedItems,
+            checkedItems: checkedItemsCount,
             totalCost: totalCost,
             generatedDate: Date(),
             planId: selectedPlanId

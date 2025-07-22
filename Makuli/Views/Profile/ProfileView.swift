@@ -22,17 +22,27 @@ struct ProfileView: View {
     private var user: User {
         authViewModel.user ?? User(
             id: "guest-id",
-            name: "Guest User",
             email: "guest@example.com",
+            fullName: "Guest User",
+            profilePictureUrl: nil,
             age: 25,
             gender: "Other",
-            goal: "General Health",
-            diet: "Balanced",
-            budget: "$50-75",
-            isPremium: false,
-            subscriptionRenewalDate: nil,
-            profileImageURL: nil,
-            isOnboardingCompleted: false
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "General Health",
+            dietaryPreferences: ["Balanced"],
+            budgetRange: "$50-75",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            hasCompletedOnboarding: false,
+            createdAt: Date(),
+            updatedAt: Date()
         )
     }
     

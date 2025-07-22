@@ -21,7 +21,7 @@ struct CurrentPlanCard: View {
                         .textCase(.uppercase)
                         .tracking(0.5)
                     
-                    Text(plan.planName)
+                    Text(plan.title)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(AppColors.textCharcoal)
@@ -91,12 +91,12 @@ struct CurrentPlanCard: View {
                     .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 4)
             )
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Active Meal Plan: \(plan.planName), \(plan.completedMealsCount) of \(plan.totalMealsCount) meals completed")
+            .accessibilityLabel("Active Meal Plan: \(plan.title), \(plan.completedMealsCount) of \(plan.totalMealsCount) meals completed")
         }
     }
 }
 
-#Preview {
-    CurrentPlanCard(plan: Plan.mockWeeklyPlan().plan)
-}
+//#Preview {
+//    CurrentPlanCard(plan: Plan.mockWeeklyPlan().plan)
+//}
 

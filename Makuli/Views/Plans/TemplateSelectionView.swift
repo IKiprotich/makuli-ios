@@ -228,6 +228,7 @@ extension TemplateSelectionView {
             weekStart: weekStart,
             userProfile: UserProfile(
                 id: user.id,
+                userId: user.id,
                 name: user.name,
                 email: user.email,
                 age: user.age,
@@ -236,15 +237,82 @@ extension TemplateSelectionView {
                 diet: user.diet,
                 budget: user.budget,
                 isPremium: user.isPremium,
-                subscriptionRenewal: nil,
-                profileImageUrl: user.profileImageURL,
-                createdAt: Date(),
-                updatedAt: Date(),
                 isOnboardingCompleted: user.isOnboardingCompleted,
                 subscriptionType: "free",
+                subscriptionRenewal: nil,
                 plansCreatedThisMonth: 0,
                 aiGenerationsThisMonth: 0,
-                lastPlanReset: Date()
+                lastPlanReset: Date(),
+                profilePictureUrl: user.profilePictureUrl,
+                bio: nil,
+                location: nil,
+                preferredLanguage: "en",
+                timezone: TimeZone.current.identifier,
+                measurementSystem: "Metric",
+                preferredCurrency: "USD",
+                notificationPreferences: NotificationPreferences(
+                    mealReminders: false,
+                    groceryReminders: false,
+                    achievementNotifications: false,
+                    weeklyReports: false,
+                    newRecipeNotifications: false,
+                    preferredNotificationTime: "08:00",
+                    pushNotificationsEnabled: false,
+                    emailNotificationsEnabled: false
+                ),
+                privacySettings: PrivacySettings(
+                    isProfilePublic: false,
+                    mealPlansVisible: false,
+                    progressSharingEnabled: false,
+                    achievementsPublic: false,
+                    locationSharingEnabled: false
+                ),
+                fitnessGoals: FitnessGoals(
+                    targetWeight: nil,
+                    targetCalories: nil,
+                    targetProtein: nil,
+                    targetCarbohydrates: nil,
+                    targetFat: nil,
+                    weeklyWorkoutMinutes: nil,
+                    targetStepsPerDay: nil
+                ),
+                mealPlanningPreferences: MealPlanningPreferences(
+                    mealsPerDay: 3,
+                    preferredPrepTime: 30,
+                    includeSnacks: false,
+                    preferredCuisines: [],
+                    rotateMeals: false,
+                    includeLeftovers: false,
+                    preferredComplexity: "Easy"
+                ),
+                dietaryPreferences: DietaryPreferences(
+                    restrictions: [],
+                    allergies: [],
+                    favoriteIngredients: [],
+                    dislikedIngredients: [],
+                    avoidIngredients: [],
+                    preferredCookingMethods: []
+                ),
+                cookingPreferences: CookingPreferences(
+                    skillLevel: "Beginner",
+                    preferredCookingTime: 30,
+                    useAppliances: false,
+                    preferredMethods: [],
+                    usePreMadeIngredients: false,
+                    batchCooking: false
+                ),
+                budgetPreferences: BudgetPreferences(
+                    weeklyBudget: nil,
+                    monthlyBudget: nil,
+                    preferredMealPrice: nil,
+                    prioritizeBudget: false,
+                    includePremiumIngredients: false,
+                    suggestAlternatives: false
+                ),
+                achievements: [],
+                progressMetrics: [],
+                createdAt: Date(),
+                updatedAt: Date()
             )
         )
         
@@ -271,7 +339,7 @@ struct TemplateSelectionCard: View {
                 
                 Spacer()
                 
-                Text(template.difficulty)
+                Text(template.cookingSkillLevel)
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundColor(difficultyColor)
@@ -289,7 +357,7 @@ struct TemplateSelectionCard: View {
                     .foregroundColor(.primary)
                     .lineLimit(2)
                 
-                Text(template.description)
+                Text(template.description ?? "")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(3)
@@ -297,7 +365,7 @@ struct TemplateSelectionCard: View {
                 // Cost and duration
                 HStack {
                     Label {
-                        Text("$\(Int(template.estimatedCostMin))-\(Int(template.estimatedCostMax))")
+                        Text("$\(Int(template.maxCostPerMeal ?? 0)) per meal")
                             .font(.caption)
                             .fontWeight(.medium)
                     } icon: {
@@ -363,7 +431,7 @@ struct TemplateSelectionCard: View {
     }
     
     private var difficultyColor: Color {
-        switch template.difficulty.lowercased() {
+        switch template.cookingSkillLevel.lowercased() {
         case "beginner":
             return .green
         case "intermediate":

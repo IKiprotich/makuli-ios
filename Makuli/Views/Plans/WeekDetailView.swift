@@ -89,11 +89,17 @@ struct WeekDetailView: View {
                     let key = ingredient.lowercased()
                     if ingredientMap[key] == nil {
                         ingredientMap[key] = GroceryItem(
-                            id: UUID().uuidString,
+                            userId: "current-user", // This should be replaced with actual user ID
                             name: ingredient,
-                            quantity: "1", // Default quantity since we don't have detailed ingredient data
-                            category: "Other", // Default category
-                            emoji: "🥄" // Default emoji
+                            quantity: 1.0,
+                            unit: "pieces",
+                            category: "Other",
+                            priority: "Medium",
+                            isCompleted: false,
+                            notes: nil,
+                            estimatedPrice: nil,
+                            recipeId: planRecipe.recipeId,
+                            planId: plan.plan.id
                         )
                     }
                 }
@@ -258,6 +264,6 @@ extension WeekDetailView {
     
 }
 
-#Preview {
-    WeekDetailView(plan: Plan.mockWeeklyPlan())
-}
+//#Preview {
+//    WeekDetailView(plan: Plan.mockWeeklyPlan())
+//}

@@ -36,7 +36,7 @@ struct GroceryItem: Identifiable, Codable {
     let name: String
     
     /// Quantity needed
-    let quantity: Double
+    var quantity: Double
     
     /// Unit of measurement (e.g., "kg", "pieces", "cups")
     let unit: String
@@ -48,7 +48,7 @@ struct GroceryItem: Identifiable, Codable {
     let priority: String
     
     /// Whether the item has been purchased/completed
-    let isCompleted: Bool
+    var isCompleted: Bool
     
     /// Optional notes about the item
     let notes: String?
@@ -158,6 +158,40 @@ struct GroceryItem: Identifiable, Codable {
         self.planId = planId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+    
+    /**
+     * Convenience initializer for creating grocery items with minimal parameters
+     * 
+     * - Parameters:
+     *   - id: Unique identifier (defaults to UUID string)
+     *   - userId: Reference to the user
+     *   - name: Item name
+     *   - quantity: Quantity needed (defaults to 1.0)
+     *   - unit: Unit of measurement (defaults to "pieces")
+     *   - category: Item category (defaults to "Other")
+     *   - priority: Priority level (defaults to "Medium")
+     *   - isCompleted: Whether item is completed (defaults to false)
+     *   - notes: Optional notes (defaults to nil)
+     *   - estimatedPrice: Optional estimated price (defaults to nil)
+     *   - recipeId: Optional recipe reference (defaults to nil)
+     *   - planId: Optional plan reference (defaults to nil)
+     */
+    init(id: String = UUID().uuidString, userId: String, name: String, quantity: Double = 1.0, unit: String = "pieces", category: String = "Other", priority: String = "Medium", isCompleted: Bool = false, notes: String? = nil, estimatedPrice: Double? = nil, recipeId: String? = nil, planId: String? = nil) {
+        self.id = id
+        self.userId = userId
+        self.name = name
+        self.quantity = quantity
+        self.unit = unit
+        self.category = category
+        self.priority = priority
+        self.isCompleted = isCompleted
+        self.notes = notes
+        self.estimatedPrice = estimatedPrice
+        self.recipeId = recipeId
+        self.planId = planId
+        self.createdAt = Date()
+        self.updatedAt = Date()
     }
     
     // MARK: - Computed Properties

@@ -291,13 +291,13 @@ extension HomeView {
     
     // MARK: - Helper Methods
     
-    private func generateProgressMetrics() -> [ProgressMetrics] {
+    private func generateProgressMetrics() -> [UIProgressMetrics] {
         if !viewModel.hasActivePlan {
             return [
-                ProgressMetrics(title: "This Week", value: "0/0", change: "", isPositive: true),
-                ProgressMetrics(title: "Get Started", value: "Create Plan", change: "", isPositive: true),
-                ProgressMetrics(title: "Recipes", value: "\(viewModel.quickRecipes.count)", change: "", isPositive: true),
-                ProgressMetrics(title: "Groceries", value: "\(viewModel.groceryStats.totalItems)", change: "", isPositive: true),
+                UIProgressMetrics(title: "This Week", value: "0/0", change: "", isPositive: true),
+                UIProgressMetrics(title: "Get Started", value: "Create Plan", change: "", isPositive: true),
+                UIProgressMetrics(title: "Recipes", value: "\(viewModel.quickRecipes.count)", change: "", isPositive: true),
+                UIProgressMetrics(title: "Groceries", value: "\(viewModel.groceryStats.totalItems)", change: "", isPositive: true),
             ]
         }
         
@@ -305,25 +305,25 @@ extension HomeView {
         let todaysProgress = viewModel.todaysCompletionStatus
         
         return [
-            ProgressMetrics(
+            UIProgressMetrics(
                 title: "This Week",
                 value: "\(completed)/\(total)",
                 change: "+\(completed)",
                 isPositive: true
             ),
-            ProgressMetrics(
+            UIProgressMetrics(
                 title: "Today",
                 value: "\(todaysProgress.completed)/\(todaysProgress.total)",
                 change: "\(Int(todaysProgress.percentage))%",
                 isPositive: todaysProgress.percentage >= 50
             ),
-            ProgressMetrics(
+            UIProgressMetrics(
                 title: "Progress",
                 value: "\(Int(percentage))%",
                 change: percentage >= 70 ? "Great!" : "Keep going",
                 isPositive: percentage >= 50
             ),
-            ProgressMetrics(
+            UIProgressMetrics(
                 title: "Groceries",
                 value: "\(viewModel.groceryStats.checkedItems)/\(viewModel.groceryStats.totalItems)",
                 change: viewModel.groceryStats.totalItems > 0 ? "Ready" : "Generate",
@@ -334,6 +334,13 @@ extension HomeView {
 }
 
 // MARK: - Supporting Views
+
+struct UIProgressMetrics {
+    let title: String
+    let value: String
+    let change: String
+    let isPositive: Bool
+}
 
 struct TodaysMealCard: View {
     let meal: PlanRecipe

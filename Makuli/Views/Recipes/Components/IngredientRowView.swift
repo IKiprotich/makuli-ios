@@ -30,7 +30,7 @@ struct IngredientRowView: View {
             .accessibilityLabel(ingredient.isCompleted ? "mark as incomplete" : "mark as complete")
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(ingredient.quantity)
+                Text(ingredient.formattedQuantity)
                     .font(AppFonts.body())
                     .foregroundColor(AppColors.textCharcoal)
                     .strikethrough(ingredient.isCompleted)

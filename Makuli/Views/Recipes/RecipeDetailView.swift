@@ -18,10 +18,22 @@ struct RecipeDetailView: View {
         // Convert string ingredients to Ingredient objects
         let convertedIngredients = recipe.ingredients.map { ingredientString in
             Ingredient(
+                id: UUID().uuidString,
+                recipeId: recipe.id,
                 name: ingredientString,
-                quantity: "1", // Default quantity since strings don't specify
-                category: "Other", // Default category
-                emoji: "🥄" // Default emoji
+                quantity: 1.0,
+                unit: "piece",
+                category: "Other",
+                preparation: nil,
+                notes: nil,
+                isOptional: false,
+                isGarnish: false,
+                isCompleted: false,
+                nutrition: nil,
+                allergens: [],
+                substitutions: [],
+                createdAt: Date(),
+                updatedAt: Date()
             )
         }
         self._ingredients = State(initialValue: convertedIngredients)
@@ -86,7 +98,7 @@ extension RecipeDetailView {
                     
                     HStack(spacing: 12) {
                         badgeView(text: recipe.cookTime ?? "30 mins", icon: "clock")
-                        badgeView(text: "Serves \(recipe.servings ?? 4)", icon: "person.2")
+                        badgeView(text: "Serves \(recipe.servings?.description ?? "4")", icon: "person.2")
                     }
                 }
                 Spacer()
@@ -207,10 +219,27 @@ extension RecipeDetailView {
 }
 
 
-
-
-
-
 #Preview {
-    RecipeDetailView(recipe: Recipe.enhancedMockRecipes()[0])
+    RecipeDetailView(recipe: Recipe(
+        id: "preview-recipe",
+        title: "Sample Recipe",
+        cookTime: "30 mins",
+        prepTime: 15,
+        servings: 4,
+        calories: 350,
+        imageUrl: nil,
+        ingredients: ["Ingredient 1", "Ingredient 2"],
+        steps: ["Step 1", "Step 2"],
+        substitutions: ["Sub 1", "Sub 2"],
+        tags: ["sample", "preview"],
+        difficulty: "Easy",
+        cuisineType: "Italian",
+        costEstimate: 15.0,
+        createdAt: Date(),
+        updatedAt: Date(),
+        createdBy: nil,
+        isPublic: true,
+        rating: 4.5,
+        ratingCount: 10
+    ))
 }

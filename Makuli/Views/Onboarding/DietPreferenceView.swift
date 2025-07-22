@@ -47,13 +47,13 @@ struct DietPreferenceView: View {
                         GridItem(.flexible())
                     ], spacing: 15) {
                         ForEach(dietOptions, id: \.0) { option in
-                            let isSelected = onboardingData.dietPreferences.contains(option.0)
+                            let isSelected = onboardingData.dietaryPreferences.contains(option.0)
                             
                             Button(action: {
                                 if isSelected {
-                                    onboardingData.dietPreferences.removeAll { $0 == option.0 }
+                                    onboardingData.dietaryPreferences.removeAll { $0 == option.0 }
                                 } else {
-                                    onboardingData.dietPreferences.append(option.0)
+                                    onboardingData.dietaryPreferences.append(option.0)
                                 }
                             }) {
                                 VStack(spacing: 10) {
@@ -118,7 +118,37 @@ struct DietPreferenceView: View {
 
 #Preview {
     DietPreferenceView(
-        onboardingData: OnboardingData(),
-        currentPage: .constant(5)
+        onboardingData: OnboardingData(
+            id: "id",
+            userId: "userId",
+            age: 25,
+            gender: "Other",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "Maintain Weight",
+            dietaryPreferences: [],
+            budgetRange: "Medium",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            includeMealPrep: true,
+            includeShoppingList: true,
+            includeNutritionInfo: true,
+            rotateMeals: true,
+            includeLeftovers: false,
+            preferredComplexity: "Easy",
+            additionalNotes: nil,
+            isCompleted: false,
+            currentStep: 1,
+            totalSteps: 7,
+            createdAt: Date(),
+            updatedAt: Date()
+        ),
+        currentPage: .constant(3)
     )
 }

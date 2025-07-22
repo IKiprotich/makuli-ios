@@ -119,9 +119,10 @@ class ProfileViewModel: ObservableObject {
             errorMessage = nil
             successMessage = nil
             
-            // Create updated profile with current data + new updates
+            // Create updated profile
             let updatedProfile = UserProfile(
                 id: userId,
+                userId: userId,
                 name: name,
                 email: profile?.email ?? "",
                 age: age,
@@ -130,15 +131,82 @@ class ProfileViewModel: ObservableObject {
                 diet: diet,
                 budget: budget,
                 isPremium: profile?.isPremium ?? false,
-                subscriptionRenewal: profile?.subscriptionRenewal,
-                profileImageUrl: profileImageUrl,
-                createdAt: profile?.createdAt ?? Date(),
-                updatedAt: Date(),
                 isOnboardingCompleted: profile?.isOnboardingCompleted ?? false,
                 subscriptionType: profile?.subscriptionType ?? "free",
+                subscriptionRenewal: profile?.subscriptionRenewal,
                 plansCreatedThisMonth: profile?.plansCreatedThisMonth ?? 0,
                 aiGenerationsThisMonth: profile?.aiGenerationsThisMonth ?? 0,
-                lastPlanReset: profile?.lastPlanReset ?? Date()
+                lastPlanReset: profile?.lastPlanReset ?? Date(),
+                profilePictureUrl: profile?.profilePictureUrl,
+                bio: profile?.bio,
+                location: profile?.location,
+                preferredLanguage: profile?.preferredLanguage ?? "en",
+                timezone: profile?.timezone ?? "UTC",
+                measurementSystem: profile?.measurementSystem ?? "metric",
+                preferredCurrency: profile?.preferredCurrency ?? "USD",
+                notificationPreferences: profile?.notificationPreferences ?? NotificationPreferences(
+                    mealReminders: true,
+                    groceryReminders: true,
+                    achievementNotifications: true,
+                    weeklyReports: true,
+                    newRecipeNotifications: true,
+                    preferredNotificationTime: "18:00",
+                    pushNotificationsEnabled: true,
+                    emailNotificationsEnabled: true
+                ),
+                privacySettings: profile?.privacySettings ?? PrivacySettings(
+                    isProfilePublic: false,
+                    mealPlansVisible: false,
+                    progressSharingEnabled: false,
+                    achievementsPublic: false,
+                    locationSharingEnabled: false
+                ),
+                fitnessGoals: profile?.fitnessGoals ?? FitnessGoals(
+                    targetWeight: nil,
+                    targetCalories: nil,
+                    targetProtein: nil,
+                    targetCarbohydrates: nil,
+                    targetFat: nil,
+                    weeklyWorkoutMinutes: nil,
+                    targetStepsPerDay: nil
+                ),
+                mealPlanningPreferences: profile?.mealPlanningPreferences ?? MealPlanningPreferences(
+                    mealsPerDay: 3,
+                    preferredPrepTime: 30,
+                    includeSnacks: false,
+                    preferredCuisines: ["american", "italian"],
+                    rotateMeals: true,
+                    includeLeftovers: true,
+                    preferredComplexity: "balanced"
+                ),
+                dietaryPreferences: profile?.dietaryPreferences ?? DietaryPreferences(
+                    restrictions: [],
+                    allergies: [],
+                    favoriteIngredients: [],
+                    dislikedIngredients: [],
+                    avoidIngredients: [],
+                    preferredCookingMethods: ["stovetop", "baking"]
+                ),
+                cookingPreferences: profile?.cookingPreferences ?? CookingPreferences(
+                    skillLevel: "beginner",
+                    preferredCookingTime: 30,
+                    useAppliances: true,
+                    preferredMethods: ["stovetop", "baking"],
+                    usePreMadeIngredients: false,
+                    batchCooking: false
+                ),
+                budgetPreferences: profile?.budgetPreferences ?? BudgetPreferences(
+                    weeklyBudget: 100.0,
+                    monthlyBudget: 400.0,
+                    preferredMealPrice: 8.0,
+                    prioritizeBudget: true,
+                    includePremiumIngredients: false,
+                    suggestAlternatives: true
+                ),
+                achievements: profile?.achievements ?? [],
+                progressMetrics: profile?.progressMetrics ?? [],
+                createdAt: profile?.createdAt ?? Date(),
+                updatedAt: Date()
             )
             
             try await supabaseManager.updateUserProfile(updatedProfile)
@@ -179,6 +247,7 @@ class ProfileViewModel: ObservableObject {
             // Create updated profile for onboarding completion
             let updatedProfile = UserProfile(
                 id: userId,
+                userId: userId,
                 name: name,
                 email: profile?.email ?? "",
                 age: age,
@@ -187,15 +256,82 @@ class ProfileViewModel: ObservableObject {
                 diet: diet,
                 budget: budget,
                 isPremium: profile?.isPremium ?? false,
-                subscriptionRenewal: profile?.subscriptionRenewal,
-                profileImageUrl: nil,
-                createdAt: profile?.createdAt ?? Date(),
-                updatedAt: Date(),
                 isOnboardingCompleted: true,
                 subscriptionType: profile?.subscriptionType ?? "free",
+                subscriptionRenewal: profile?.subscriptionRenewal,
                 plansCreatedThisMonth: profile?.plansCreatedThisMonth ?? 0,
                 aiGenerationsThisMonth: profile?.aiGenerationsThisMonth ?? 0,
-                lastPlanReset: profile?.lastPlanReset ?? Date()
+                lastPlanReset: profile?.lastPlanReset ?? Date(),
+                profilePictureUrl: profile?.profilePictureUrl,
+                bio: profile?.bio,
+                location: profile?.location,
+                preferredLanguage: profile?.preferredLanguage ?? "en",
+                timezone: profile?.timezone ?? "UTC",
+                measurementSystem: profile?.measurementSystem ?? "metric",
+                preferredCurrency: profile?.preferredCurrency ?? "USD",
+                notificationPreferences: profile?.notificationPreferences ?? NotificationPreferences(
+                    mealReminders: true,
+                    groceryReminders: true,
+                    achievementNotifications: true,
+                    weeklyReports: true,
+                    newRecipeNotifications: true,
+                    preferredNotificationTime: "18:00",
+                    pushNotificationsEnabled: true,
+                    emailNotificationsEnabled: true
+                ),
+                privacySettings: profile?.privacySettings ?? PrivacySettings(
+                    isProfilePublic: false,
+                    mealPlansVisible: false,
+                    progressSharingEnabled: false,
+                    achievementsPublic: false,
+                    locationSharingEnabled: false
+                ),
+                fitnessGoals: profile?.fitnessGoals ?? FitnessGoals(
+                    targetWeight: nil,
+                    targetCalories: nil,
+                    targetProtein: nil,
+                    targetCarbohydrates: nil,
+                    targetFat: nil,
+                    weeklyWorkoutMinutes: nil,
+                    targetStepsPerDay: nil
+                ),
+                mealPlanningPreferences: profile?.mealPlanningPreferences ?? MealPlanningPreferences(
+                    mealsPerDay: 3,
+                    preferredPrepTime: 30,
+                    includeSnacks: false,
+                    preferredCuisines: ["american", "italian"],
+                    rotateMeals: true,
+                    includeLeftovers: true,
+                    preferredComplexity: "balanced"
+                ),
+                dietaryPreferences: profile?.dietaryPreferences ?? DietaryPreferences(
+                    restrictions: [],
+                    allergies: [],
+                    favoriteIngredients: [],
+                    dislikedIngredients: [],
+                    avoidIngredients: [],
+                    preferredCookingMethods: ["stovetop", "baking"]
+                ),
+                cookingPreferences: profile?.cookingPreferences ?? CookingPreferences(
+                    skillLevel: "beginner",
+                    preferredCookingTime: 30,
+                    useAppliances: true,
+                    preferredMethods: ["stovetop", "baking"],
+                    usePreMadeIngredients: false,
+                    batchCooking: false
+                ),
+                budgetPreferences: profile?.budgetPreferences ?? BudgetPreferences(
+                    weeklyBudget: 100.0,
+                    monthlyBudget: 400.0,
+                    preferredMealPrice: 8.0,
+                    prioritizeBudget: true,
+                    includePremiumIngredients: false,
+                    suggestAlternatives: true
+                ),
+                achievements: profile?.achievements ?? [],
+                progressMetrics: profile?.progressMetrics ?? [],
+                createdAt: profile?.createdAt ?? Date(),
+                updatedAt: Date()
             )
             
             try await supabaseManager.updateUserProfile(updatedProfile)

@@ -255,15 +255,15 @@ extension DeveloperPanelView {
             ], spacing: 12) {
                 ForEach(TemplateCategory.allCases, id: \.self) { category in
                     VStack(spacing: 8) {
-                        Text(category.icon)
+                        Text("🍽️")
                             .font(.title2)
                         
-                        Text(category.rawValue)
+                        Text(category.rawValue.capitalized)
                             .font(.caption)
                             .fontWeight(.medium)
                             .multilineTextAlignment(.center)
                         
-                        Text(category.description)
+                        Text("Template category")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)

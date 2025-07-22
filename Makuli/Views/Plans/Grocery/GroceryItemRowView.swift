@@ -39,7 +39,7 @@ struct GroceryItemRowView: View {
             .buttonStyle(PlainButtonStyle())
             
             //emoji
-            Text(item.emoji)
+            Text("🛒")
             .font(.title2)
             .frame(width: 32)
             
@@ -50,7 +50,7 @@ struct GroceryItemRowView: View {
                     .foregroundColor(isChecked ? AppColors.successGreen : AppColors.textCharcoal)
                     .strikethrough(isChecked)
                 
-                Text(item.quantity)
+                Text(item.formattedQuantity)
                     .font(.system(size:14))
                     .foregroundColor(isChecked ? AppColors.successGreen.opacity(0.7) : Color.gray)
                     .strikethrough(isChecked)

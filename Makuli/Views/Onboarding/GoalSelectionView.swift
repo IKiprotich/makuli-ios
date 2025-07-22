@@ -48,13 +48,13 @@ struct GoalSelectionView: View {
                     VStack(spacing: 15) {
                         ForEach(goalOptions, id: \.0) { option in
                             Button(action: {
-                                onboardingData.goal = option.0
+                                onboardingData.fitnessGoal = option.0
                             }) {
                                 HStack(spacing: 15) {
                                     Image(systemName: option.2)
                                         .font(.title2)
                                         .foregroundColor(
-                                            onboardingData.goal == option.0
+                                            onboardingData.fitnessGoal == option.0
                                                 ? .white
                                                 : AppColors.primaryOrange
                                         )
@@ -64,7 +64,7 @@ struct GoalSelectionView: View {
                                         Text(option.0)
                                             .font(.headline)
                                             .foregroundColor(
-                                                onboardingData.goal == option.0
+                                                onboardingData.fitnessGoal == option.0
                                                     ? .white
                                                 : AppColors.textCharcoal
                                             )
@@ -72,7 +72,7 @@ struct GoalSelectionView: View {
                                         Text(option.1)
                                             .font(.caption)
                                             .foregroundColor(
-                                                onboardingData.goal == option.0
+                                                onboardingData.fitnessGoal == option.0
                                                     ? .white.opacity(0.8)
                                                 : AppColors.textCharcoal.opacity(0.6)
                                             )
@@ -80,14 +80,14 @@ struct GoalSelectionView: View {
                                     
                                     Spacer()
                                     
-                                    if onboardingData.goal == option.0 {
+                                    if onboardingData.fitnessGoal == option.0 {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundColor(.white)
                                     }
                                 }
                                 .padding()
                                 .background(
-                                    onboardingData.goal == option.0
+                                    onboardingData.fitnessGoal == option.0
                                         ? AppColors.primaryOrange
                                         : Color.white
                                 )
@@ -95,7 +95,7 @@ struct GoalSelectionView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(
-                                            onboardingData.goal == option.0
+                                            onboardingData.fitnessGoal == option.0
                                                 ? Color.clear
                                                 : Color.gray.opacity(0.3),
                                             lineWidth: 1
@@ -111,7 +111,7 @@ struct GoalSelectionView: View {
                 
                 // Continue button
                 Button(action: {
-                    if !onboardingData.goal.isEmpty {
+                    if !onboardingData.fitnessGoal.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             currentPage = 4
                         }
@@ -123,13 +123,13 @@ struct GoalSelectionView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
-                            !onboardingData.goal.isEmpty
+                            !onboardingData.fitnessGoal.isEmpty
                             ? AppColors.primaryOrange
                                 : Color.gray.opacity(0.5)
                         )
                         .cornerRadius(12)
                 }
-                .disabled(onboardingData.goal.isEmpty)
+                .disabled(onboardingData.fitnessGoal.isEmpty)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
             }
@@ -139,7 +139,37 @@ struct GoalSelectionView: View {
 
 #Preview {
     GoalSelectionView(
-        onboardingData: OnboardingData(),
-        currentPage: .constant(3)
+        onboardingData: OnboardingData(
+            id: "id",
+            userId: "userId",
+            age: 25,
+            gender: "Other",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "Maintain Weight",
+            dietaryPreferences: [],
+            budgetRange: "Medium",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            includeMealPrep: true,
+            includeShoppingList: true,
+            includeNutritionInfo: true,
+            rotateMeals: true,
+            includeLeftovers: false,
+            preferredComplexity: "Easy",
+            additionalNotes: nil,
+            isCompleted: false,
+            currentStep: 1,
+            totalSteps: 7,
+            createdAt: Date(),
+            updatedAt: Date()
+        ),
+        currentPage: .constant(5)
     )
 }

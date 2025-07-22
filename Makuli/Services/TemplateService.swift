@@ -60,7 +60,7 @@ class TemplateService: ObservableObject {
             
             let meals = try JSONDecoder().decode([TemplateMeal].self, from: mealsResponse.data)
             
-            return FullMealPlanTemplate(id: id, template: template, meals: meals)
+            return FullMealPlanTemplate(id: UUID(uuidString: id) ?? UUID(), templateName: template.name, meals: meals)
             
         } catch {
             Logger.error("Failed to fetch full template \(id): \(error)")
@@ -74,11 +74,11 @@ class TemplateService: ObservableObject {
             // Create plan request from template
             let planRequest = CreatePlanRequest(
                 userId: userId,
-                title: template.template.name,
+                title: template.templateName,
                 weekStart: ISO8601DateFormatter().string(from: weekStart),
                 weekEnd: ISO8601DateFormatter().string(from: Calendar.current.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart),
-                totalCost: template.template.estimatedCostMax,
-                templateId: template.template.id,
+                totalCost: 75.0, // Default cost since template doesn't have cost info
+                templateId: template.id.uuidString,
                 generationMethod: "template"
             )
             
@@ -97,14 +97,15 @@ class TemplateService: ObservableObject {
                 CreatePlanRecipeRequest(
                     planId: createdPlan.id,
                     recipeId: meal.recipeId,
-                    dayOfWeek: meal.dayOfWeek,
+                    dayOfWeek: Int(meal.dayOfWeek) ?? 0,
                     mealType: meal.mealType,
                     position: meal.position,
                     day: meal.day,
                     customMealName: meal.mealName,
-                    customIngredients: nil,
-                    customInstructions: nil,
-                    customCookTime: meal.cookingTime
+                    customIngredients: meal.ingredients,
+                    customInstructions: meal.instructions,
+                    customCookTime: meal.cookingTime,
+                    notes: nil
                 )
             }
             
@@ -116,7 +117,7 @@ class TemplateService: ObservableObject {
                     .execute()
             }
             
-            Logger.info("Successfully created plan from template: \(template.template.name)")
+            Logger.info("Successfully created plan from template: \(template.templateName)")
             return true
             
         } catch {
@@ -261,7 +262,8 @@ class TemplateService: ObservableObject {
             icon: "🫒",
             colorScheme: "blue",
             targetCaloriesPerDay: 2000,
-            macros: MacroDistribution(protein: 20, carbs: 45, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -319,7 +321,8 @@ class TemplateService: ObservableObject {
             icon: "💰",
             colorScheme: "green",
             targetCaloriesPerDay: 2500,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -377,7 +380,8 @@ class TemplateService: ObservableObject {
             icon: "⚡️",
             colorScheme: "yellow",
             targetCaloriesPerDay: 2200,
-            macros: MacroDistribution(protein: 20, carbs: 40, fat: 40)
+            macros: "protein: 20%, carbs: 40%, fat: 40%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -435,7 +439,8 @@ class TemplateService: ObservableObject {
             icon: "🥗",
             colorScheme: "purple",
             targetCaloriesPerDay: 2100,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -505,7 +510,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "Asian Fusion Week",
             description: "Delicious Asian-inspired meals featuring fresh ingredients, bold flavors, and healthy cooking methods",
-            category: "Asian Fusion",
+            category: TemplateCategory.asianFusion.rawValue,
             difficulty: "Intermediate", 
             durationDays: 7,
             estimatedCostMin: 70.0,
@@ -516,7 +521,8 @@ class TemplateService: ObservableObject {
             icon: "🍣",
             colorScheme: "red",
             targetCaloriesPerDay: 2200,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -563,7 +569,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "Mexican Fiesta Week",
             description: "Vibrant Mexican flavors with fresh ingredients, bold spices, and colorful presentations",
-            category: "Mexican",
+            category: TemplateCategory.mexican.rawValue,
             difficulty: "Beginner",
             durationDays: 7,
             estimatedCostMin: 55.0,
@@ -574,7 +580,8 @@ class TemplateService: ObservableObject {
             icon: "🌮",
             colorScheme: "orange",
             targetCaloriesPerDay: 2400,
-            macros: MacroDistribution(protein: 20, carbs: 45, fat: 35)
+            macros: "protein: 20%, carbs: 45%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -621,7 +628,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "Italian Classics Week",
             description: "Authentic Italian recipes featuring fresh pasta, quality ingredients, and traditional cooking methods",
-            category: "Italian",
+            category: TemplateCategory.italian.rawValue,
             difficulty: "Intermediate",
             durationDays: 7,
             estimatedCostMin: 80.0,
@@ -632,7 +639,8 @@ class TemplateService: ObservableObject {
             icon: "🍝",
             colorScheme: "brown",
             targetCaloriesPerDay: 2300,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -690,7 +698,8 @@ class TemplateService: ObservableObject {
             icon: "🍴",
             colorScheme: "pink",
             targetCaloriesPerDay: 2500,
-            macros: MacroDistribution(protein: 20, carbs: 45, fat: 35)
+            macros: "protein: 20%, carbs: 45%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -737,7 +746,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "High-Protein Fitness Week",
             description: "Protein-packed meals designed for muscle building, recovery, and athletic performance",
-            category: "High-Protein",
+            category: TemplateCategory.highProtein.rawValue,
             difficulty: "Intermediate",
             durationDays: 7,
             estimatedCostMin: 90.0,
@@ -748,7 +757,8 @@ class TemplateService: ObservableObject {
             icon: "💪",
             colorScheme: "purple",
             targetCaloriesPerDay: 2400,
-            macros: MacroDistribution(protein: 30, carbs: 30, fat: 40)
+            macros: "protein: 30%, carbs: 30%, fat: 40%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -806,7 +816,8 @@ class TemplateService: ObservableObject {
             icon: "🌱",
             colorScheme: "green",
             targetCaloriesPerDay: 2200,
-            macros: MacroDistribution(protein: 20, carbs: 40, fat: 40)
+            macros: "protein: 20%, carbs: 40%, fat: 40%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -864,7 +875,8 @@ class TemplateService: ObservableObject {
             icon: "👨‍👩‍👧‍👦",
             colorScheme: "orange",
             targetCaloriesPerDay: 2800,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -922,7 +934,8 @@ class TemplateService: ObservableObject {
             icon: "🥑",
             colorScheme: "purple",
             targetCaloriesPerDay: 2000,
-            macros: MacroDistribution(protein: 20, carbs: 30, fat: 50)
+            macros: "protein: 20%, carbs: 30%, fat: 50%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -969,7 +982,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "Meal Prep Master",
             description: "Efficient meal prep recipes designed for batch cooking and easy weekly planning",
-            category: "Meal Prep",
+            category: TemplateCategory.mealPrep.rawValue,
             difficulty: "Intermediate",
             durationDays: 7,
             estimatedCostMin: 65.0,
@@ -980,7 +993,8 @@ class TemplateService: ObservableObject {
             icon: "🥣",
             colorScheme: "blue",
             targetCaloriesPerDay: 2200,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -1027,7 +1041,7 @@ class TemplateService: ObservableObject {
         let template = CreateMealPlanTemplateRequest(
             name: "Around the World",
             description: "A culinary journey featuring authentic dishes from different countries and cultures",
-            category: "Global Cuisine",
+            category: TemplateCategory.globalCuisine.rawValue,
             difficulty: "Advanced",
             durationDays: 7,
             estimatedCostMin: 95.0,
@@ -1038,7 +1052,8 @@ class TemplateService: ObservableObject {
             icon: "🌎",
             colorScheme: "purple",
             targetCaloriesPerDay: 2500,
-            macros: MacroDistribution(protein: 25, carbs: 40, fat: 35)
+            macros: "protein: 25%, carbs: 40%, fat: 35%",
+            createdBy: "system"
         )
         
         let meals = createWeekMeals(templateId: "", meals: [
@@ -1084,4 +1099,4 @@ class TemplateService: ObservableObject {
     deinit {
         fetchTask?.cancel()
     }
-} 
+}

@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct MealCardView: View {
-    let meal: MealPlan
+    let meal: Meal
     
     var body: some View {
         HStack(spacing: 12){
             //meal plan description
             VStack(alignment: .leading, spacing: 4){
                 
-                Text(meal.mealType.rawValue)
+                Text(meal.category.rawValue.capitalized)
                     .font(AppFonts.caption())
                     .foregroundColor(.secondary)
                 
@@ -23,7 +23,7 @@ struct MealCardView: View {
                     .font(AppFonts.headline())
                     .foregroundColor(.primary)
                 
-                Text("\(meal.duration) min * \(meal.difficulty.rawValue)")
+                Text("\(meal.cookingTime) min * \(meal.difficulty.rawValue.capitalized)")
                     .font(AppFonts.caption())
                     .foregroundColor(.secondary)
             }
@@ -35,7 +35,7 @@ struct MealCardView: View {
                 .fill(Color.gray.opacity(0.2))
                 .frame(width: 80, height: 60)
                 .overlay(
-                    Image(systemName: meal.imageName)
+                    Image(systemName: "fork.knife")
                         .font(.title2)
                         .foregroundColor(.white)
                 )
@@ -47,6 +47,6 @@ struct MealCardView: View {
     }
 }
 
-#Preview {
-    MealCardView(meal: MealPlan(mealType: MealType(rawValue: "breakfast")!, name: "Avocado Toast with Eggs", duration: 10, difficulty: Difficulty(rawValue: "easy")!, imageName: "cup.and.saucer", backgroundColor: "orange"))
-}
+//#Preview {
+//    MealCardView(meal: MealPlan(mealType: MealType(rawValue: "breakfast")!, name: "Avocado Toast with Eggs", duration: 10, difficulty: Difficulty(rawValue: "easy")!, imageName: "cup.and.saucer", backgroundColor: "orange"))
+//}

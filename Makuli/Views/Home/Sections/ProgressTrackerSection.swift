@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProgressTrackerSection: View {
     
-    let metrics : [ProgressMetrics]
+    let metrics : [UIProgressMetrics]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16){

@@ -10,72 +10,6 @@ import Foundation
 // MARK: - Core Models
 // Plan struct moved to Plan.swift for production Supabase integration
 
-struct Meal: Identifiable, Codable {
-    let id: UUID
-    let name: String
-    let category: MealCategory
-    let cookingTime: Int // in minutes
-    let difficulty: DifficultyLevel
-    let imageURL: String?
-    var isCompleted: Bool
-    let scheduledDate: Date?
-    let recipe: Recipe?
-    
-    init(id: UUID = UUID(), name: String, category: MealCategory, cookingTime: Int, difficulty: DifficultyLevel, imageURL: String? = nil, isCompleted: Bool = false, scheduledDate: Date? = nil, recipe: Recipe? = nil) {
-        self.id = id
-        self.name = name
-        self.category = category
-        self.cookingTime = cookingTime
-        self.difficulty = difficulty
-        self.imageURL = imageURL
-        self.isCompleted = isCompleted
-        self.scheduledDate = scheduledDate
-        self.recipe = recipe
-    }
-    
-    enum MealCategory: String, CaseIterable, Codable {
-        case breakfast = "Breakfast"
-        case lunch = "Lunch"
-        case dinner = "Dinner"
-        case snack = "Snack"
-        
-        var emoji: String {
-            switch self {
-            case .breakfast: return "🌅"
-            case .lunch: return "☀️"
-            case .dinner: return "🌙"
-            case .snack: return "🍎"
-            }
-        }
-        
-        var displayName: String {
-            return self.rawValue
-        }
-    }
-    
-    enum DifficultyLevel: String, CaseIterable, Codable {
-        case easy = "Easy"
-        case medium = "Medium"
-        case hard = "Hard"
-        
-        var emoji: String {
-            switch self {
-            case .easy: return "😊"
-            case .medium: return "😐"
-            case .hard: return "😰"
-            }
-        }
-        
-        var color: String {
-            switch self {
-            case .easy: return "green"
-            case .medium: return "orange"
-            case .hard: return "red"
-            }
-        }
-    }
-}
-
 // MARK: - Mock Data
 // Plan mock data moved to Plan.swift for production integration
 
@@ -131,31 +65,91 @@ struct DayPlan: Identifiable, Codable {
             // Create mock meals for this day
             let meals = [
                 Meal(
+                    id: UUID(),
                     name: "Avocado Toast with Eggs",
                     category: .breakfast,
                     cookingTime: 10,
+                    prepTime: 5,
+                    cookTime: 5,
                     difficulty: .easy,
+                    imageURL: nil,
+                    description: "Healthy breakfast with avocado and eggs",
                     isCompleted: dayOffset < 2,
                     scheduledDate: date,
-                    recipe: nil
+                    recipe: nil,
+                    recipeId: nil
                 ),
                 Meal(
+                    id: UUID(),
                     name: "Mediterranean Quinoa Bowl",
                     category: .lunch,
                     cookingTime: 25,
+                    prepTime: 10,
+                    cookTime: 15,
                     difficulty: .medium,
+                    imageURL: nil,
+                    description: "Nutritious quinoa bowl with Mediterranean flavors",
                     isCompleted: dayOffset < 2,
                     scheduledDate: date,
-                    recipe: Recipe.mockRecipe()
+                    recipe: Recipe(
+                        id: UUID().uuidString,
+                        title: "Mediterranean Quinoa Bowl",
+                        cookTime: "25 mins",
+                        prepTime: 10,
+                        servings: 2,
+                        calories: 350,
+                        imageUrl: nil,
+                        ingredients: ["quinoa", "cucumber", "tomatoes", "olives"],
+                        steps: ["Cook quinoa", "Chop vegetables", "Mix ingredients"],
+                        substitutions: nil,
+                        tags: ["healthy", "vegetarian", "quick"],
+                        difficulty: "medium",
+                        cuisineType: "mediterranean",
+                        costEstimate: 8.0,
+                        createdAt: Date(),
+                        updatedAt: Date(),
+                        createdBy: nil,
+                        isPublic: true,
+                        rating: 4.5,
+                        ratingCount: 10
+                    ),
+                    recipeId: UUID().uuidString
                 ),
                 Meal(
+                    id: UUID(),
                     name: "Grilled Salmon with Asparagus",
                     category: .dinner,
                     cookingTime: 20,
+                    prepTime: 5,
+                    cookTime: 15,
                     difficulty: .medium,
+                    imageURL: nil,
+                    description: "Delicious grilled salmon with fresh asparagus",
                     isCompleted: dayOffset < 1,
                     scheduledDate: date,
-                    recipe: Recipe.mockRecipe()
+                    recipe: Recipe(
+                        id: UUID().uuidString,
+                        title: "Grilled Salmon with Asparagus",
+                        cookTime: "20 mins",
+                        prepTime: 5,
+                        servings: 2,
+                        calories: 450,
+                        imageUrl: nil,
+                        ingredients: ["salmon fillet", "asparagus", "lemon", "olive oil"],
+                        steps: ["Season salmon", "Grill salmon", "Cook asparagus"],
+                        substitutions: nil,
+                        tags: ["healthy", "high-protein", "quick"],
+                        difficulty: "medium",
+                        cuisineType: "american",
+                        costEstimate: 15.0,
+                        createdAt: Date(),
+                        updatedAt: Date(),
+                        createdBy: nil,
+                        isPublic: true,
+                        rating: 4.8,
+                        ratingCount: 15
+                    ),
+                    recipeId: UUID().uuidString
                 )
             ]
             

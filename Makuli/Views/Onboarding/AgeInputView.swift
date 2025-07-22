@@ -111,5 +111,38 @@ struct AgeInputView: View {
 }
 
 #Preview {
-    AgeInputView(onboardingData: OnboardingData(), currentPage: .constant(1))
+    AgeInputView(
+        onboardingData: OnboardingData(
+            id: "preview-id",
+            userId: "preview-user",
+            age: 25,
+            gender: "Other",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "Maintain Weight",
+            dietaryPreferences: [],
+            budgetRange: "Medium",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            includeMealPrep: true,
+            includeShoppingList: true,
+            includeNutritionInfo: true,
+            rotateMeals: true,
+            includeLeftovers: false,
+            preferredComplexity: "Easy",
+            additionalNotes: nil,
+            isCompleted: false,
+            currentStep: 1,
+            totalSteps: 7,
+            createdAt: Date(),
+            updatedAt: Date()
+        ),
+        currentPage: .constant(1)
+    )
 }

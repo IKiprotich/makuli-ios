@@ -26,7 +26,7 @@ import Foundation
  * - Used to create initial UserProfile
  * - Used to generate personalized meal plans
  */
-struct OnboardingData: Identifiable, Codable {
+final class OnboardingData: Identifiable, Codable, ObservableObject {
     /// Unique identifier for the onboarding data
     let id: String
     
@@ -34,76 +34,76 @@ struct OnboardingData: Identifiable, Codable {
     let userId: String
     
     /// User's age in years
-    let age: Int
+    var age: Int
     
     /// User's gender (Male, Female, Other, Prefer not to say)
-    let gender: String
+    var gender: String
     
     /// User's height in centimeters
-    let height: Double
+    var height: Double
     
     /// User's weight in kilograms
-    let weight: Double
+    var weight: Double
     
     /// User's activity level (Sedentary, Lightly Active, Moderately Active, Very Active, Extremely Active)
-    let activityLevel: String
+    var activityLevel: String
     
     /// User's fitness goal (Lose Weight, Maintain Weight, Gain Weight, Build Muscle)
-    let fitnessGoal: String
+    var fitnessGoal: String
     
     /// User's dietary preferences (e.g., ["Vegetarian", "Gluten-Free"])
-    let dietaryPreferences: [String]
+    var dietaryPreferences: [String]
     
     /// User's budget range for meal planning (Low, Medium, High)
-    let budgetRange: String
+    var budgetRange: String
     
     /// User's preferred cuisine types (e.g., ["Italian", "Mexican", "Asian"])
-    let preferredCuisines: [String]
+    var preferredCuisines: [String]
     
     /// User's cooking skill level (Beginner, Intermediate, Advanced)
-    let cookingSkillLevel: String
+    var cookingSkillLevel: String
     
     /// User's preferred meal prep time in minutes
-    let preferredPrepTime: Int
+    var preferredPrepTime: Int
     
     /// User's preferred number of servings per meal
-    let preferredServings: Int
+    var preferredServings: Int
     
     /// User's allergies and intolerances (e.g., ["Peanuts", "Lactose"])
-    let allergies: [String]
+    var allergies: [String]
     
     /// User's favorite ingredients (e.g., ["Chicken", "Quinoa", "Avocado"])
-    let favoriteIngredients: [String]
+    var favoriteIngredients: [String]
     
     /// User's disliked ingredients (e.g., ["Mushrooms", "Olives"])
-    let dislikedIngredients: [String]
+    var dislikedIngredients: [String]
     
     /// Whether the user wants to include meal prep instructions
-    let includeMealPrep: Bool
+    var includeMealPrep: Bool
     
     /// Whether the user wants to include shopping lists
-    let includeShoppingList: Bool
+    var includeShoppingList: Bool
     
     /// Whether the user wants to include nutritional information
-    let includeNutritionInfo: Bool
+    var includeNutritionInfo: Bool
     
     /// Whether the user wants to rotate meals to avoid repetition
-    let rotateMeals: Bool
+    var rotateMeals: Bool
     
     /// Whether the user wants to include leftovers in planning
-    let includeLeftovers: Bool
+    var includeLeftovers: Bool
     
     /// User's preferred meal complexity (Easy, Medium, Hard)
-    let preferredComplexity: String
+    var preferredComplexity: String
     
     /// Additional notes or preferences from the user
-    let additionalNotes: String?
+    var additionalNotes: String?
     
     /// Whether the user has completed the onboarding process
-    let isCompleted: Bool
+    var isCompleted: Bool
     
     /// Current step in the onboarding process
-    let currentStep: Int
+    var currentStep: Int
     
     /// Total number of steps in the onboarding process
     let totalSteps: Int
@@ -112,7 +112,7 @@ struct OnboardingData: Identifiable, Codable {
     let createdAt: Date
     
     /// Timestamp when the onboarding data was last updated
-    let updatedAt: Date
+    var updatedAt: Date
     
     // MARK: - Coding Keys
     

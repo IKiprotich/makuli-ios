@@ -38,10 +38,10 @@ struct BudgetInputView: View {
                 // Budget selection
                 VStack(spacing: 15) {
                     ForEach(budgetOptions, id: \.0) { option in
-                        let isSelected = onboardingData.budget == option.0
+                        let isSelected = onboardingData.budgetRange == option.0
                         
                         Button(action: {
-                            onboardingData.budget = option.0
+                            onboardingData.budgetRange = option.0
                         }) {
                             HStack(spacing: 15) {
                                 Image(systemName: option.2)
@@ -88,7 +88,7 @@ struct BudgetInputView: View {
                 
                 // Continue button
                 Button(action: {
-                    if !onboardingData.budget.isEmpty {
+                    if !onboardingData.budgetRange.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             currentPage = 5
                         }
@@ -100,13 +100,13 @@ struct BudgetInputView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
-                            onboardingData.budget.isEmpty
+                            onboardingData.budgetRange.isEmpty
                             ? Color.gray.opacity(0.5)
                             : AppColors.primaryOrange
                         )
                         .cornerRadius(12)
                 }
-                .disabled(onboardingData.budget.isEmpty)
+                .disabled(onboardingData.budgetRange.isEmpty)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
             }
@@ -116,7 +116,37 @@ struct BudgetInputView: View {
 
 #Preview {
     BudgetInputView(
-        onboardingData: OnboardingData(),
-        currentPage: .constant(4)
+        onboardingData: OnboardingData(
+            id: "id",
+            userId: "userId",
+            age: 25,
+            gender: "Other",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "Maintain Weight",
+            dietaryPreferences: [],
+            budgetRange: "Medium",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            includeMealPrep: true,
+            includeShoppingList: true,
+            includeNutritionInfo: true,
+            rotateMeals: true,
+            includeLeftovers: false,
+            preferredComplexity: "Easy",
+            additionalNotes: nil,
+            isCompleted: false,
+            currentStep: 1,
+            totalSteps: 7,
+            createdAt: Date(),
+            updatedAt: Date()
+        ),
+        currentPage: .constant(2)
     )
 }

@@ -65,24 +65,24 @@ struct StartPlanView: View {
                             Text("Goal:")
                                 .fontWeight(.medium)
                             Spacer()
-                            Text(onboardingData.goal)
+                            Text(onboardingData.fitnessGoal)
                         }
                         HStack {
                             Text("Budget:")
                                 .fontWeight(.medium)
                             Spacer()
-                            Text(onboardingData.budget)
+                            Text(onboardingData.budgetRange)
                         }
                     }
                     .foregroundColor(AppColors.textCharcoal)
                     
-                    if !onboardingData.dietPreferences.isEmpty {
+                    if !onboardingData.dietaryPreferences.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Diet Preferences:")
                                 .fontWeight(.medium)
                                 .foregroundColor(AppColors.textCharcoal)
                             
-                            Text(onboardingData.dietPreferences.joined(separator: ", "))
+                            Text(onboardingData.dietaryPreferences.joined(separator: ", "))
                                 .foregroundColor(AppColors.textCharcoal.opacity(0.8))
                         }
                     }
@@ -123,15 +123,38 @@ struct StartPlanView: View {
 }
 
 #Preview {
-    let data = OnboardingData()
-    data.age = 25
-    data.gender = "Female"
-    data.goal = "Lose Weight"
-    data.budget = "$100 - $200"
-    data.dietPreferences = ["Vegetarian", "Gluten-free"]
-    
-    return StartPlanView(
-        onboardingData: data,
+    StartPlanView(
+        onboardingData: OnboardingData(
+            id: "preview-id",
+            userId: "preview-user",
+            age: 25,
+            gender: "Other",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "Moderately Active",
+            fitnessGoal: "Maintain Weight",
+            dietaryPreferences: [],
+            budgetRange: "Medium",
+            preferredCuisines: [],
+            cookingSkillLevel: "Beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
+            includeMealPrep: true,
+            includeShoppingList: true,
+            includeNutritionInfo: true,
+            rotateMeals: true,
+            includeLeftovers: false,
+            preferredComplexity: "Easy",
+            additionalNotes: nil,
+            isCompleted: false,
+            currentStep: 1,
+            totalSteps: 7,
+            createdAt: Date(),
+            updatedAt: Date()
+        ),
         onboardingViewModel: OnboardingViewModel(),
         authViewModel: AuthViewModel()
     )

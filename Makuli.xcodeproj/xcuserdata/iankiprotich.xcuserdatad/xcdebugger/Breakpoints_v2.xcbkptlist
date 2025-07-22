@@ -3,4 +3,68 @@
    uuid = "E20E2864-A615-45C3-B5A3-42125D7BB04B"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "280157D5-A788-4C92-B20A-31886C40FED4"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Makuli/Services/SupabaseManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "167"
+            endingLineNumber = "167"
+            landmarkName = "PlanRecipeInsert"
+            landmarkType = "14">
+            <Locations>
+               <Location
+                  uuid = "280157D5-A788-4C92-B20A-31886C40FED4 - c91acc91074f13d3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(5) suspend resume partial function for closure #1 () async throws -&gt; Makuli.Plan in Makuli.SupabaseManager.createMealPlanFromTemplate(templateId: Swift.String, userId: Swift.String, weekStart: Foundation.Date, title: Swift.String) async throws -&gt; Makuli.Plan"
+                  moduleName = "Makuli.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/iankiprotich/Makuli/Makuli/Services/SupabaseManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "175"
+                  endingLineNumber = "175">
+               </Location>
+               <Location
+                  uuid = "280157D5-A788-4C92-B20A-31886C40FED4 - 626b925333eab7c1"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(7) suspend resume partial function for closure #1 () async throws -&gt; Makuli.Plan in Makuli.SupabaseManager.createMealPlanFromTemplate(templateId: Swift.String, userId: Swift.String, weekStart: Foundation.Date, title: Swift.String) async throws -&gt; Makuli.Plan"
+                  moduleName = "Makuli.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/iankiprotich/Makuli/Makuli/Services/SupabaseManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "175"
+                  endingLineNumber = "175">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7C26EEE5-07D6-4CCA-9F63-E466355835C3"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Makuli/Views/Onboarding/AgeInputView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "106"
+            endingLineNumber = "106"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

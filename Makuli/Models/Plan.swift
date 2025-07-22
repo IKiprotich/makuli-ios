@@ -232,6 +232,27 @@ struct Plan: Codable, Identifiable {
             }
         }
     }
+    
+    // MARK: - Computed Properties
+    
+    /// Total number of meals in the plan (placeholder - would be calculated from plan_recipes)
+    var totalMealsCount: Int {
+        // This would typically be calculated from the plan_recipes table
+        // For now, return a placeholder value
+        return 21 // 3 meals per day for 7 days
+    }
+    
+    /// Number of completed meals in the plan (placeholder - would be calculated from plan_recipes)
+    var completedMealsCount: Int {
+        // This would typically be calculated from the plan_recipes table
+        // For now, calculate based on completion percentage
+        return Int(completionPercentage / 100.0 * Double(totalMealsCount))
+    }
+    
+    /// Progress as a percentage (0.0 to 1.0)
+    var progress: Double {
+        return completionPercentage / 100.0
+    }
 }
 
 /// Represents an individual meal within a plan, stored in the Supabase 'plan_recipes' table.

@@ -174,13 +174,13 @@ class SupabaseManager: ObservableObject {
                 
                 let planRecipeData = PlanRecipeInsert(
                     plan_id: plan.id,
-                    day_of_week: meal.dayOfWeek,
+                    day_of_week: Int(meal.dayOfWeek) ?? 0,
                     meal_type: meal.mealType,
                     day: meal.day,
                     custom_meal_name: meal.mealName,
-                    custom_ingredients: meal.ingredients ?? [],
-                    custom_instructions: meal.instructions ?? [],
-                    custom_cook_time: meal.cookingTime ?? 30
+                    custom_ingredients: meal.ingredients,
+                    custom_instructions: meal.instructions,
+                    custom_cook_time: meal.cookingTime
                 )
                 
                 try await client
@@ -257,12 +257,18 @@ class SupabaseManager: ObservableObject {
                 let groceryItem = GroceryItem(
                     id: UUID().uuidString,
                     userId: userId,
-                    planId: planId,
                     name: ingredient,
-                    quantity: count > 1 ? "\(count)x" : "1x",
+                    quantity: Double(count),
+                    unit: "pieces",
                     category: categorizeIngredient(ingredient),
-                    emoji: emojiForIngredient(ingredient),
-                    isChecked: false
+                    priority: "Medium",
+                    isCompleted: false,
+                    notes: nil,
+                    estimatedPrice: nil,
+                    recipeId: nil,
+                    planId: planId,
+                    createdAt: Date(),
+                    updatedAt: Date()
                 )
                 
                 groceryItems.append(groceryItem)

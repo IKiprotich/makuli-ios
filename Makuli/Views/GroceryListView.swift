@@ -53,7 +53,7 @@ struct GroceryListView: View {
                                 await viewModel.clearCheckedItems()
                             }
                         }
-                        .disabled(viewModel.checkedItems == 0)
+                        .disabled(viewModel.checkedItemsCount == 0)
                         
                         Button("Share List", systemImage: "square.and.arrow.up") {
                             shareGroceryList()
@@ -184,7 +184,7 @@ extension GroceryListView {
                     Text("Shopping Progress")
                         .font(.headline)
                     
-                    Text("\(viewModel.checkedItems) of \(viewModel.totalItems) items")
+                    Text("\(viewModel.checkedItemsCount) of \(viewModel.totalItems) items")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -214,17 +214,23 @@ extension GroceryListView {
                 Spacer()
                 
                 if viewModel.totalItems > 0 {
-                    Button(viewModel.checkedItems == viewModel.totalItems ? "Uncheck All" : "Check All") {
-                        Task {
-                            if viewModel.checkedItems == viewModel.totalItems {
+                    if viewModel.checkedItemsCount == viewModel.totalItems {
+                        Button("Uncheck All") {
+                            Task {
                                 await viewModel.uncheckAllItems()
-                            } else {
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundColor(AppColors.primaryOrange)
+                    } else {
+                        Button("Check All") {
+                            Task {
                                 await viewModel.checkAllItems()
                             }
                         }
+                        .font(.caption)
+                        .foregroundColor(AppColors.primaryOrange)
                     }
-                    .font(.caption)
-                    .foregroundColor(AppColors.primaryOrange)
                 }
             }
         }
@@ -269,23 +275,23 @@ struct GroceryItemRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Button(action: onToggle) {
-                Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
+                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundColor(item.isChecked ? .green : .gray)
+                    .foregroundColor(item.isCompleted ? .green : .gray)
             }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
                     .font(.body)
                     .foregroundColor(.primary)
-                    .strikethrough(item.isChecked)
+                    .strikethrough(item.isCompleted)
                 
                 HStack {
-                    Text(item.quantity)
+                    Text("\(item.quantity)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    if let cost = item.estimatedCost, cost > 0 {
+                    if let cost = item.estimatedPrice, cost > 0 {
                         Text("• $\(String(format: "%.2f", cost))")
                             .font(.caption)
                             .foregroundColor(.green)
@@ -295,7 +301,7 @@ struct GroceryItemRow: View {
             
             Spacer()
         }
-        .opacity(item.isChecked ? 0.6 : 1.0)
+        .opacity(item.isCompleted ? 0.6 : 1.0)
         .swipeActions(edge: .trailing) {
             Button("Delete", role: .destructive) {
                 onRemove()

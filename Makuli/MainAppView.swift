@@ -33,7 +33,7 @@ struct MainAppView: View {
             }
         }
         .environmentObject(authViewModel)
-        .onChange(of: authViewModel.user?.isOnboardingCompleted) { _, newValue in
+        .onChange(of: authViewModel.user?.isOnboardingCompleted) { newValue in
             if let completed = newValue {
                 Logger.debug("Onboarding status changed: \(completed)")
             }

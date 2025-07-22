@@ -341,13 +341,12 @@ class PlanViewModel: ObservableObject {
         return templates.filter { $0.category == category.rawValue }
     }
     
-    /// Gets popular templates (based on popularity score)
+    /// Gets popular templates (based on usage count)
     var popularTemplates: [MealPlanTemplate] {
         return templates
-            .filter { $0.isActive }
-            .sorted { ($0.popularityScore ?? 0) > ($1.popularityScore ?? 0) }
+            .sorted { $0.usageCount > $1.usageCount }
             .prefix(6)
-            .compactMap { $0 }
+            .map { $0 }
     }
     
     /// Searches templates by query
@@ -357,7 +356,7 @@ class PlanViewModel: ObservableObject {
         let lowercaseQuery = query.lowercased()
         return templates.filter { template in
             template.name.lowercased().contains(lowercaseQuery) ||
-            template.description.lowercased().contains(lowercaseQuery) ||
+            (template.description?.lowercased().contains(lowercaseQuery) ?? false) ||
             template.category.lowercased().contains(lowercaseQuery) ||
             template.tags.contains { $0.lowercased().contains(lowercaseQuery) }
         }
@@ -409,11 +408,11 @@ class PlanViewModel: ObservableObject {
     }
     
     /// Gets meals grouped by day for a plan
-    func getDayMeals(for plan: PlanWithRecipes) -> [DayMeals] {
+    func getDayMeals(for plan: PlanWithRecipes) -> [PlanDayMeals] {
         let calendar = Calendar.current
         let weekdaySymbols = calendar.weekdaySymbols
         
-        var dayMealsList: [DayMeals] = []
+        var dayMealsList: [PlanDayMeals] = []
         
         for dayOfWeek in 0..<7 {
             let dayName = weekdaySymbols[dayOfWeek]
@@ -424,7 +423,7 @@ class PlanViewModel: ObservableObject {
             let dinner = dayRecipes.filter { $0.mealType == "dinner" }
             let snacks = dayRecipes.filter { $0.mealType == "snack" }
             
-            let dayMeals = DayMeals(
+            let dayMeals = PlanDayMeals(
                 day: dayName,
                 dayOfWeek: dayOfWeek,
                 breakfast: breakfast,
@@ -467,4 +466,4 @@ class PlanViewModel: ObservableObject {
 }
 
 // MARK: - Generation State
-// MealPlanGenerationState and MealPlanPreferences moved to MealPlanGeneration.swift 
+// MealPlanGenerationState and MealPlanPreferences moved to MealPlanGeneration.swift

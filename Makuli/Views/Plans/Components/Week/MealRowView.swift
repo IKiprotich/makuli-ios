@@ -158,15 +158,17 @@ extension MealRowView {
         case .lunch: return .blue
         case .dinner: return .purple
         case .snack: return .green
+        case .other: return .gray
         }
     }
     
-    private func getMealCategoryIcon(_ category: Meal.MealCategory) -> String {
+    private func getMealCategoryIcon(_ category: MealCategory) -> String {
         switch category {
         case .breakfast: return "sunrise.fill"
         case .lunch: return "sun.max.fill"
         case .dinner: return "moon.fill"
         case .snack: return "apple.logo"
+        case .other: return "fork.knife"
         }
     }
     

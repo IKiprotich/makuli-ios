@@ -200,7 +200,7 @@ class AuthManager: ObservableObject {
                 budget: budget,
                 isPremium: currentUser.isPremium,
                 subscriptionRenewal: currentUser.subscriptionRenewalDate,
-                profileImageURL: currentUser.profileImageURL,
+                profileImageURL: currentUser.profilePictureUrl,
                 createdAt: createdAt,
                 isOnboardingCompleted: true
             )
@@ -233,17 +233,27 @@ class AuthManager: ObservableObject {
             // Update local user object
             self.user = User(
                 id: userId,
-                name: currentUser.name,
                 email: currentUser.email,
+                fullName: currentUser.name,
+                profilePictureUrl: currentUser.profilePictureUrl,
                 age: age,
                 gender: gender,
-                goal: goal,
-                diet: diet,
-                budget: budget,
-                isPremium: currentUser.isPremium,
-                subscriptionRenewalDate: currentUser.subscriptionRenewalDate,
-                profileImageURL: currentUser.profileImageURL,
-                isOnboardingCompleted: true
+                height: 170.0, // Default height
+                weight: 70.0, // Default weight
+                activityLevel: "moderately active", // Default activity level
+                fitnessGoal: goal,
+                dietaryPreferences: [diet],
+                budgetRange: budget,
+                preferredCuisines: ["american", "italian"], // Default cuisines
+                cookingSkillLevel: "beginner", // Default cooking skill
+                preferredPrepTime: 30, // Default prep time
+                preferredServings: 2, // Default servings
+                allergies: [], // Default empty allergies
+                favoriteIngredients: [], // Default empty favorites
+                dislikedIngredients: [], // Default empty dislikes
+                hasCompletedOnboarding: true,
+                createdAt: Date(),
+                updatedAt: Date()
             )
             
             Logger.success("Local user object updated")
@@ -301,17 +311,27 @@ class AuthManager: ObservableObject {
                 // Create User with database data
                 self.user = User(
                     id: profile.id,
-                    name: profile.name,
                     email: profile.email,
+                    fullName: profile.name,
+                    profilePictureUrl: profile.profileImageURL,
                     age: profile.age,
                     gender: profile.gender,
-                    goal: profile.goal,
-                    diet: profile.diet,
-                    budget: profile.budget,
-                    isPremium: profile.isPremium,
-                    subscriptionRenewalDate: profile.subscriptionRenewal,
-                    profileImageURL: profile.profileImageURL,
-                    isOnboardingCompleted: profile.isOnboardingCompleted
+                    height: 170.0, // Default height
+                    weight: 70.0, // Default weight
+                    activityLevel: "moderately active", // Default activity level
+                    fitnessGoal: profile.goal,
+                    dietaryPreferences: [profile.diet],
+                    budgetRange: profile.budget,
+                    preferredCuisines: ["american", "italian"], // Default cuisines
+                    cookingSkillLevel: "beginner", // Default cooking skill
+                    preferredPrepTime: 30, // Default prep time
+                    preferredServings: 2, // Default servings
+                    allergies: [], // Default empty allergies
+                    favoriteIngredients: [], // Default empty favorites
+                    dislikedIngredients: [], // Default empty dislikes
+                    hasCompletedOnboarding: profile.isOnboardingCompleted,
+                    createdAt: Date(),
+                    updatedAt: Date()
                 )
                 
                 // Log authentication result
@@ -344,17 +364,27 @@ class AuthManager: ObservableObject {
         let profileImageURL = anyJSONToString(supabaseUser.userMetadata["avatar_url"]) ?? ""
         return User(
             id: supabaseUser.id.uuidString.lowercased(),
-            name: name,
             email: supabaseUser.email ?? "",
+            fullName: name,
+            profilePictureUrl: profileImageURL,
             age: 0, 
             gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
-            goal: "maintain_weight", // Default goal value to satisfy database constraint
-            diet: "none", // Default diet value to satisfy database constraint
-            budget: "medium", // Default budget value to satisfy database constraint
-            isPremium: false,
-            subscriptionRenewalDate: nil,
-            profileImageURL: profileImageURL,
-            isOnboardingCompleted: false
+            height: 170.0, // Default height
+            weight: 70.0, // Default weight
+            activityLevel: "moderately active", // Default activity level
+            fitnessGoal: "maintain_weight", // Default goal value to satisfy database constraint
+            dietaryPreferences: ["none"], // Default diet value to satisfy database constraint
+            budgetRange: "medium", // Default budget value to satisfy database constraint
+            preferredCuisines: ["american", "italian"], // Default cuisines
+            cookingSkillLevel: "beginner", // Default cooking skill
+            preferredPrepTime: 30, // Default prep time
+            preferredServings: 2, // Default servings
+            allergies: [], // Default empty allergies
+            favoriteIngredients: [], // Default empty favorites
+            dislikedIngredients: [], // Default empty dislikes
+            hasCompletedOnboarding: false,
+            createdAt: Date(),
+            updatedAt: Date()
         )
     }
     

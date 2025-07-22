@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProgressCard: View {
     
-    let metric: ProgressMetrics
+    let metric: UIProgressMetrics
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8){

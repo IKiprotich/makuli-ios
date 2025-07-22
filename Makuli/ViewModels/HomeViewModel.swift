@@ -197,7 +197,7 @@ class HomeViewModel: ObservableObject {
             
             let groceryItems = try await supabaseManager.fetchGroceryList(userId: userId)
             let totalItems = groceryItems.count
-            let checkedItems = groceryItems.filter { $0.isChecked }.count
+            let checkedItems = groceryItems.filter { $0.isCompleted }.count
             
             self.groceryStats = (totalItems, checkedItems)
             

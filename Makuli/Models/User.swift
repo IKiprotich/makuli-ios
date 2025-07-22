@@ -217,6 +217,41 @@ struct User: Identifiable, Codable {
     
     // MARK: - Computed Properties
     
+    /// User's name (alias for fullName)
+    var name: String {
+        return fullName
+    }
+    
+    /// User's goal (alias for fitnessGoal)
+    var goal: String {
+        return fitnessGoal
+    }
+    
+    /// User's diet (first dietary preference or default)
+    var diet: String {
+        return dietaryPreferences.first ?? "Balanced"
+    }
+    
+    /// User's budget (alias for budgetRange)
+    var budget: String {
+        return budgetRange
+    }
+    
+    /// Whether user has premium access (placeholder - would be from subscription)
+    var isPremium: Bool {
+        return false // Placeholder - would be determined by subscription status
+    }
+    
+    /// Subscription renewal date (placeholder - would be from subscription)
+    var subscriptionRenewalDate: String? {
+        return nil // Placeholder - would be from subscription data
+    }
+    
+    /// Whether user has completed onboarding (alias for hasCompletedOnboarding)
+    var isOnboardingCompleted: Bool {
+        return hasCompletedOnboarding
+    }
+    
     /**
      * User's Body Mass Index (BMI)
      * 

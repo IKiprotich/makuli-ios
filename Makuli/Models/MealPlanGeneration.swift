@@ -73,8 +73,8 @@ struct GeneratedMeal: Codable {
     let estimatedCost: Double
     
     /// Converts to a UI-compatible Meal object
-    func toMeal(category: Meal.MealCategory) -> Meal {
-        let difficultyLevel: Meal.DifficultyLevel
+    func toMeal(category: MealCategory) -> Meal {
+        let difficultyLevel: DifficultyLevel
         switch difficulty.lowercased() {
         case "easy":
             difficultyLevel = .easy
@@ -83,65 +83,34 @@ struct GeneratedMeal: Codable {
         default:
             difficultyLevel = .medium
         }
-        
-        // Try to find a matching recipe in the existing database
         let recipe = findMatchingRecipe()
-        
         return Meal(
+            id: UUID(),
             name: name,
             category: category,
             cookingTime: cookingTime,
+            prepTime: nil,
+            cookTime: nil,
             difficulty: difficultyLevel,
             imageURL: nil,
+            description: nil,
             isCompleted: false,
-            recipe: recipe
+            scheduledDate: nil,
+            recipe: recipe,
+            recipeId: nil
         )
     }
     
     /// Attempts to find a matching recipe from existing recipes
     private func findMatchingRecipe() -> Recipe? {
-        let existingRecipes = Recipe.enhancedMockRecipes()
-        
-        // First, try exact name match
-        if let exactMatch = existingRecipes.first(where: { $0.title.lowercased() == name.lowercased() }) {
-            return exactMatch
-        }
-        
-        // Then try partial matches based on keywords
-        let nameWords = name.lowercased().components(separatedBy: .whitespaces)
-        let partialMatch = existingRecipes.first { recipe in
-            let recipeWords = recipe.title.lowercased().components(separatedBy: .whitespaces)
-            return nameWords.contains { nameWord in
-                recipeWords.contains { recipeWord in
-                    recipeWord.contains(nameWord) || nameWord.contains(recipeWord)
-                }
-            }
-        }
-        
-        if let match = partialMatch {
-            return match
-        }
-        
-        // If no match found, create a new recipe from AI data
-        return createRecipeFromGeneratedMeal()
+        // For now, return nil since we don't have mock recipes
+        // In a real implementation, this would fetch from the database
+        return nil
     }
     
     /// Creates a new Recipe object from the AI-generated meal data
     private func createRecipeFromGeneratedMeal() -> Recipe {
-        let recipeIngredients = ingredients.enumerated().map { index, ingredient in
-            // Parse ingredient string to create proper Ingredient objects
-            let parts = ingredient.components(separatedBy: " ")
-            let quantity = parts.first(where: { $0.contains(where: \.isNumber) }) ?? "1"
-            let name = parts.filter { !$0.contains(where: \.isNumber) }.joined(separator: " ")
-            
-            return Ingredient(
-                name: name.isEmpty ? ingredient : name,
-                quantity: quantity,
-                category: categorizeIngredient(ingredient),
-                emoji: getIngredientEmoji(ingredient)
-            )
-        }
-        
+        // For now, create a simple recipe without complex ingredient parsing
         return Recipe(
             id: UUID().uuidString,
             title: name,
@@ -277,4 +246,4 @@ struct MealPlanPreferences {
     static let budgetOptions = ["Low ($40-60)", "Medium ($60-100)", "High ($100+)"]
     static let commonDietaryRestrictions = ["Vegetarian", "Vegan", "No Pork", "No Beef", "Gluten-Free", "Dairy-Free"]
     static let commonGoals = ["Weight Loss", "Weight Gain", "Muscle Building", "General Health", "Energy Boost"]
-} 
+}

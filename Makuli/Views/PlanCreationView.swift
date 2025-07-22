@@ -388,20 +388,20 @@ struct SelectableTemplateCard: View {
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.leading)
                 
-                Text(template.description)
+                Text(template.description ?? "")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
                 HStack {
-                    Text("$\(Int(template.estimatedCostMin))-\(Int(template.estimatedCostMax))")
+                    Text("$\(Int(template.maxCostPerMeal ?? 0)) per meal")
                         .font(.caption2)
                         .foregroundColor(.green)
                     
                     Spacer()
                     
-                    Text(template.difficulty.capitalized)
+                    Text(template.cookingSkillLevel.capitalized)
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)

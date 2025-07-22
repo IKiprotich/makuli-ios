@@ -44,7 +44,8 @@ struct PreviousPlanRow: View {
 // MARK: - Preview
 struct PreviousPlanRow_Previews: PreviewProvider {
     static var previews: some View {
-        PreviousPlanRow(plan: WeekPlan.mockData.first!)
+        // Preview removed due to missing mockData
+        Text("PreviousPlanRow Preview")
             .padding()
     }
 } 
