@@ -35,7 +35,7 @@ struct User: Identifiable, Codable {
     let fullName: String
     
     /// User's profile picture URL (optional)
-    let profilePictureUrl: String?
+    let profileImageUrl: String?
     
     /// User's age in years
     let age: Int
@@ -97,7 +97,7 @@ struct User: Identifiable, Codable {
         case id
         case email
         case fullName = "full_name"
-        case profilePictureUrl = "profile_picture_url"
+        case profileImageUrl = "profile_picture_url"
         case age
         case gender
         case height
@@ -126,7 +126,7 @@ struct User: Identifiable, Codable {
         id = try container.decode(String.self, forKey: .id)
         email = try container.decode(String.self, forKey: .email)
         fullName = try container.decode(String.self, forKey: .fullName)
-        profilePictureUrl = try container.decodeIfPresent(String.self, forKey: .profilePictureUrl)
+        profileImageUrl = try container.decodeIfPresent(String.self, forKey: .profileImageUrl)
         age = try container.decode(Int.self, forKey: .age)
         gender = try container.decode(String.self, forKey: .gender)
         height = try container.decode(Double.self, forKey: .height)
@@ -170,7 +170,7 @@ struct User: Identifiable, Codable {
      *   - id: Unique identifier
      *   - email: User's email address
      *   - fullName: User's full name
-     *   - profilePictureUrl: Optional profile picture URL
+     *   - profileImageUrl: Optional profile picture URL
      *   - age: User's age in years
      *   - gender: User's gender
      *   - height: User's height in centimeters
@@ -190,11 +190,11 @@ struct User: Identifiable, Codable {
      *   - createdAt: Creation timestamp
      *   - updatedAt: Last update timestamp
      */
-    init(id: String, email: String, fullName: String, profilePictureUrl: String?, age: Int, gender: String, height: Double, weight: Double, activityLevel: String, fitnessGoal: String, dietaryPreferences: [String], budgetRange: String, preferredCuisines: [String], cookingSkillLevel: String, preferredPrepTime: Int, preferredServings: Int, allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], hasCompletedOnboarding: Bool, createdAt: Date, updatedAt: Date) {
+    init(id: String, email: String, fullName: String, profileImageUrl: String?, age: Int, gender: String, height: Double, weight: Double, activityLevel: String, fitnessGoal: String, dietaryPreferences: [String], budgetRange: String, preferredCuisines: [String], cookingSkillLevel: String, preferredPrepTime: Int, preferredServings: Int, allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], hasCompletedOnboarding: Bool, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.email = email
         self.fullName = fullName
-        self.profilePictureUrl = profilePictureUrl
+        self.profileImageUrl = profileImageUrl
         self.age = age
         self.gender = gender
         self.height = height
@@ -319,9 +319,9 @@ struct User: Identifiable, Codable {
      * 
      * - Returns: URL if valid, nil otherwise
      */
-    var validProfilePictureUrl: URL? {
-        guard let profilePictureUrl = profilePictureUrl, !profilePictureUrl.isEmpty else { return nil }
-        return URL(string: profilePictureUrl)
+    var validProfileImageUrl: URL? {
+        guard let profileImageUrl = profileImageUrl, !profileImageUrl.isEmpty else { return nil }
+        return URL(string: profileImageUrl)
     }
     
     /**

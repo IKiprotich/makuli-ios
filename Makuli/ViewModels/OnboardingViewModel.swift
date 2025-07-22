@@ -333,7 +333,7 @@ class OnboardingViewModel: ObservableObject {
                 plansCreatedThisMonth: 0,
                 aiGenerationsThisMonth: 0,
                 lastPlanReset: Date(),
-                profilePictureUrl: nil,
+                profileImageUrl: nil,
                 bio: nil,
                 location: nil,
                 preferredLanguage: "en",
@@ -412,7 +412,7 @@ class OnboardingViewModel: ObservableObject {
                 id: updatedProfile.id,
                 email: updatedProfile.email ?? "",
                 fullName: updatedProfile.name ?? "Name",
-                profilePictureUrl: updatedProfile.profilePictureUrl,
+                profileImageUrl: updatedProfile.profileImageUrl,
                 age: updatedProfile.age ?? 25,
                 gender: updatedProfile.gender ?? "",
                 height: 170.0, // Default height

@@ -227,21 +227,20 @@ class RecipesViewModel: ObservableObject {
     private func performFetch() async {
         isLoading = true
         errorMessage = nil
-        
         do {
             Logger.info("Fetching recipes from database")
-            
             let fetchedRecipes = try await supabaseManager.fetchRecipes()
             self.recipes = fetchedRecipes
-            
             Logger.info("Successfully loaded \(fetchedRecipes.count) recipes")
-            
+        } catch is CancellationError {
+            // Task was cancelled (e.g., user navigated away)
+            Logger.debug("Recipe fetch cancelled")
+            // Do not set errorMessage for cancellations
         } catch {
             Logger.error("Failed to fetch recipes: \(error)")
             self.errorMessage = "Failed to load recipes. Please check your connection and try again."
             self.recipes = []
         }
-        
         isLoading = false
     }
     

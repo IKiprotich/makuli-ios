@@ -200,7 +200,7 @@ class AuthManager: ObservableObject {
                 budget: budget,
                 isPremium: currentUser.isPremium,
                 subscriptionRenewal: currentUser.subscriptionRenewalDate,
-                profileImageURL: currentUser.profilePictureUrl,
+                profileImageURL: currentUser.profileImageUrl,
                 createdAt: createdAt,
                 isOnboardingCompleted: true
             )
@@ -235,7 +235,7 @@ class AuthManager: ObservableObject {
                 id: userId,
                 email: currentUser.email,
                 fullName: currentUser.name,
-                profilePictureUrl: currentUser.profilePictureUrl,
+                profileImageUrl: currentUser.profileImageUrl,
                 age: age,
                 gender: gender,
                 height: 170.0, // Default height
@@ -313,7 +313,7 @@ class AuthManager: ObservableObject {
                     id: profile.id,
                     email: profile.email,
                     fullName: profile.name,
-                    profilePictureUrl: profile.profileImageURL,
+                    profileImageUrl: profile.profileImageURL,
                     age: profile.age,
                     gender: profile.gender,
                     height: 170.0, // Default height
@@ -366,7 +366,7 @@ class AuthManager: ObservableObject {
             id: supabaseUser.id.uuidString.lowercased(),
             email: supabaseUser.email ?? "",
             fullName: name,
-            profilePictureUrl: profileImageURL,
+            profileImageUrl: profileImageURL,
             age: 0, 
             gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
             height: 170.0, // Default height

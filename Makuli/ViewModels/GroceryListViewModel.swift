@@ -281,6 +281,10 @@ class GroceryListViewModel: ObservableObject {
             let fetchedGroceries = try await supabaseManager.fetchGroceryList(userId: userId)
             self.groceries = fetchedGroceries
             Logger.info("Successfully loaded \(fetchedGroceries.count) grocery items")
+        } catch is CancellationError {
+            // Task was cancelled (e.g., user navigated away)
+            Logger.debug("Grocery fetch cancelled")
+            // Do not set errorMessage for cancellations
         } catch {
             Logger.error("Failed to fetch grocery list: \(error)")
             self.errorMessage = "Failed to load grocery list. Please check your connection and try again."

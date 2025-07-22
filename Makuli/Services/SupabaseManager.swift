@@ -345,6 +345,33 @@ class SupabaseManager: ObservableObject {
         }, context: "fetchGroceryList")
     }
     
+    func uploadProfileImage(userId: String, imageData: Data) async throws -> String {
+        let fileName = "\(userId)_profile.jpg"
+        let bucket = "profile-pictures"
+        let path = "\(userId)/\(fileName)"
+
+        // Upload to Supabase Storage with upsert/overwrite enabled
+        let response = try await client.storage.from(bucket).upload(
+            path: path,
+            file: imageData,
+            options: FileOptions(upsert: true)
+        )
+
+        // Manually construct the public URL
+        let publicUrl = "\(Configuration.supabaseURL)/storage/v1/object/public/\(bucket)/\(path)"
+        return publicUrl
+    }
+
+    func updateUserProfileImageUrl(userId: String, imageUrl: String) async throws {
+        // Use [String: String] instead of [String: Any]
+        let updates = ["profile_image_url": imageUrl]
+        _ = try await client
+            .from("profiles")
+            .update(updates)
+            .eq("id", value: userId)
+            .execute()
+    }
+    
     // --- Stubs for ProfileViewModel ---
     func deleteUserAccount(userId: String) async throws {
         throw SupabaseError.operationFailed

@@ -133,6 +133,8 @@ class HomeViewModel: ObservableObject {
                 self.weekProgress = (completed, total, percentage)
                 Logger.info("Loaded current plan with \(total) meals")
             }
+        } catch is CancellationError {
+            Logger.debug("Current plan fetch cancelled")
         } catch {
             Logger.error("Failed to load current plan: \(error)")
             self.errorMessage = "Failed to load your meal plan"
@@ -184,6 +186,8 @@ class HomeViewModel: ObservableObject {
             
             Logger.info("Loaded \(quickRecipes.count) quick recipes")
             
+        } catch is CancellationError {
+            Logger.debug("Quick recipes fetch cancelled")
         } catch {
             Logger.error("Failed to load quick recipes: \(error)")
             // Don't show error for this, it's not critical
@@ -203,6 +207,8 @@ class HomeViewModel: ObservableObject {
             
             Logger.info("Loaded grocery stats: \(checkedItems)/\(totalItems) items checked")
             
+        } catch is CancellationError {
+            Logger.debug("Grocery stats fetch cancelled")
         } catch {
             Logger.error("Failed to load grocery stats: \(error)")
             // Don't show error for this, it's not critical
@@ -221,6 +227,8 @@ class HomeViewModel: ObservableObject {
             }
             self.recentPlans = planWithRecipes
             Logger.info("Loaded \(recentPlans.count) recent plans")
+        } catch is CancellationError {
+            Logger.debug("Recent plans fetch cancelled")
         } catch {
             Logger.error("Failed to load recent plans: \(error)")
             // Don't show error for this, it's not critical

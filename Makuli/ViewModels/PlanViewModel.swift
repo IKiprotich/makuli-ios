@@ -67,7 +67,6 @@ class PlanViewModel: ObservableObject {
     private func performFetch(for userId: String) async {
         isLoading = true
         errorMessage = nil
-        
         do {
             Logger.info("Fetching plans for user: \(userId)")
             
@@ -90,6 +89,10 @@ class PlanViewModel: ObservableObject {
             
             Logger.info("Successfully loaded \(fetchedPlans.count) plans")
             
+        } catch is CancellationError {
+            // Task was cancelled (e.g., user navigated away)
+            Logger.debug("Plan fetch cancelled")
+            // Do not set errorMessage for cancellations
         } catch {
             Logger.error("Failed to fetch plans: \(error)")
             self.errorMessage = "Failed to load meal plans. Please check your connection and try again."

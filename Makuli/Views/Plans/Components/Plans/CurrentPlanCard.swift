@@ -33,20 +33,30 @@ struct CurrentPlanCard: View {
                 
                 Spacer()
                 
-                AsyncImage(url: URL(string: "meal_placeholder")) { image in
-                    image
+                let validImageURL: URL? = nil // No real image URL for now
+                if let url = validImageURL {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemGray5))
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .foregroundColor(.secondary)
+                            )
+                    }
+                    .frame(width: 100, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                } else {
+                    Image(systemName: "photo")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemGray5))
-                        .overlay(
-                            Image(systemName: "photo")
-                                .foregroundColor(.secondary)
-                        )
+                        .frame(width: 100, height: 100)
+                        .background(Color(.systemGray5))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                .frame(width: 100, height: 100)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             
             // Progress bar

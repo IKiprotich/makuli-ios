@@ -6,6 +6,8 @@ class UserProfileViewModel: ObservableObject {
     @Published var profile: UserProfile?
     @Published var isLoading = false
     @Published var error: String?
+    @Published var uploadSuccess: Bool = false
+    @Published var uploadError: String? = nil
     
     private var fetchTask: Task<Void, Never>?
 
@@ -69,6 +71,22 @@ class UserProfileViewModel: ObservableObject {
             self.error = "Failed to fetch profile: \(error.localizedDescription)"
             self.profile = nil
             print("[DEBUG] Fetch error: \(error)")
+        }
+    }
+    
+    @MainActor
+    func uploadProfileImage(data: Data) async {
+        guard let userId = profile?.id else { return }
+        do {
+            let imageUrl = try await SupabaseManager.shared.uploadProfileImage(userId: userId, imageData: data)
+            profile?.profileImageUrl = imageUrl
+            try await SupabaseManager.shared.updateUserProfileImageUrl(userId: userId, imageUrl: imageUrl)
+            uploadSuccess = true
+            uploadError = nil
+        } catch {
+            print("Failed to upload image: \(error)")
+            uploadSuccess = false
+            uploadError = error.localizedDescription
         }
     }
     

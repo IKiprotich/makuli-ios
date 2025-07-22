@@ -29,103 +29,103 @@ import Foundation
  */
 struct UserProfile: Identifiable, Codable {
     /// Unique identifier for the user profile
-    let id: String
+    var id: String
     
-    /// Reference to the user this profile belongs to
-    let userId: String
+    /// ID of the user who owns this profile
+    var userId: String?
     
     /// User's name
-    let name: String?
+    var name: String?
     
     /// User's email address
-    let email: String?
+    var email: String?
     
     /// User's age
-    let age: Int?
+    var age: Int?
     
     /// User's gender
-    let gender: String?
+    var gender: String?
     
     /// User's fitness goal
-    let goal: String?
+    var goal: String?
     
     /// User's dietary preferences
-    let diet: String?
+    var diet: String?
     
     /// User's budget preference
-    let budget: String?
+    var budget: String?
     
     /// Whether user has premium access
-    let isPremium: Bool
+    var isPremium: Bool
     
     /// Whether user has completed onboarding
-    let isOnboardingCompleted: Bool
+    var isOnboardingCompleted: Bool
     
-    /// Subscription type
-    var subscriptionType: String
+    /// User's subscription type (optional, backend may omit this field)
+    var subscriptionType: String?
     
     /// Subscription renewal date
     var subscriptionRenewal: Date?
     
     /// Number of plans created this month
-    let plansCreatedThisMonth: Int
+    var plansCreatedThisMonth: Int
     
     /// Number of AI generations this month
-    let aiGenerationsThisMonth: Int
+    var aiGenerationsThisMonth: Int
     
     /// Last plan reset date
-    let lastPlanReset: Date
+    var lastPlanReset: Date
     
     /// User's profile picture URL
-    let profilePictureUrl: String?
+    var profileImageUrl: String?
     
     /// User's bio or description
-    let bio: String?
+    var bio: String?
     
     /// User's location/city
-    let location: String?
+    var location: String?
     
-    /// User's preferred language
-    let preferredLanguage: String
+    /// User's preferred language (optional, backend may omit this field)
+    var preferredLanguage: String?
     
-    /// User's timezone
-    let timezone: String
+    /// User's timezone (optional, backend may omit this field)
+    var timezone: String?
     
-    /// User's preferred measurement system (Metric, Imperial)
-    let measurementSystem: String
+    /// User's preferred measurement system (optional, backend may omit this field)
+    var measurementSystem: String?
     
-    /// User's preferred currency
-    let preferredCurrency: String
+    /// User's preferred currency (optional, backend may omit this field)
+    var preferredCurrency: String?
     
-    /// User's notification preferences
-    let notificationPreferences: NotificationPreferences
+    /// User's notification preferences (optional, backend may omit this field)
+    var notificationPreferences: NotificationPreferences?
     
-    /// User's privacy settings
-    let privacySettings: PrivacySettings
+    /// User's privacy settings (optional, backend may omit this field)
+    var privacySettings: PrivacySettings?
     
-    /// User's fitness goals and targets
-    let fitnessGoals: FitnessGoals
+    /// User's fitness goals and targets (optional, backend may omit this field)
+    var fitnessGoals: FitnessGoals?
     
-    /// User's meal planning preferences
-    let mealPlanningPreferences: MealPlanningPreferences
+    /// User's meal planning preferences (optional, backend may omit this field)
+    var mealPlanningPreferences: MealPlanningPreferences?
     
-    /// User's dietary restrictions and preferences
-    let dietaryPreferences: DietaryPreferences
+    /// User's dietary preferences (optional, backend may omit this field)
+    var dietaryPreferences: DietaryPreferences?
     
-    /// User's cooking experience and preferences
-    let cookingPreferences: CookingPreferences
+    /// User's cooking preferences (optional, backend may omit this field)
+    var cookingPreferences: CookingPreferences?
     
-    /// User's budget and cost preferences
-    let budgetPreferences: BudgetPreferences
+    /// User's budget preferences (optional, backend may omit this field)
+    var budgetPreferences: BudgetPreferences?
     
-    /// User's achievement and progress data
-    let achievements: [Achievement]
+    /// User's achievement and progress data (optional, backend may omit this field)
+    var achievements: [Achievement]?
     
-    /// User's progress metrics over time
-    let progressMetrics: [ProgressMetrics]
+    /// User's progress metrics over time (optional, backend may omit this field)
+    var progressMetrics: [ProgressMetrics]?
     
     /// Timestamp when the profile was created
-    let createdAt: Date
+    var createdAt: Date
     
     /// Timestamp when the profile was last updated
     var updatedAt: Date
@@ -149,7 +149,7 @@ struct UserProfile: Identifiable, Codable {
         case plansCreatedThisMonth = "plans_created_this_month"
         case aiGenerationsThisMonth = "ai_generations_this_month"
         case lastPlanReset = "last_plan_reset"
-        case profilePictureUrl = "profile_picture_url"
+        case profileImageUrl = "profile_image_url"
         case bio
         case location
         case preferredLanguage = "preferred_language"
@@ -175,7 +175,8 @@ struct UserProfile: Identifiable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         id = try container.decode(String.self, forKey: .id)
-        userId = try container.decode(String.self, forKey: .userId)
+        // Use decodeIfPresent to avoid crash if user_id is missing from backend response
+        userId = try container.decodeIfPresent(String.self, forKey: .userId)
         name = try container.decodeIfPresent(String.self, forKey: .name)
         email = try container.decodeIfPresent(String.self, forKey: .email)
         age = try container.decodeIfPresent(Int.self, forKey: .age)
@@ -185,27 +186,36 @@ struct UserProfile: Identifiable, Codable {
         budget = try container.decodeIfPresent(String.self, forKey: .budget)
         isPremium = try container.decode(Bool.self, forKey: .isPremium)
         isOnboardingCompleted = try container.decode(Bool.self, forKey: .isOnboardingCompleted)
-        subscriptionType = try container.decode(String.self, forKey: .subscriptionType)
+        // Use decodeIfPresent to avoid crash if subscription_type is missing from backend response
+        subscriptionType = try container.decodeIfPresent(String.self, forKey: .subscriptionType)
         subscriptionRenewal = try container.decodeIfPresent(Date.self, forKey: .subscriptionRenewal)
         plansCreatedThisMonth = try container.decode(Int.self, forKey: .plansCreatedThisMonth)
         aiGenerationsThisMonth = try container.decode(Int.self, forKey: .aiGenerationsThisMonth)
         lastPlanReset = try container.decode(Date.self, forKey: .lastPlanReset)
-        profilePictureUrl = try container.decodeIfPresent(String.self, forKey: .profilePictureUrl)
+        profileImageUrl = try container.decodeIfPresent(String.self, forKey: .profileImageUrl)
         bio = try container.decodeIfPresent(String.self, forKey: .bio)
         location = try container.decodeIfPresent(String.self, forKey: .location)
-        preferredLanguage = try container.decode(String.self, forKey: .preferredLanguage)
-        timezone = try container.decode(String.self, forKey: .timezone)
-        measurementSystem = try container.decode(String.self, forKey: .measurementSystem)
-        preferredCurrency = try container.decode(String.self, forKey: .preferredCurrency)
-        notificationPreferences = try container.decode(NotificationPreferences.self, forKey: .notificationPreferences)
-        privacySettings = try container.decode(PrivacySettings.self, forKey: .privacySettings)
-        fitnessGoals = try container.decode(FitnessGoals.self, forKey: .fitnessGoals)
-        mealPlanningPreferences = try container.decode(MealPlanningPreferences.self, forKey: .mealPlanningPreferences)
-        dietaryPreferences = try container.decode(DietaryPreferences.self, forKey: .dietaryPreferences)
-        cookingPreferences = try container.decode(CookingPreferences.self, forKey: .cookingPreferences)
-        budgetPreferences = try container.decode(BudgetPreferences.self, forKey: .budgetPreferences)
-        achievements = try container.decode([Achievement].self, forKey: .achievements)
-        progressMetrics = try container.decode([ProgressMetrics].self, forKey: .progressMetrics)
+        // Use decodeIfPresent to avoid crash if preferred_language is missing from backend response
+        preferredLanguage = try container.decodeIfPresent(String.self, forKey: .preferredLanguage)
+        // Use decodeIfPresent to avoid crash if timezone is missing from backend response
+        timezone = try container.decodeIfPresent(String.self, forKey: .timezone)
+        // Use decodeIfPresent to avoid crash if measurement_system is missing from backend response
+        measurementSystem = try container.decodeIfPresent(String.self, forKey: .measurementSystem)
+        // Use decodeIfPresent to avoid crash if preferred_currency is missing from backend response
+        preferredCurrency = try container.decodeIfPresent(String.self, forKey: .preferredCurrency)
+        // Use decodeIfPresent to avoid crash if notification_preferences is missing from backend response
+        notificationPreferences = try container.decodeIfPresent(NotificationPreferences.self, forKey: .notificationPreferences)
+        // Use decodeIfPresent to avoid crash if privacy_settings is missing from backend response
+        privacySettings = try container.decodeIfPresent(PrivacySettings.self, forKey: .privacySettings)
+        
+        // Use decodeIfPresent to avoid crash if any of these fields are missing from backend response
+        fitnessGoals = try container.decodeIfPresent(FitnessGoals.self, forKey: .fitnessGoals)
+        mealPlanningPreferences = try container.decodeIfPresent(MealPlanningPreferences.self, forKey: .mealPlanningPreferences)
+        dietaryPreferences = try container.decodeIfPresent(DietaryPreferences.self, forKey: .dietaryPreferences)
+        cookingPreferences = try container.decodeIfPresent(CookingPreferences.self, forKey: .cookingPreferences)
+        budgetPreferences = try container.decodeIfPresent(BudgetPreferences.self, forKey: .budgetPreferences)
+        achievements = try container.decodeIfPresent([Achievement].self, forKey: .achievements)
+        progressMetrics = try container.decodeIfPresent([ProgressMetrics].self, forKey: .progressMetrics)
         
         // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
@@ -246,7 +256,7 @@ struct UserProfile: Identifiable, Codable {
      *   - plansCreatedThisMonth: Number of plans created this month
      *   - aiGenerationsThisMonth: Number of AI generations this month
      *   - lastPlanReset: Last plan reset date
-     *   - profilePictureUrl: User's profile picture URL
+     *   - profileImageUrl: User's profile picture URL
      *   - bio: User's bio or description
      *   - location: User's location/city
      *   - preferredLanguage: User's preferred language
@@ -265,7 +275,7 @@ struct UserProfile: Identifiable, Codable {
      *   - createdAt: Creation timestamp
      *   - updatedAt: Last update timestamp
      */
-    init(id: String, userId: String, name: String?, email: String?, age: Int?, gender: String?, goal: String?, diet: String?, budget: String?, isPremium: Bool, isOnboardingCompleted: Bool, subscriptionType: String, subscriptionRenewal: Date?, plansCreatedThisMonth: Int, aiGenerationsThisMonth: Int, lastPlanReset: Date, profilePictureUrl: String?, bio: String?, location: String?, preferredLanguage: String, timezone: String, measurementSystem: String, preferredCurrency: String, notificationPreferences: NotificationPreferences, privacySettings: PrivacySettings, fitnessGoals: FitnessGoals, mealPlanningPreferences: MealPlanningPreferences, dietaryPreferences: DietaryPreferences, cookingPreferences: CookingPreferences, budgetPreferences: BudgetPreferences, achievements: [Achievement], progressMetrics: [ProgressMetrics], createdAt: Date, updatedAt: Date) {
+    init(id: String, userId: String?, name: String?, email: String?, age: Int?, gender: String?, goal: String?, diet: String?, budget: String?, isPremium: Bool, isOnboardingCompleted: Bool, subscriptionType: String?, subscriptionRenewal: Date?, plansCreatedThisMonth: Int, aiGenerationsThisMonth: Int, lastPlanReset: Date, profileImageUrl: String?, bio: String?, location: String?, preferredLanguage: String?, timezone: String?, measurementSystem: String?, preferredCurrency: String?, notificationPreferences: NotificationPreferences?, privacySettings: PrivacySettings?, fitnessGoals: FitnessGoals?, mealPlanningPreferences: MealPlanningPreferences?, dietaryPreferences: DietaryPreferences?, cookingPreferences: CookingPreferences?, budgetPreferences: BudgetPreferences?, achievements: [Achievement]?, progressMetrics: [ProgressMetrics]?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.userId = userId
         self.name = name
@@ -282,7 +292,7 @@ struct UserProfile: Identifiable, Codable {
         self.plansCreatedThisMonth = plansCreatedThisMonth
         self.aiGenerationsThisMonth = aiGenerationsThisMonth
         self.lastPlanReset = lastPlanReset
-        self.profilePictureUrl = profilePictureUrl
+        self.profileImageUrl = profileImageUrl
         self.bio = bio
         self.location = location
         self.preferredLanguage = preferredLanguage
@@ -310,8 +320,8 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: URL if valid, nil otherwise
      */
     var validProfilePictureUrl: URL? {
-        guard let profilePictureUrl = profilePictureUrl, !profilePictureUrl.isEmpty else { return nil }
-        return URL(string: profilePictureUrl)
+        guard let profileImageUrl = profileImageUrl, !profileImageUrl.isEmpty else { return nil }
+        return URL(string: profileImageUrl)
     }
     
     /**
@@ -356,7 +366,7 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: True if profile picture URL is set
      */
     var hasProfilePicture: Bool {
-        return profilePictureUrl != nil && !profilePictureUrl!.isEmpty
+        return profileImageUrl != nil && !profileImageUrl!.isEmpty
     }
     
     /**
@@ -365,7 +375,7 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: Count of earned achievements
      */
     var totalAchievements: Int {
-        return achievements.count
+        return achievements?.count ?? 0
     }
     
     /**
@@ -374,7 +384,7 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: Most recent progress metrics or nil
      */
     var latestProgressMetrics: ProgressMetrics? {
-        return progressMetrics.max { $0.date < $1.date }
+        return progressMetrics?.max { $0.date < $1.date }
     }
     
     // MARK: - Helper Methods
@@ -386,7 +396,7 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: Array of achievements in the specified category
      */
     func achievementsByCategory(_ category: String) -> [Achievement] {
-        return achievements.filter { $0.category.lowercased() == category.lowercased() }
+        return achievements?.filter { $0.category.lowercased() == category.lowercased() } ?? []
     }
     
     /**
@@ -398,7 +408,7 @@ struct UserProfile: Identifiable, Codable {
      * - Returns: Array of progress metrics within the date range
      */
     func progressMetricsForDateRange(startDate: Date, endDate: Date) -> [ProgressMetrics] {
-        return progressMetrics.filter { $0.date >= startDate && $0.date <= endDate }
+        return progressMetrics?.filter { $0.date >= startDate && $0.date <= endDate } ?? []
     }
     
     /**
@@ -425,7 +435,7 @@ struct UserProfile: Identifiable, Codable {
             plansCreatedThisMonth: plansCreatedThisMonth,
             aiGenerationsThisMonth: aiGenerationsThisMonth,
             lastPlanReset: lastPlanReset,
-            profilePictureUrl: profilePictureUrl,
+            profileImageUrl: profileImageUrl,
             bio: newBio,
             location: location,
             preferredLanguage: preferredLanguage,
@@ -470,7 +480,7 @@ struct UserProfile: Identifiable, Codable {
             plansCreatedThisMonth: plansCreatedThisMonth,
             aiGenerationsThisMonth: aiGenerationsThisMonth,
             lastPlanReset: lastPlanReset,
-            profilePictureUrl: profilePictureUrl,
+            profileImageUrl: profileImageUrl,
             bio: bio,
             location: newLocation,
             preferredLanguage: preferredLanguage,
@@ -1215,7 +1225,7 @@ extension UserProfile {
     
     /// Subscription display name
     var subscriptionDisplayName: String {
-        switch subscriptionType.lowercased() {
+        switch subscriptionType?.lowercased() {
         case "free": return "Free Plan"
         case "monthly": return "Monthly Premium"
         case "yearly": return "Yearly Premium"

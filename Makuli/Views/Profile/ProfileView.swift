@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ProfileView: View {
     
@@ -18,13 +19,17 @@ struct ProfileView: View {
     @StateObject private var profileViewModel = UserProfileViewModel()
     
     @State private var showingDeveloperPanel = false
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var selectedImageData: Data? = nil
+    @State private var showCropper = false
+    @State private var imageToCrop: UIImage? = nil
     
     private var user: User {
         authViewModel.user ?? User(
             id: "guest-id",
             email: "guest@example.com",
             fullName: "Guest User",
-            profilePictureUrl: nil,
+            profileImageUrl: nil,
             age: 25,
             gender: "Other",
             height: 170.0,
@@ -111,14 +116,78 @@ extension ProfileView {
         VStack(spacing: 16) {
             
             //profile image
-            ZStack {
-                Circle()
-                    .fill(Color(AppColors.primaryOrange.opacity(0.2)))
+            // Profile Image with overlay camera button
+            ZStack(alignment: .bottomTrailing) {
+                if let imageData = selectedImageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                } else if let url = profileViewModel.profile?.profileImageUrl, let imageUrl = URL(string: url) {
+                    AsyncImage(url: imageUrl) { image in
+                        image.resizable()
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: 100, height: 100)
-                
-                Image(systemName: "person.crop.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(AppColors.primaryOrange)
+                    .clipShape(Circle())
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 100, height: 100)
+                }
+
+                PhotosPicker(
+                    selection: $selectedItem,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 32, height: 32)
+                            .shadow(radius: 2)
+                        Image(systemName: "camera.fill")
+                            .foregroundColor(.black)
+                    }
+                }
+                .offset(x: 8, y: 8)
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                           let uiImage = UIImage(data: data) {
+                            imageToCrop = uiImage
+                            showCropper = true
+                        }
+                    }
+                }
+            }
+            .frame(width: 100, height: 100)
+            .sheet(isPresented: $showCropper) {
+                if let image = imageToCrop {
+                    ImageCropperView(image: image) { croppedImage in
+                        if let croppedData = croppedImage.jpegData(compressionQuality: 0.9) {
+                            selectedImageData = croppedData
+                            Task {
+                                await profileViewModel.uploadProfileImage(data: croppedData)
+                            }
+                        }
+                        showCropper = false
+                    }
+                }
+            }
+            .alert("Profile Picture Updated", isPresented: $profileViewModel.uploadSuccess) {
+                Button("OK", role: .cancel) { profileViewModel.uploadSuccess = false }
+            } message: {
+                Text("Your profile picture has been successfully uploaded.")
+            }
+            .alert("Upload Failed", isPresented: .constant(profileViewModel.uploadError != nil)) {
+                Button("OK", role: .cancel) { profileViewModel.uploadError = nil }
+            } message: {
+                Text(profileViewModel.uploadError ?? "Unknown error")
             }
             
             //user info
@@ -130,12 +199,13 @@ extension ProfileView {
                         .foregroundColor(.red)
                 } else if let profile = profileViewModel.profile {
                     Text(profile.name ?? "No Name")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                         .foregroundColor(.primary)
+                        .padding(.bottom, 4)
                     if let goal = profile.goal {
                         Text("Goal: \(goal)")
-                            .font(.subheadline)
+                            .font(.headline)
                             .foregroundColor(.secondary)
                     }
                 } else {

@@ -243,7 +243,7 @@ extension TemplateSelectionView {
                 plansCreatedThisMonth: 0,
                 aiGenerationsThisMonth: 0,
                 lastPlanReset: Date(),
-                profilePictureUrl: user.profilePictureUrl,
+                profileImageUrl: user.profileImageUrl,
                 bio: nil,
                 location: nil,
                 preferredLanguage: "en",

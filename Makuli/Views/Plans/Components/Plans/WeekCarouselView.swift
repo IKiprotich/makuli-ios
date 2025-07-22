@@ -38,20 +38,30 @@ struct WeekCarouselCard: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            AsyncImage(url: URL(string: "meal_placeholder")) { image in
-                image
+            let validImageURL: URL? = nil // No real image URL for now
+            if let url = validImageURL {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray5))
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.secondary)
+                        )
+                }
+                .frame(width: 120, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            } else {
+                Image(systemName: "photo")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray5))
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundColor(.secondary)
-                    )
+                    .frame(width: 120, height: 80)
+                    .background(Color(.systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .frame(width: 120, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
             
             VStack(spacing: 4) {
                 Text(week.weekTitle)
