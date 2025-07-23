@@ -361,11 +361,29 @@ extension MealPlanGenerationView {
     }
     
     private func saveMealPlan(_ response: MealPlanGenerationResponse) {
-        // The plan is automatically saved during generation
-        // This button just triggers the save state if needed
-        Task {
-            await planViewModel.fetchPlans(for: profileViewModel.profile?.id ?? "")
+        // Convert the AI response to a MealPlan and add to AI-generated plans
+        let mealPlan = convertToMealPlan(from: response)
+        planViewModel.addAIGeneratedPlan(mealPlan)
+        // Optionally, show a success state or dismiss
+        dismiss()
+    }
+
+    /// Helper to convert MealPlanGenerationResponse to MealPlan
+    private func convertToMealPlan(from response: MealPlanGenerationResponse) -> MealPlan {
+        // Generate a unique ID and planId for the new plan
+        let id = UUID().uuidString
+        let planId = id // Or use a different logic if needed
+        // Convert the response's meals to the [String: [String: [Meal]]] format expected by MealPlan
+        var mealsDict: [String: [String: [Meal]]] = [:]
+        for dayPlan in response.meals {
+            var mealTypes: [String: [Meal]] = [:]
+            mealTypes["breakfast"] = [dayPlan.breakfast.toMeal(category: .breakfast)]
+            mealTypes["lunch"] = [dayPlan.lunch.toMeal(category: .lunch)]
+            mealTypes["dinner"] = [dayPlan.dinner.toMeal(category: .dinner)]
+            mealsDict[dayPlan.day] = mealTypes
         }
+        let now = Date()
+        return MealPlan(id: id, planId: planId, meals: mealsDict, createdAt: now, updatedAt: now, isAIGenerated: true)
     }
 }
 

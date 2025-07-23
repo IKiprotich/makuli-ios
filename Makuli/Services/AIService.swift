@@ -13,10 +13,10 @@ import Foundation
 class AIService: ObservableObject {
     static let shared = AIService()
     
-    private var openAIAPIKey: String {
-        Configuration.openAIAPIKey
-    }
-    private let baseURL = "https://api.openai.com/v1/chat/completions"
+    // MARK: - GPTGod API Configuration (switched from OpenAI)
+    // Hardcoded for now; move to secure storage for production!
+    private let gptGodAPIKey = "sk-OsMMq65tXdfOIlTUYtocSL7NCsmA7CerN77OkEv29dODg1EA"
+    private let baseURL = "https://api.gptgod.online"
     
     private init() {}
     
@@ -54,37 +54,46 @@ class AIService: ObservableObject {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.addValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        // Switched to GPTGod API key (was OpenAI)
+        request.addValue("Bearer \(gptGodAPIKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let requestData = try JSONEncoder().encode(openAIRequest)
         request.httpBody = requestData
         
+        Logger.info("Sending meal plan generation request to GPTGod API")
         let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
+            Logger.error("Invalid response received from GPTGod API")
             throw AIServiceError.invalidResponse
         }
         
+        Logger.info("Received response from GPTGod API with status code: \(httpResponse.statusCode)")
+        
         guard httpResponse.statusCode == 200 else {
+            Logger.error("GPTGod API returned error status code: \(httpResponse.statusCode)")
             throw AIServiceError.apiError(httpResponse.statusCode)
         }
         
-        let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
-        
-        guard let choice = openAIResponse.choices.first else {
-            throw AIServiceError.noContent
+        do {
+            let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            guard let choice = openAIResponse.choices.first else {
+                Logger.error("No content in GPTGod API response")
+                throw AIServiceError.noContent
+            }
+            let content = choice.message.content
+            guard let contentData = content.data(using: .utf8) else {
+                Logger.error("Invalid JSON string in GPTGod API response")
+                throw AIServiceError.invalidJSONResponse
+            }
+            let mealPlan = try JSONDecoder().decode(MealPlanGenerationResponse.self, from: contentData)
+            Logger.info("Successfully parsed meal plan from GPTGod API response")
+            return mealPlan
+        } catch {
+            Logger.error("Failed to decode GPTGod API response: \(error.localizedDescription)")
+            throw error
         }
-        
-        let content = choice.message.content
-        
-        // Parse the JSON response from OpenAI
-        guard let contentData = content.data(using: .utf8) else {
-            throw AIServiceError.invalidJSONResponse
-        }
-        
-        let mealPlan = try JSONDecoder().decode(MealPlanGenerationResponse.self, from: contentData)
-        return mealPlan
     }
     
     private func buildPrompt(from request: MealPlanGenerationRequest) -> String {

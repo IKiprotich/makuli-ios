@@ -11,8 +11,7 @@ struct AgeInputView: View {
     
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
-    @State private var ageText = ""
-    @FocusState private var isTextFieldFocused: Bool
+    @State private var selectedAge: Int = 25
     
     
     var body: some View {
@@ -23,50 +22,31 @@ struct AgeInputView: View {
             VStack(spacing: 30) {
                 
                 //progress indicator
-                ProgressView(value: 2, total: 7)
+                ProgressView(value: 1, total: 14)
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
                 
                 Spacer()
                 
-                VStack(spacing: 20) {
-                    Text("How old are you?")
-                        .font(.system(size: 32, weight: .bold))
+                VStack(spacing: 12) {
+                    Text("Age")
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundColor(AppColors.textCharcoal)
                         .multilineTextAlignment(.center)
-                    
-                    Text("This helps us personalize your meal plans")
+                    Text("Age is used to calculate your calories")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
                         .multilineTextAlignment(.center)
                 }
-                
-                
-                //age input
-                VStack(spacing: 15) {
-                    TextField("Enter your age", text: $ageText)
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 200)
-                        .multilineTextAlignment(.center)
-                        .focused($isTextFieldFocused)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) {
-                                Spacer()
-                                Button("Done") {
-                                    isTextFieldFocused = false
-                                }
-                                .foregroundColor(AppColors.primaryOrange)
-                            }
-                        }
-                        .onChange(of: ageText) {
-                            if let age = Int(ageText) {
-                                onboardingData.age = age
-                            }
-                        }
+                .padding(.horizontal, 24)
+                Picker("Age", selection: $selectedAge) {
+                    ForEach(10...100, id: \.self) { value in
+                        Text("\(value)").tag(value)
+                    }
                 }
+                .pickerStyle(WheelPickerStyle())
+                .frame(height: 120)
                 
                 
                 Spacer()
@@ -74,38 +54,24 @@ struct AgeInputView: View {
                 
                 //continue button
                 Button(action: {
-                    isTextFieldFocused = false // Dismiss keyboard
-                    if onboardingData.age > 0 {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            currentPage = 2
-                        }
-                    }
+                    onboardingData.age = selectedAge
+                    currentPage += 1
                 }) {
                     Text("Continue")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(
-                            onboardingData.age > 0
-                                ? AppColors.primaryOrange
-                                : Color.gray.opacity(0.5)
-                        )
+                        .background(AppColors.primaryOrange)
                         .cornerRadius(12)
                 }
-                .disabled(onboardingData.age <= 0)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
                 
             }
         }
-        .onTapGesture {
-            isTextFieldFocused = false // Dismiss keyboard when tapping outside
-        }
         .onAppear {
-            if onboardingData.age > 0 {
-                ageText = String(onboardingData.age)
-            }
+            selectedAge = onboardingData.age > 0 ? onboardingData.age : 25
         }
     }
 }

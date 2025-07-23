@@ -23,6 +23,10 @@ class PlanViewModel: ObservableObject {
     @Published var isLoadingTemplates = false
     @Published var templateErrorMessage: String?
     
+    // MARK: - AI-Generated Meal Plans
+    /// Holds all AI-generated meal plans (local only)
+    @Published var aiGeneratedPlans: [MealPlan] = []
+    
     private let supabaseManager = SupabaseManager.shared
     private var fetchTask: Task<Void, Never>?
 
@@ -465,6 +469,33 @@ class PlanViewModel: ObservableObject {
         }
         
         return upcomingMeals
+    }
+    
+    // MARK: - AI-Generated Plan Management
+    /// Loads AI-generated plans from UserDefaults
+    func loadAIGeneratedPlans() {
+        if let data = UserDefaults.standard.data(forKey: "AIGeneratedPlans"),
+           let plans = try? JSONDecoder().decode([MealPlan].self, from: data) {
+            aiGeneratedPlans = plans
+        }
+    }
+    /// Saves AI-generated plans to UserDefaults
+    func saveAIGeneratedPlans() {
+        if let data = try? JSONEncoder().encode(aiGeneratedPlans) {
+            UserDefaults.standard.set(data, forKey: "AIGeneratedPlans")
+        }
+    }
+    /// Adds a new AI-generated plan and persists it
+    func addAIGeneratedPlan(_ plan: MealPlan) {
+        var aiPlan = plan
+        aiPlan.isAIGenerated = true
+        aiGeneratedPlans.append(aiPlan)
+        saveAIGeneratedPlans()
+    }
+    
+    // Load AI-generated plans on initialization
+    init() {
+        loadAIGeneratedPlans()
     }
 }
 

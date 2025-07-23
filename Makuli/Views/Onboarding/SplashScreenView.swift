@@ -54,8 +54,10 @@ struct SplashScreenView: View {
                     opacity = 1.0
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea()
         }
-        .background(Color.white)
+        .background(Color.white.ignoresSafeArea())
     }
 }
 

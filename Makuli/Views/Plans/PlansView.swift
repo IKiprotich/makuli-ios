@@ -33,6 +33,24 @@ struct PlansView: View {
                         }
                     }
                     
+                    // --- AI-Generated Meal Plans Section ---
+                    if !viewModel.aiGeneratedPlans.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("AI-Generated Meal Plans")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(AppColors.textCharcoal)
+                                .padding(.horizontal, 20)
+                            LazyVStack(alignment: .leading, spacing: 16) {
+                                ForEach(viewModel.aiGeneratedPlans) { plan in
+                                    AIGeneratedPlanRow(plan: plan)
+                                        .padding(.horizontal, 20)
+                                }
+                            }
+                        }
+                    }
+                    // --- End AI-Generated Meal Plans Section ---
+                    
                     // Previous plans section
                     previousPlansSection
                 }
@@ -239,6 +257,32 @@ extension PlansView {
                 }
             }
         }
+    }
+}
+
+// MARK: - Row for AI-Generated Meal Plans
+struct AIGeneratedPlanRow: View {
+    let plan: MealPlan
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "sparkles")
+                .foregroundColor(AppColors.primaryOrange)
+                .font(.title2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("AI Plan: \(plan.allDays.first ?? "Week")")
+                    .font(.headline)
+                    .foregroundColor(AppColors.textCharcoal)
+                Text("Meals: \(plan.totalMealCount)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+        .padding(12)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
     }
 }
 

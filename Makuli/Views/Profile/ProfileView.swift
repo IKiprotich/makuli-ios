@@ -386,22 +386,52 @@ extension ProfileView {
     
     // MARK: - Account Actions Section
     private var accountActionsSection: some View {
-        VStack(spacing: 12) {
-            Button("Log Out") {
-                showingLogoutAlert = true
+        VStack(spacing: 8) {
+            Button(action: handleEditProfile) {
+                HStack {
+                    Image(systemName: "pencil")
+                    Text("Edit Profile")
+                }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Color(.systemBackground))
-            .foregroundColor(.red)
-            .cornerRadius(12)
-            .fontWeight(.medium)
-            
-            Button("Delete Account") {
-                showingDeleteAlert = true
+            .font(.subheadline)
+            .foregroundColor(.primary)
+            .padding(.vertical, 8)
+            Button(action: handleUpdatePreferences) {
+                HStack {
+                    Image(systemName: "slider.horizontal.3")
+                    Text("Update Preferences")
+                }
+            }
+            .font(.subheadline)
+            .foregroundColor(.primary)
+            .padding(.vertical, 8)
+            Button(action: handleLogout) {
+                HStack {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                    Text("Log Out")
+                }
             }
             .font(.subheadline)
             .foregroundColor(.red)
+            .padding(.vertical, 8)
+            Button(action: handleDeleteAccount) {
+                HStack {
+                    Image(systemName: "trash")
+                    Text("Delete Account")
+                }
+            }
+            .font(.subheadline)
+            .foregroundColor(.red)
+            .padding(.vertical, 8)
+            // Reset Onboarding Button for testing
+            Button(action: handleResetOnboarding) {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Reset Onboarding (Test)")
+                }
+            }
+            .font(.subheadline)
+            .foregroundColor(AppColors.primaryOrange)
             .padding(.vertical, 8)
         }
     }
@@ -488,7 +518,40 @@ extension ProfileView {
         // API call to delete user data, clear local storage
     }
 
-    
+    /// Handles the reset onboarding action (for testing)
+    private func handleResetOnboarding() {
+        Logger.debug("Reset Onboarding tapped")
+        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+        // Recreate the user with hasCompletedOnboarding: false
+        if let user = authViewModel.user {
+            let resetUser = User(
+                id: user.id,
+                email: user.email,
+                fullName: user.fullName,
+                profileImageUrl: user.profileImageUrl,
+                age: user.age,
+                gender: user.gender,
+                height: user.height,
+                weight: user.weight,
+                activityLevel: user.activityLevel,
+                fitnessGoal: user.fitnessGoal,
+                dietaryPreferences: user.dietaryPreferences,
+                budgetRange: user.budgetRange,
+                preferredCuisines: user.preferredCuisines,
+                cookingSkillLevel: user.cookingSkillLevel,
+                preferredPrepTime: user.preferredPrepTime,
+                preferredServings: user.preferredServings,
+                allergies: user.allergies,
+                favoriteIngredients: user.favoriteIngredients,
+                dislikedIngredients: user.dislikedIngredients,
+                hasCompletedOnboarding: false,
+                createdAt: user.createdAt,
+                updatedAt: Date()
+            )
+            authViewModel.user = resetUser
+        }
+        // Optionally, update backend profile as well if needed
+    }
     
     
 }

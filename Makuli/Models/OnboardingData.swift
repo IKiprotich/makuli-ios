@@ -114,6 +114,24 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     /// Timestamp when the onboarding data was last updated
     var updatedAt: Date
     
+    /// User's selected onboarding goals (e.g., ["Plan my meals", "Eat healthy"])
+    var onboardingGoals: [String]
+    
+    /// User's main food preference (Flexible, Vegetarian, Vegan, Pescatarian)
+    var foodPreference: String
+    
+    /// User's disliked cuisine types (e.g., ["Mexican", "Thai"])
+    var dislikedCuisines: [String]
+    
+    /// User's pantry status (Basic, Average, Well-stocked)
+    var pantryStatus: String
+    
+    /// User's selected avatar emoji
+    var avatarEmoji: String
+    
+    /// User's explicit daily calorie goal (optional, can override calculated value)
+    var calorieGoal: Int?
+    
     // MARK: - Coding Keys
     
     enum CodingKeys: String, CodingKey {
@@ -146,6 +164,12 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         case totalSteps = "total_steps"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+        case onboardingGoals = "onboarding_goals"
+        case foodPreference = "food_preference"
+        case dislikedCuisines = "disliked_cuisines"
+        case pantryStatus = "pantry_status"
+        case avatarEmoji = "avatar_emoji"
+        case calorieGoal = "calorie_goal"
     }
     
     // MARK: - Custom Decoder
@@ -180,6 +204,13 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
         currentStep = try container.decode(Int.self, forKey: .currentStep)
         totalSteps = try container.decode(Int.self, forKey: .totalSteps)
+        
+        onboardingGoals = (try? container.decode([String].self, forKey: .onboardingGoals)) ?? []
+        foodPreference = (try? container.decode(String.self, forKey: .foodPreference)) ?? "Flexible"
+        dislikedCuisines = (try? container.decode([String].self, forKey: .dislikedCuisines)) ?? []
+        pantryStatus = (try? container.decode(String.self, forKey: .pantryStatus)) ?? "Basic"
+        avatarEmoji = (try? container.decode(String.self, forKey: .avatarEmoji)) ?? ""
+        calorieGoal = try? container.decodeIfPresent(Int.self, forKey: .calorieGoal)
         
         // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
@@ -233,8 +264,14 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
      *   - totalSteps: Total number of steps
      *   - createdAt: Creation timestamp
      *   - updatedAt: Last update timestamp
+     *   - onboardingGoals: User's selected onboarding goals
+     *   - foodPreference: User's main food preference
+     *   - dislikedCuisines: User's disliked cuisine types
+     *   - pantryStatus: User's pantry status
+     *   - avatarEmoji: User's selected avatar emoji
+     *   - calorieGoal: User's explicit daily calorie goal
      */
-    init(id: String, userId: String, age: Int, gender: String, height: Double, weight: Double, activityLevel: String, fitnessGoal: String, dietaryPreferences: [String], budgetRange: String, preferredCuisines: [String], cookingSkillLevel: String, preferredPrepTime: Int, preferredServings: Int, allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], includeMealPrep: Bool, includeShoppingList: Bool, includeNutritionInfo: Bool, rotateMeals: Bool, includeLeftovers: Bool, preferredComplexity: String, additionalNotes: String?, isCompleted: Bool, currentStep: Int, totalSteps: Int, createdAt: Date, updatedAt: Date) {
+    init(id: String, userId: String, age: Int, gender: String, height: Double, weight: Double, activityLevel: String, fitnessGoal: String, dietaryPreferences: [String], budgetRange: String, preferredCuisines: [String], cookingSkillLevel: String, preferredPrepTime: Int, preferredServings: Int, allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], includeMealPrep: Bool, includeShoppingList: Bool, includeNutritionInfo: Bool, rotateMeals: Bool, includeLeftovers: Bool, preferredComplexity: String, additionalNotes: String?, isCompleted: Bool, currentStep: Int, totalSteps: Int, createdAt: Date, updatedAt: Date, onboardingGoals: [String] = [], foodPreference: String = "Flexible", dislikedCuisines: [String] = [], pantryStatus: String = "Basic", avatarEmoji: String = "", calorieGoal: Int? = nil) {
         self.id = id
         self.userId = userId
         self.age = age
@@ -264,6 +301,12 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         self.totalSteps = totalSteps
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.onboardingGoals = onboardingGoals
+        self.foodPreference = foodPreference
+        self.dislikedCuisines = dislikedCuisines
+        self.pantryStatus = pantryStatus
+        self.avatarEmoji = avatarEmoji
+        self.calorieGoal = calorieGoal
     }
     
     // MARK: - Computed Properties

@@ -14,7 +14,7 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    private let totalPages = 7
+    private let totalPages = 14 // Decremented by 1 since cuisine step is removed
     
     init() {
         // Initialize with default values for onboarding
@@ -57,43 +57,77 @@ struct OnboardingView: View {
             TabView(selection: $currentPage) {
                 SplashScreenView()
                     .tag(0)
-                
                 AgeInputView(
                     onboardingData: onboardingData,
                     currentPage: $currentPage
                 )
                 .tag(1)
-                
                 GenderSelectionView(
                     onboardingData: onboardingData,
                     currentPage: $currentPage
                 )
                 .tag(2)
-                
                 GoalSelectionView(
                     onboardingData: onboardingData,
                     currentPage: $currentPage
                 )
                 .tag(3)
-                
                 BudgetInputView(
                     onboardingData: onboardingData,
                     currentPage: $currentPage
                 )
                 .tag(4)
-                
                 DietPreferenceView(
                     onboardingData: onboardingData,
                     currentPage: $currentPage
                 )
                 .tag(5)
-                
-                StartPlanView(
+                AllergiesView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(6)
+                DislikesView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(7)
+                EnergyNeedsView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(8)
+                WeightInputView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(9)
+                HeightInputView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(10)
+                CookingSkillView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(11)
+                PantryStatusView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(12)
+                AvatarSelectionView(
+                    onboardingData: onboardingData,
+                    currentPage: $currentPage
+                )
+                .tag(13)
+                PlanSummaryView(
                     onboardingData: onboardingData,
                     onboardingViewModel: onboardingViewModel,
                     authViewModel: authViewModel
                 )
-                .tag(6)
+                .tag(14)
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .navigationBarHidden(true)
