@@ -11,18 +11,18 @@ struct AgeInputView: View {
     
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     @State private var selectedAge: Int = 25
     
     
     var body: some View {
         ZStack {
             AppColors.bgCream
-                .ignoresSafeArea()
             
             VStack(spacing: 30) {
                 
                 //progress indicator
-                ProgressView(value: 1, total: 14)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -70,6 +70,7 @@ struct AgeInputView: View {
                 
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             selectedAge = onboardingData.age > 0 ? onboardingData.age : 25
         }
@@ -109,6 +110,7 @@ struct AgeInputView: View {
             createdAt: Date(),
             updatedAt: Date()
         ),
-        currentPage: .constant(1)
+        currentPage: .constant(1),
+        totalPages: 7
     )
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct BudgetInputView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let budgetOptions = [
         ("$50 - $100", "Budget-friendly meals", "dollarsign.circle.fill"),
@@ -13,11 +14,11 @@ struct BudgetInputView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             
             VStack(spacing: 30) {
                 // Progress bar
-                ProgressView(value: 5, total: 7)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -111,6 +112,7 @@ struct BudgetInputView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 }
 
@@ -147,6 +149,7 @@ struct BudgetInputView: View {
             createdAt: Date(),
             updatedAt: Date()
         ),
-        currentPage: .constant(2)
+        currentPage: .constant(2),
+        totalPages: 7
     )
 }

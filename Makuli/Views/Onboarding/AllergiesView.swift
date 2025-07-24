@@ -3,6 +3,8 @@ import SwiftUI
 struct AllergiesView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
+    @State private var selectedAllergies: [String] = []
     
     private let allergyOptions = [
         "Dairy", "Egg", "Fish", "Flax", "Gluten", "Meat", "Peanuts", "Sesame", "Shellfish", "Soya", "Tree nuts", "Celery", "Lupin", "Mustard", "Sulfites"
@@ -10,9 +12,9 @@ struct AllergiesView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 6, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -30,12 +32,17 @@ struct AllergiesView: View {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         ForEach(allergyOptions, id: \.self) { allergy in
-                            let isSelected = onboardingData.allergies.contains(allergy)
+                            let isSelected = selectedAllergies.contains(allergy)
                             Button(action: {
+                                // 1. Update UI state instantly
                                 if isSelected {
-                                    onboardingData.allergies.removeAll { $0 == allergy }
+                                    selectedAllergies.removeAll { $0 == allergy }
                                 } else {
-                                    onboardingData.allergies.append(allergy)
+                                    selectedAllergies.append(allergy)
+                                }
+                                // 2. Update shared model in background
+                                DispatchQueue.main.async {
+                                    onboardingData.allergies = selectedAllergies
                                 }
                             }) {
                                 Text(allergy)
@@ -56,7 +63,12 @@ struct AllergiesView: View {
                 }
                 Spacer()
                 Button(action: {
+                    // 1. Advance page immediately
                     currentPage += 1
+                    // 2. Save to onboardingData in background
+                    DispatchQueue.main.async {
+                        onboardingData.allergies = selectedAllergies
+                    }
                 }) {
                     Text("Continue")
                         .font(.headline)
@@ -69,6 +81,10 @@ struct AllergiesView: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
             }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            selectedAllergies = onboardingData.allergies
         }
     }
 } 

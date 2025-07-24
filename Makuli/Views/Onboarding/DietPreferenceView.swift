@@ -3,6 +3,7 @@ import SwiftUI
 struct DietPreferenceView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let dietOptions = [
         ("No restrictions", "leaf.fill"),
@@ -15,13 +16,15 @@ struct DietPreferenceView: View {
         ("Dairy-free", "drop.fill")
     ]
     
+    @State private var selectedDiets: [String] = []
+    
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             
             VStack(spacing: 30) {
                 // Progress bar
-                ProgressView(value: 6, total: 7)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -47,13 +50,18 @@ struct DietPreferenceView: View {
                         GridItem(.flexible())
                     ], spacing: 15) {
                         ForEach(dietOptions, id: \.0) { option in
-                            let isSelected = onboardingData.dietaryPreferences.contains(option.0)
+                            let isSelected = selectedDiets.contains(option.0)
                             
                             Button(action: {
+                                // 1. Update UI state instantly
                                 if isSelected {
-                                    onboardingData.dietaryPreferences.removeAll { $0 == option.0 }
+                                    selectedDiets.removeAll { $0 == option.0 }
                                 } else {
-                                    onboardingData.dietaryPreferences.append(option.0)
+                                    selectedDiets.append(option.0)
+                                }
+                                // 2. Update shared model in background
+                                DispatchQueue.main.async {
+                                    onboardingData.dietaryPreferences = selectedDiets
                                 }
                             }) {
                                 VStack(spacing: 10) {
@@ -97,8 +105,11 @@ struct DietPreferenceView: View {
                 
                 // Continue button
                 Button(action: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        currentPage = 6
+                    // 1. Advance page immediately
+                    currentPage += 1
+                    // 2. Save to onboardingData in background
+                    DispatchQueue.main.async {
+                        onboardingData.dietaryPreferences = selectedDiets
                     }
                 }) {
                     Text("Continue")
@@ -112,6 +123,10 @@ struct DietPreferenceView: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
             }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            selectedDiets = onboardingData.dietaryPreferences
         }
     }
 }
@@ -149,6 +164,7 @@ struct DietPreferenceView: View {
             createdAt: Date(),
             updatedAt: Date()
         ),
-        currentPage: .constant(3)
+        currentPage: .constant(3),
+        totalPages: 7
     )
 }

@@ -15,7 +15,6 @@ struct StartPlanView: View {
     var body: some View {
         ZStack {
             AppColors.bgCream
-                .ignoresSafeArea()
             
             VStack(spacing: 40) {
                 // Progress indicator
@@ -119,6 +118,7 @@ struct StartPlanView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 }
 

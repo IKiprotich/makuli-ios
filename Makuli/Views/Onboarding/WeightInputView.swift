@@ -3,12 +3,13 @@ import SwiftUI
 struct WeightInputView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     @State private var selectedWeight: Double = 75.0
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 9, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -47,6 +48,7 @@ struct WeightInputView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             selectedWeight = onboardingData.weight > 0 ? onboardingData.weight : 75.0
         }

@@ -3,6 +3,7 @@ import SwiftUI
 struct PantryStatusView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let pantryOptions = [
         ("Basic", "I only have salt & pepper, olive oil"),
@@ -12,9 +13,9 @@ struct PantryStatusView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 13, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -74,5 +75,6 @@ struct PantryStatusView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 } 

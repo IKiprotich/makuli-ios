@@ -3,12 +3,13 @@ import SwiftUI
 struct HeightInputView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     @State private var selectedHeight: Double = 170.0
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 10, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -47,6 +48,7 @@ struct HeightInputView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             selectedHeight = onboardingData.height > 0 ? onboardingData.height : 170.0
         }

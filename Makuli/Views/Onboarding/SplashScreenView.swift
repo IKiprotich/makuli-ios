@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SplashScreenView: View {
+    @Binding var currentPage: Int
+    let totalPages: Int
     @State private var scale = 0.8
     @State private var opacity = 0.6
     
@@ -22,10 +24,13 @@ struct SplashScreenView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 30) {
-                // App Logo/Icon
-                Image(systemName: "fork.knife.circle.fill")
-                    .font(.system(size: 100))
-                    .foregroundColor(.white)
+                // App Logo
+                Image("AppLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 120, height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+                    .shadow(radius: 8)
                 
                 // App Name
                 Text("Buildplate")
@@ -54,13 +59,11 @@ struct SplashScreenView: View {
                     opacity = 1.0
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea()
         }
-        .background(Color.white.ignoresSafeArea())
+        .ignoresSafeArea()
     }
 }
 
 #Preview {
-    SplashScreenView()
+    SplashScreenView(currentPage: .constant(0), totalPages: 14)
 }

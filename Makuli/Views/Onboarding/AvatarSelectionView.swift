@@ -3,6 +3,7 @@ import SwiftUI
 struct AvatarSelectionView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let emojiOptions = [
         "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐸", "🐵", "🦉", "🐙"
@@ -10,9 +11,9 @@ struct AvatarSelectionView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 13, total: 14)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -75,5 +76,6 @@ struct AvatarSelectionView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 } 

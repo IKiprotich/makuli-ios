@@ -3,6 +3,7 @@ import SwiftUI
 struct CookingSkillView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let skillOptions = [
         ("Novice", "I think I know where the microwave is"),
@@ -13,9 +14,9 @@ struct CookingSkillView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 12, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -75,5 +76,6 @@ struct CookingSkillView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 } 

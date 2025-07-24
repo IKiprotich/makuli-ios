@@ -10,17 +10,16 @@ import SwiftUI
 struct GenderSelectionView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     
     private let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
     
     var body: some View {
         ZStack {
             AppColors.bgCream
-                .ignoresSafeArea()
-            
             VStack(spacing: 30) {
                 // progress indicator
-                ProgressView(value: 3, total: 7)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -110,6 +109,7 @@ struct GenderSelectionView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 }
 
@@ -146,6 +146,7 @@ struct GenderSelectionView: View {
             createdAt: Date(),
             updatedAt: Date()
         ),
-        currentPage: .constant(4)
+        currentPage: .constant(4),
+        totalPages: 7
     )
 }

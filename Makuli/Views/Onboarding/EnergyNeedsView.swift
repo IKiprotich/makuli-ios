@@ -3,11 +3,12 @@ import SwiftUI
 struct EnergyNeedsView: View {
     @ObservedObject var onboardingData: OnboardingData
     @Binding var currentPage: Int
+    let totalPages: Int
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 8, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -41,5 +42,6 @@ struct EnergyNeedsView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 } 

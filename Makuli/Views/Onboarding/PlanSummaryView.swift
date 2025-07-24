@@ -4,11 +4,13 @@ struct PlanSummaryView: View {
     @ObservedObject var onboardingData: OnboardingData
     @ObservedObject var onboardingViewModel: OnboardingViewModel
     @ObservedObject var authViewModel: AuthViewModel
+    @Binding var currentPage: Int
+    let totalPages: Int
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.bgCream
             VStack(spacing: 30) {
-                ProgressView(value: 15, total: 15)
+                ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
@@ -46,5 +48,6 @@ struct PlanSummaryView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea()
     }
 } 
