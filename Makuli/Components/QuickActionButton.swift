@@ -14,27 +14,50 @@ struct QuickActionButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action){
-            
-            HStack(spacing: 8){
-                Image(systemName: icon)
-                    .font(.title3)
+        Button(action: action) {
+            VStack(spacing: 12) {
+                // Icon container
+                ZStack {
+                    Circle()
+                        .fill(AppColors.primaryOrange.opacity(0.1))
+                        .frame(width: 56, height: 56)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(AppColors.primaryOrange)
+                }
                 
+                // Title
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(AppColors.textCharcoal)
+                    .multilineTextAlignment(.center)
             }
-            .foregroundColor(AppColors.textCharcoal)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(AppColors.bgCream)
-            .cornerRadius(12)
-            
+            .padding(20)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(AppColors.bgCream)
+                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+            )
         }
-        .frame(maxWidth: .infinity)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
 #Preview {
-    //QuickActionButton()
+    HStack(spacing: 16) {
+        QuickActionButton(
+            icon: "list.bullet",
+            title: "Grocery List",
+            action: {}
+        )
+        
+        QuickActionButton(
+            icon: "magnifyingglass",
+            title: "Explore Recipes",
+            action: {}
+        )
+    }
+    .padding()
 }
