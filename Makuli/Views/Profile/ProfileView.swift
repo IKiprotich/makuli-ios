@@ -99,6 +99,7 @@ struct ProfileView: View {
         } message: {
             Text("This action cannot be undone. All your data will be permanently deleted.")
         }
+
         .sheet(isPresented: $showingDeveloperPanel) {
             DeveloperPanelView()
         }

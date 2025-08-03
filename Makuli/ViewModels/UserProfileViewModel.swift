@@ -10,6 +10,9 @@ class UserProfileViewModel: ObservableObject {
     @Published var uploadError: String? = nil
     
     private var fetchTask: Task<Void, Never>?
+    
+    // Notification name for profile updates
+    static let profileUpdatedNotification = Notification.Name("ProfileUpdated")
 
     func fetchProfile() async {
         // Don't fetch if we already have a profile and no error
@@ -33,6 +36,29 @@ class UserProfileViewModel: ObservableObject {
         profile = nil
         error = nil
         await fetchProfile()
+    }
+    
+    // Method to notify other views that profile has been updated
+    func notifyProfileUpdated() {
+        NotificationCenter.default.post(name: Self.profileUpdatedNotification, object: nil)
+    }
+    
+    // Method to listen for profile updates
+    func startListeningForUpdates() {
+        NotificationCenter.default.addObserver(
+            forName: Self.profileUpdatedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                await self?.forceRefreshProfile()
+            }
+        }
+    }
+    
+    // Method to stop listening for updates
+    nonisolated func stopListeningForUpdates() {
+        NotificationCenter.default.removeObserver(self, name: Self.profileUpdatedNotification, object: nil)
     }
     
     private func performFetch() async {
@@ -81,6 +107,13 @@ class UserProfileViewModel: ObservableObject {
             let imageUrl = try await SupabaseManager.shared.uploadProfileImage(userId: userId, imageData: data)
             profile?.profileImageUrl = imageUrl
             try await SupabaseManager.shared.updateUserProfileImageUrl(userId: userId, imageUrl: imageUrl)
+            
+            // Force refresh the profile data to ensure all views get the updated image URL
+            await forceRefreshProfile()
+            
+            // Notify other views that profile has been updated
+            notifyProfileUpdated()
+            
             uploadSuccess = true
             uploadError = nil
         } catch {
@@ -92,5 +125,6 @@ class UserProfileViewModel: ObservableObject {
     
     deinit {
         fetchTask?.cancel()
+        stopListeningForUpdates()
     }
 } 
