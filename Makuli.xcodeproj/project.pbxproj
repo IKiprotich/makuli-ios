@@ -430,6 +430,7 @@
 		};
 		0A1DB21E2E0DDCFC00F82D54 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 0A1DB1922E0DCD3800F82D54 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
 		};
 		0AF3527D2E0E97E800CB84F1 /* GoogleSignIn */ = {
