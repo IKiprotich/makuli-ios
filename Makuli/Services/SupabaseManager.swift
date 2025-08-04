@@ -194,6 +194,89 @@ class SupabaseManager: ObservableObject {
         }, context: "createMealPlanFromTemplate")
     }
     
+    /// Create a new meal plan manually with selected meals
+    func createMealPlanManually(
+        userId: String,
+        weekStart: Date,
+        weekEnd: Date,
+        title: String,
+        selectedMeals: [String: [String: Bool]]
+    ) async throws -> Plan {
+        return try await performDatabaseOperation({
+            // First create the plan
+            let planData: [String: String] = [
+                "user_id": userId,
+                "title": title,
+                "week_start": ISO8601DateFormatter().string(from: weekStart),
+                "week_end": ISO8601DateFormatter().string(from: weekEnd),
+                "generation_method": "manual"
+            ]
+            
+            let planResponse = try await client
+                .from("plans")
+                .insert(planData)
+                .select("*")
+                .single()
+                .execute()
+            
+            let plan = try JSONDecoder().decode(Plan.self, from: planResponse.data)
+            
+            // Then create plan recipes for each selected meal
+            let calendar = Calendar.current
+            var currentDate = weekStart
+            
+            while currentDate <= weekEnd {
+                let dateKey = formatDateKey(currentDate)
+                if let dayMeals = selectedMeals[dateKey] {
+                    for (mealType, isSelected) in dayMeals {
+                        if isSelected {
+                            let dayName = formatDayName(currentDate)
+                            let mealName = getDefaultMealName(for: mealType)
+                            
+                            // Calculate day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+                            let weekday = calendar.component(.weekday, from: currentDate)
+                            let adjustedDayOfWeek = weekday - 1 // Convert to 0-based
+                            
+                            struct PlanRecipeInsert: Codable {
+                                let plan_id: String
+                                let day_of_week: Int
+                                let meal_type: String
+                                let day: String
+                                let position: Int
+                                let custom_meal_name: String
+                                let custom_ingredients: [String]
+                                let custom_instructions: [String]
+                                let custom_cook_time: Int
+                            }
+                            
+                            let planRecipeData = PlanRecipeInsert(
+                                plan_id: plan.id,
+                                day_of_week: adjustedDayOfWeek,
+                                meal_type: mealType.lowercased(),
+                                day: dayName,
+                                position: getMealPosition(for: mealType),
+                                custom_meal_name: mealName,
+                                custom_ingredients: getDefaultIngredients(for: mealType),
+                                custom_instructions: getDefaultInstructions(for: mealType),
+                                custom_cook_time: getDefaultCookTime(for: mealType)
+                            )
+                            
+                            try await client
+                                .from("plan_recipes")
+                                .insert(planRecipeData)
+                                .execute()
+                        }
+                    }
+                }
+                
+                currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+            }
+            
+            return plan
+            
+        }, context: "createMealPlanManually")
+    }
+    
     /// Fetch user's meal plans
     func fetchUserPlans(userId: String) async throws -> [Plan] {
         return try await performDatabaseOperation({
@@ -419,6 +502,85 @@ class SupabaseManager: ObservableObject {
         if ingredient.contains("rice") { return "🍚" }
         
         return "🛒"
+    }
+    
+    // MARK: - Helper Methods for Manual Plan Creation
+    
+    private func formatDateKey(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDayName(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: date)
+    }
+    
+    private func getMealPosition(for mealType: String) -> Int {
+        switch mealType.lowercased() {
+        case "breakfast": return 0
+        case "lunch": return 1
+        case "dinner": return 2
+        case "snack": return 3
+        default: return 0
+        }
+    }
+    
+    private func getDefaultMealName(for mealType: String) -> String {
+        switch mealType.lowercased() {
+        case "breakfast":
+            return "Healthy Breakfast Bowl"
+        case "lunch":
+            return "Nutritious Lunch"
+        case "dinner":
+            return "Balanced Dinner"
+        case "snack":
+            return "Healthy Snack"
+        default:
+            return "Meal"
+        }
+    }
+    
+    private func getDefaultIngredients(for mealType: String) -> [String] {
+        switch mealType.lowercased() {
+        case "breakfast":
+            return ["eggs", "whole grain bread", "avocado", "tomatoes", "olive oil"]
+        case "lunch":
+            return ["quinoa", "mixed vegetables", "chicken breast", "olive oil", "herbs"]
+        case "dinner":
+            return ["salmon fillet", "brown rice", "broccoli", "lemon", "garlic"]
+        case "snack":
+            return ["almonds", "apple", "greek yogurt"]
+        default:
+            return ["ingredients"]
+        }
+    }
+    
+    private func getDefaultInstructions(for mealType: String) -> [String] {
+        switch mealType.lowercased() {
+        case "breakfast":
+            return ["Prepare ingredients", "Cook eggs to preference", "Toast bread", "Assemble bowl"]
+        case "lunch":
+            return ["Cook quinoa", "Prepare vegetables", "Cook chicken", "Combine ingredients"]
+        case "dinner":
+            return ["Season salmon", "Cook rice", "Steam broccoli", "Plate and serve"]
+        case "snack":
+            return ["Wash apple", "Portion almonds", "Serve with yogurt"]
+        default:
+            return ["Prepare meal"]
+        }
+    }
+    
+    private func getDefaultCookTime(for mealType: String) -> Int {
+        switch mealType.lowercased() {
+        case "breakfast": return 15
+        case "lunch": return 25
+        case "dinner": return 30
+        case "snack": return 5
+        default: return 20
+        }
     }
 }
 
