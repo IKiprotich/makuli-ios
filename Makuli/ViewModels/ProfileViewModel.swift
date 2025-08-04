@@ -499,12 +499,347 @@ class ProfileViewModel: ObservableObject {
             // Clear local state
             self.profile = nil
             
-            Logger.info("Successfully deleted user account")
             isUpdating = false
             return true
             
         } catch {
             Logger.error("Failed to delete account: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    // MARK: - Preference Update Methods
+    
+    /// Updates user's fitness goal
+    func updateGoal(_ newGoal: String) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating goal to: \(newGoal)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            currentProfile.goal = newGoal
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Goal updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update goal: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's budget preference
+    func updateBudget(_ newBudget: String) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating budget to: \(newBudget)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            currentProfile.budget = newBudget
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Budget updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update budget: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's diet preference
+    func updateDietPreference(_ newDiet: String) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating diet preference to: \(newDiet)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            currentProfile.diet = newDiet
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Diet preference updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update diet preference: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's cooking skill level
+    func updateCookingSkill(_ newSkill: String) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating cooking skill to: \(newSkill)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update cooking preferences
+            let updatedCookingPreferences = CookingPreferences(
+                skillLevel: newSkill,
+                preferredCookingTime: currentProfile.cookingPreferences?.preferredCookingTime ?? 30,
+                useAppliances: currentProfile.cookingPreferences?.useAppliances ?? true,
+                preferredMethods: currentProfile.cookingPreferences?.preferredMethods ?? [],
+                usePreMadeIngredients: currentProfile.cookingPreferences?.usePreMadeIngredients ?? false,
+                batchCooking: currentProfile.cookingPreferences?.batchCooking ?? false
+            )
+            
+            currentProfile.cookingPreferences = updatedCookingPreferences
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Cooking skill updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update cooking skill: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's preferred cuisines
+    func updatePreferredCuisines(_ newCuisines: [String]) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating preferred cuisines to: \(newCuisines)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update meal planning preferences
+            let updatedMealPlanningPreferences = MealPlanningPreferences(
+                mealsPerDay: currentProfile.mealPlanningPreferences?.mealsPerDay ?? 3,
+                preferredPrepTime: currentProfile.mealPlanningPreferences?.preferredPrepTime ?? 30,
+                includeSnacks: currentProfile.mealPlanningPreferences?.includeSnacks ?? true,
+                preferredCuisines: newCuisines,
+                rotateMeals: currentProfile.mealPlanningPreferences?.rotateMeals ?? true,
+                includeLeftovers: currentProfile.mealPlanningPreferences?.includeLeftovers ?? true,
+                preferredComplexity: currentProfile.mealPlanningPreferences?.preferredComplexity ?? "Medium"
+            )
+            
+            currentProfile.mealPlanningPreferences = updatedMealPlanningPreferences
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Preferred cuisines updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update preferred cuisines: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's disliked ingredients
+    func updateDislikedIngredients(_ newDislikes: [String]) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating disliked ingredients to: \(newDislikes)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update dietary preferences
+            let updatedDietaryPreferences = DietaryPreferences(
+                restrictions: currentProfile.dietaryPreferences?.restrictions ?? [],
+                allergies: currentProfile.dietaryPreferences?.allergies ?? [],
+                favoriteIngredients: currentProfile.dietaryPreferences?.favoriteIngredients ?? [],
+                dislikedIngredients: newDislikes,
+                avoidIngredients: currentProfile.dietaryPreferences?.avoidIngredients ?? [],
+                preferredCookingMethods: currentProfile.dietaryPreferences?.preferredCookingMethods ?? []
+            )
+            
+            currentProfile.dietaryPreferences = updatedDietaryPreferences
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Disliked ingredients updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update disliked ingredients: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's meals per day preference
+    func updateMealsPerDay(_ newMeals: Int) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating meals per day to: \(newMeals)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update meal planning preferences
+            let updatedMealPlanningPreferences = MealPlanningPreferences(
+                mealsPerDay: newMeals,
+                preferredPrepTime: currentProfile.mealPlanningPreferences?.preferredPrepTime ?? 30,
+                includeSnacks: currentProfile.mealPlanningPreferences?.includeSnacks ?? true,
+                preferredCuisines: currentProfile.mealPlanningPreferences?.preferredCuisines ?? [],
+                rotateMeals: currentProfile.mealPlanningPreferences?.rotateMeals ?? true,
+                includeLeftovers: currentProfile.mealPlanningPreferences?.includeLeftovers ?? true,
+                preferredComplexity: currentProfile.mealPlanningPreferences?.preferredComplexity ?? "Medium"
+            )
+            
+            currentProfile.mealPlanningPreferences = updatedMealPlanningPreferences
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Meals per day updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update meals per day: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's calorie target
+    func updateCalorieTarget(_ newCalories: Int) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating calorie target to: \(newCalories)")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update fitness goals
+            let updatedFitnessGoals = FitnessGoals(
+                targetWeight: currentProfile.fitnessGoals?.targetWeight,
+                targetCalories: newCalories,
+                targetProtein: currentProfile.fitnessGoals?.targetProtein,
+                targetCarbohydrates: currentProfile.fitnessGoals?.targetCarbohydrates,
+                targetFat: currentProfile.fitnessGoals?.targetFat,
+                weeklyWorkoutMinutes: currentProfile.fitnessGoals?.weeklyWorkoutMinutes,
+                targetStepsPerDay: currentProfile.fitnessGoals?.targetStepsPerDay
+            )
+            
+            currentProfile.fitnessGoals = updatedFitnessGoals
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Calorie target updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update calorie target: \(error)")
+            self.errorMessage = error.localizedDescription
+            isUpdating = false
+            return false
+        }
+    }
+    
+    /// Updates user's macro targets
+    func updateMacroTargets(protein: Int, carbs: Int, fat: Int) async -> Bool {
+        guard var currentProfile = profile else { return false }
+        
+        do {
+            Logger.info("Updating macro targets to: \(protein)%, \(carbs)%, \(fat)%")
+            
+            isUpdating = true
+            errorMessage = nil
+            
+            // Update fitness goals with macro percentages
+            let updatedFitnessGoals = FitnessGoals(
+                targetWeight: currentProfile.fitnessGoals?.targetWeight,
+                targetCalories: currentProfile.fitnessGoals?.targetCalories,
+                targetProtein: Double(protein),
+                targetCarbohydrates: Double(carbs),
+                targetFat: Double(fat),
+                weeklyWorkoutMinutes: currentProfile.fitnessGoals?.weeklyWorkoutMinutes,
+                targetStepsPerDay: currentProfile.fitnessGoals?.targetStepsPerDay
+            )
+            
+            currentProfile.fitnessGoals = updatedFitnessGoals
+            currentProfile.updatedAt = Date()
+            
+            try await supabaseManager.updateUserProfile(currentProfile)
+            
+            // Update local state
+            self.profile = currentProfile
+            self.successMessage = "Macro targets updated successfully"
+            
+            isUpdating = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to update macro targets: \(error)")
             self.errorMessage = error.localizedDescription
             isUpdating = false
             return false
