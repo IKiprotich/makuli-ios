@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainAppView: View {
     @StateObject private var authViewModel = AuthViewModel()
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         Group {
@@ -33,6 +34,7 @@ struct MainAppView: View {
             }
         }
         .environmentObject(authViewModel)
+        .environmentObject(themeManager)
         .onChange(of: authViewModel.user?.isOnboardingCompleted) { newValue in
             if let completed = newValue {
                 Logger.debug("Onboarding status changed: \(completed)")

@@ -8,10 +8,13 @@ import SwiftUI
 
 @main
 struct BuildplateApp: App {
+    @StateObject private var themeManager = ThemeManager.shared
+    
     var body: some Scene {
         WindowGroup {
             MainAppView()
-                .preferredColorScheme(.light)
+                .preferredColorScheme(themeManager.colorScheme)
+                .environmentObject(themeManager)
         }
     }
 }
