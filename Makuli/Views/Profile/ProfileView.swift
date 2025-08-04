@@ -9,25 +9,43 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
-    
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var mealReminders = false
-    @State private var darkMode = false
+    @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var profileViewModel = UserProfileViewModel()
+    @StateObject private var viewModel = ProfileViewModel()
+    
+    // Profile image selection
+    @State private var selectedItem: PhotosPickerItem?
+    @State private var selectedImageData: Data?
+    @State private var showCropper = false
+    @State private var imageToCrop: UIImage?
+    
+    // Alerts
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
-    @StateObject var viewModel = ProfileViewModel()
-    @StateObject private var profileViewModel = UserProfileViewModel()
+    @State private var showingImageUploadSuccess = false
+    @State private var showingImageUploadError = false
     
-    @State private var showingDeveloperPanel = false
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImageData: Data? = nil
-    @State private var showCropper = false
-    @State private var imageToCrop: UIImage? = nil
+    // Navigation sheets for preference modification
+    @State private var showingCalorieTarget = false
+    @State private var showingMacroTargets = false
+    @State private var showingDietPreference = false
+    @State private var showingDislikes = false
+    @State private var showingFavoriteCuisines = false
+    @State private var showingCookingSkills = false
+    @State private var showingMealsPerDay = false
+    @State private var showingGoal = false
+    @State private var showingBudget = false
+    
+    // App settings
+    @State private var mealReminders = true
+    @State private var pushNotifications = true
+    @State private var darkMode = false
     
     private var user: User {
         authViewModel.user ?? User(
-            id: "guest-id",
-            email: "guest@example.com",
+            id: "",
+            email: "",
             fullName: "Guest User",
             profileImageUrl: nil,
             age: 25,
@@ -54,38 +72,42 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 12) {
+                LazyVStack(spacing: 24) {
                     
-                    //header section
-                    profileHeader
+                    // Profile Header Section
+                    profileHeaderSection
                     
-                    //dietary preferences section
-                    dietaryPreferencesSection
+                    // Nutrition Preferences Section
+                    nutritionPreferencesSection
                     
-                    //subscription section
+                    // Meal Plan Preferences Section
+                    mealPlanPreferencesSection
+                    
+                    // Subscription Section
                     subscriptionSection
                     
-                    //app setting section
-                    appsettingsSection
+                    // App Settings Section
+                    appSettingsSection
                     
-                    //support and legal section
+                    // Support & Legal Section
                     supportLegalSection
                     
-                    //account actions
+                    // Account Actions Section
                     accountActionsSection
                     
-                    Spacer(minLength: 100)
+                    // Bottom spacing
+                    Spacer(minLength: 32)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle(Text("Profile"))
-            .navigationBarTitleDisplayMode(.inline)
+            .background(AppColors.getBackground(for: themeManager.colorScheme))
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.large)
         }
         .alert("Log Out", isPresented: $showingLogoutAlert){
             Button("Cancel", role: .cancel){}
-            Button("Log Out",role: .destructive){
+            Button("Log Out", role: .destructive){
                 handleLogout()
             }
         } message: {
@@ -99,48 +121,115 @@ struct ProfileView: View {
         } message: {
             Text("This action cannot be undone. All your data will be permanently deleted.")
         }
-
-        .sheet(isPresented: $showingDeveloperPanel) {
-            DeveloperPanelView()
+        .alert("Success", isPresented: .constant(viewModel.successMessage != nil)) {
+            Button("OK") {
+                viewModel.successMessage = nil
+            }
+        } message: {
+            Text(viewModel.successMessage ?? "")
+        }
+        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button("OK") {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
         }
         .task {
             await profileViewModel.fetchProfile()
         }
+        // Navigation sheets for preference modification
+        .sheet(isPresented: $showingCalorieTarget) {
+            CalorieTargetView(currentValue: profileViewModel.profile?.fitnessGoals?.targetCalories ?? 2200) { newValue in
+                handleCalorieTargetUpdate(newValue)
+            }
+        }
+        .sheet(isPresented: $showingMacroTargets) {
+            MacroTargetsView(
+                currentProtein: Int(profileViewModel.profile?.fitnessGoals?.targetProtein ?? 25),
+                currentCarbs: Int(profileViewModel.profile?.fitnessGoals?.targetCarbohydrates ?? 55),
+                currentFat: Int(profileViewModel.profile?.fitnessGoals?.targetFat ?? 20)
+            ) { protein, carbs, fat in
+                handleMacroTargetsUpdate(protein: protein, carbs: carbs, fat: fat)
+            }
+        }
+        .sheet(isPresented: $showingDietPreference) {
+            ProfileDietPreferenceView(currentPreference: profileViewModel.profile?.diet ?? user.dietaryPreferences.first ?? "Balanced") { newPreference in
+                handleDietPreferenceUpdate(newPreference)
+            }
+        }
+        .sheet(isPresented: $showingDislikes) {
+            ProfileDislikesView(currentDislikes: profileViewModel.profile?.dietaryPreferences?.dislikedIngredients ?? user.dislikedIngredients) { newDislikes in
+                handleDislikesUpdate(newDislikes)
+            }
+        }
+        .sheet(isPresented: $showingFavoriteCuisines) {
+            FavoriteCuisinesView(currentCuisines: profileViewModel.profile?.mealPlanningPreferences?.preferredCuisines ?? user.preferredCuisines) { newCuisines in
+                handleFavoriteCuisinesUpdate(newCuisines)
+            }
+        }
+        .sheet(isPresented: $showingCookingSkills) {
+            CookingSkillsView(currentSkill: profileViewModel.profile?.cookingPreferences?.skillLevel ?? user.cookingSkillLevel) { newSkill in
+                handleCookingSkillsUpdate(newSkill)
+            }
+        }
+        .sheet(isPresented: $showingMealsPerDay) {
+            MealsPerDayView(currentMeals: profileViewModel.profile?.mealPlanningPreferences?.mealsPerDay ?? user.preferredServings) { newMeals in
+                handleMealsPerDayUpdate(newMeals)
+            }
+        }
+        .sheet(isPresented: $showingGoal) {
+            GoalView(currentGoal: profileViewModel.profile?.goal ?? user.goal) { newGoal in
+                handleGoalUpdate(newGoal)
+            }
+        }
+        .sheet(isPresented: $showingBudget) {
+            BudgetView(currentBudget: profileViewModel.profile?.budget ?? user.budget) { newBudget in
+                handleBudgetUpdate(newBudget)
+            }
+        }
     }
 }
 
-
+// MARK: - ProfileView Extensions
 extension ProfileView {
     
-    //MARK: Profile header
-    private var profileHeader: some View {
-        VStack(spacing: 16) {
-            
-            //profile image
-            // Profile Image with overlay camera button
+    // MARK: - Profile Header Section
+    private var profileHeaderSection: some View {
+        VStack(spacing: 20) {
+            // Profile Image
             ZStack(alignment: .bottomTrailing) {
                 if let imageData = selectedImageData, let uiImage = UIImage(data: imageData) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 120, height: 120)
                         .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                 } else if let url = profileViewModel.profile?.profileImageUrl, let imageUrl = URL(string: url) {
                     AsyncImage(url: imageUrl) { image in
-                        image.resizable()
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
                     } placeholder: {
                         ProgressView()
+                            .frame(width: 120, height: 120)
                     }
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 100, height: 100)
+                    .frame(width: 120, height: 120)
                     .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                 } else {
                     Image(systemName: "person.crop.circle.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 120, height: 120)
+                        .foregroundColor(AppColors.primaryOrange.opacity(0.3))
+                        .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                 }
-
+                
                 PhotosPicker(
                     selection: $selectedItem,
                     matching: .images,
@@ -148,418 +237,517 @@ extension ProfileView {
                 ) {
                     ZStack {
                         Circle()
-                            .fill(Color.white)
-                            .frame(width: 32, height: 32)
-                            .shadow(radius: 2)
+                            .fill(AppColors.primaryOrange)
+                            .frame(width: 36, height: 36)
+                            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                         Image(systemName: "camera.fill")
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
                 .offset(x: 8, y: 8)
                 .onChange(of: selectedItem) { newItem in
                     Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data) {
-                            imageToCrop = uiImage
-                            showCropper = true
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            selectedImageData = data
+                            if let uiImage = UIImage(data: data) {
+                                imageToCrop = uiImage
+                                showCropper = true
+                            }
                         }
                     }
                 }
             }
-            .frame(width: 100, height: 100)
+            .frame(width: 120, height: 120)
             .sheet(isPresented: $showCropper) {
                 if let image = imageToCrop {
                     ImageCropperView(image: image) { croppedImage in
-                        if let croppedData = croppedImage.jpegData(compressionQuality: 0.9) {
-                            selectedImageData = croppedData
+                        if let imageData = croppedImage.jpegData(compressionQuality: 0.8) {
+                            selectedImageData = imageData
+                            // Upload the cropped image
                             Task {
-                                await profileViewModel.uploadProfileImage(data: croppedData)
+                                let success = await viewModel.uploadProfileImage(imageData, userId: user.id)
+                                if success {
+                                    showingImageUploadSuccess = true
+                                } else {
+                                    showingImageUploadError = true
+                                }
                             }
                         }
-                        showCropper = false
                     }
                 }
             }
-            .alert("Profile Picture Updated", isPresented: $profileViewModel.uploadSuccess) {
-                Button("OK", role: .cancel) { profileViewModel.uploadSuccess = false }
-            } message: {
-                Text("Your profile picture has been successfully uploaded.")
-            }
-            .alert("Upload Failed", isPresented: .constant(profileViewModel.uploadError != nil)) {
-                Button("OK", role: .cancel) { profileViewModel.uploadError = nil }
-            } message: {
-                Text(profileViewModel.uploadError ?? "Unknown error")
-            }
             
-            //user info
-            VStack(spacing: 4) {
+            // User Info
+            VStack(spacing: 12) {
                 if profileViewModel.isLoading {
                     ProgressView()
+                        .scaleEffect(1.2)
                 } else if let error = profileViewModel.error {
                     Text(error)
+                        .font(.subheadline)
                         .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
                 } else if let profile = profileViewModel.profile {
                     Text(profile.name ?? "No Name")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+                        .font(.title)
+                        .fontWeight(.semibold)
                         .foregroundColor(.primary)
-                        .padding(.bottom, 4)
-                    if let goal = profile.goal {
-                        Text("Goal: \(goal)")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                    }
+                    
+                    Text(profile.email ?? user.email)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 } else {
-                    Text("Looks like your profile is missing. Please restart onboarding.")
+                    Text("Profile not found")
+                        .font(.subheadline)
                         .foregroundColor(.orange)
-                }
-            }
-            
-            //edit profile buton
-            Button("Edit Profile"){
-                handleEditProfile()
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color(.systemGray6))
-            .foregroundColor(.primary)
-            .cornerRadius(12)
-            .fontWeight(.medium)
-        }
-        .padding(.vertical, 20)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Profile \(profileViewModel.profile?.name ?? user.name), \(profileViewModel.profile?.id ?? user.email)")
-    }
-    
-    
-    //MARK: Dietary Preferences Section
-    private var dietaryPreferencesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Dietary Preferences", icon: "fork.knife")
-            
-            VStack (spacing: 8) {
-                if let profile = profileViewModel.profile {
-                    ProfileRowView(title: "Goal", value: profile.goal ?? "Set Goal")
-                    ProfileRowView(title: "Budget", value: profile.budget ?? "Not set")
-                } else {
-                    ProfileRowView(title: "Goal", value: "Set Goal")
-                    ProfileRowView(title: "Budget", value: "Not set")
+                        .multilineTextAlignment(.center)
                 }
                 
-                Button ("Update Preferences"){
-                    handleUpdatePreferences()
+                // Edit Profile Button
+                Button(action: handleEditProfile) {
+                    Text("Edit Profile")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.primaryOrange)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(AppColors.primaryOrange, lineWidth: 1.5)
+                        )
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-                .background(Color(.systemBackground))
-                .foregroundColor(Color(.systemOrange))
-                .cornerRadius(12)
-                .fontWeight(.medium)
+                .buttonStyle(PlainButtonStyle())
             }
+        }
+        .padding(.vertical, 24)
+    }
+    
+    // MARK: - Nutrition Preferences Section
+    private var nutritionPreferencesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader("Nutrition", icon: "flame.fill")
+            
+            VStack(spacing: 12) {
+                // Goal
+                ProfileRowView(
+                    icon: "target",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Goal",
+                    value: profileViewModel.profile?.goal ?? user.goal,
+                    showChevron: true
+                ) {
+                    showingGoal = true
+                }
+                
+                // Budget
+                ProfileRowView(
+                    icon: "dollarsign.circle.fill",
+                    iconColor: AppColors.successGreen,
+                    title: "Budget",
+                    value: profileViewModel.profile?.budget ?? user.budget,
+                    showChevron: true
+                ) {
+                    showingBudget = true
+                }
+                
+                // Calorie target
+                let calorieTarget = profileViewModel.profile?.fitnessGoals?.targetCalories ?? 2200
+                ProfileRowView(
+                    icon: "flame.fill",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Calorie target",
+                    value: "\(calorieTarget) kcal",
+                    showChevron: true
+                ) {
+                    showingCalorieTarget = true
+                }
+                
+                // Macro targets
+                let protein = Int(profileViewModel.profile?.fitnessGoals?.targetProtein ?? 25)
+                let carbs = Int(profileViewModel.profile?.fitnessGoals?.targetCarbohydrates ?? 55)
+                let fat = Int(profileViewModel.profile?.fitnessGoals?.targetFat ?? 20)
+                ProfileRowView(
+                    icon: "chart.pie.fill",
+                    iconColor: AppColors.successGreen,
+                    title: "Macro targets",
+                    value: "\(protein)%, \(carbs)%, \(fat)%",
+                    showChevron: true
+                ) {
+                    showingMacroTargets = true
+                }
+                
+                // Diet preference
+                let dietPreference = profileViewModel.profile?.diet ?? user.dietaryPreferences.first ?? "Balanced"
+                ProfileRowView(
+                    icon: "leaf.fill",
+                    iconColor: AppColors.successGreen,
+                    title: "Diet preference",
+                    value: dietPreference,
+                    showChevron: true
+                ) {
+                    showingDietPreference = true
+                }
+                
+                // Dislikes
+                let dislikesCount = profileViewModel.profile?.dietaryPreferences?.dislikedIngredients.count ?? user.dislikedIngredients.count
+                ProfileRowView(
+                    icon: "xmark.circle.fill",
+                    iconColor: AppColors.warnRed,
+                    title: "Dislikes",
+                    value: "\(dislikesCount) ingredient\(dislikesCount == 1 ? "" : "s")",
+                    showChevron: true
+                ) {
+                    showingDislikes = true
+                }
+                
+                // Favorite cuisines
+                let cuisinesCount = profileViewModel.profile?.mealPlanningPreferences?.preferredCuisines.count ?? user.preferredCuisines.count
+                ProfileRowView(
+                    icon: "hand.thumbsup.fill",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Favorite cuisines",
+                    value: "\(cuisinesCount) cuisine\(cuisinesCount == 1 ? "" : "s")",
+                    showChevron: true
+                ) {
+                    showingFavoriteCuisines = true
+                }
+                
+                // Cooking skills
+                let cookingSkill = profileViewModel.profile?.cookingPreferences?.skillLevel ?? user.cookingSkillLevel
+                ProfileRowView(
+                    icon: "fork.knife.circle.fill",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Cooking skills",
+                    value: cookingSkill,
+                    showChevron: true
+                ) {
+                    showingCookingSkills = true
+                }
+            }
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
     
+    // MARK: - Meal Plan Preferences Section
+    private var mealPlanPreferencesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader("Meal Plan", icon: "calendar")
+            
+            VStack(spacing: 12) {
+                // Meals per day
+                let mealsPerDay = profileViewModel.profile?.mealPlanningPreferences?.mealsPerDay ?? user.preferredServings
+                ProfileRowView(
+                    icon: "list.bullet",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Meals per day",
+                    value: "\(mealsPerDay) meal\(mealsPerDay == 1 ? "" : "s")",
+                    showChevron: true
+                ) {
+                    showingMealsPerDay = true
+                }
+            }
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        }
+    }
     
-    
-    //MARK: Subscription Section
+    // MARK: - Subscription Section
     private var subscriptionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader("Subscription", icon: "crown.fill")
             
-            
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 if user.isPremium {
                     ProfileRowView(title: "Plan", value: "Premium")
-                    if let renewalDate = user.subscriptionRenewalDate {
-                        ProfileRowView(title: "Renewal Date", value: renewalDate)
-                    }
                     
-                    Button("Manage Subscription"){
-                        handleManageSubscription()
+                    Button("Manage Subscription") {
+                        // TODO: Handle subscription management
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
                     .background(Color(.systemBackground))
-                    .foregroundColor(Color(.systemOrange))
+                    .foregroundColor(AppColors.primaryOrange)
                     .cornerRadius(12)
                     .fontWeight(.medium)
-                }
-                else {
+                } else {
                     ProfileRowView(title: "Plan", value: "Free")
                     
-                    Button("Upgrade to Premium"){
-                        handleUpgradeToPremium()
+                    Button("Upgrade to Premium") {
+                        // TODO: Handle premium upgrade
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color(.systemOrange))
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [AppColors.primaryOrange, AppColors.primaryOrange.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                     .foregroundColor(.white)
                     .cornerRadius(12)
                     .fontWeight(.semibold)
-                    
+                    .shadow(color: AppColors.primaryOrange.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
             }
-           
-            
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
     
-    
-    
-    
-    //MARK: App Settings Section
-    private var appsettingsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("AppSettings", icon: "gearshape.fill")
+    // MARK: - App Settings Section
+    private var appSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader("App Settings", icon: "gearshape.fill")
             
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 ProfileRowView(title: "Meal Reminder", toggleValue: $mealReminders)
                 
-                
-                HStack {
-                    Text("Language")
-                        .font(.body)
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Text("English")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                ProfileRowView(title: "Push Notifications", toggleValue: $pushNotifications)
                 
                 ProfileRowView(title: "Dark Mode", toggleValue: $darkMode)
             }
-            
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
     
-    
-    
-    //MARK: Support and Legal Section
+    // MARK: - Support and Legal Section
     private var supportLegalSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader("Support & Legal", icon: "questionmark.circle.fill")
             
-            
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 ProfileRowView(icon: "questionmark.circle.fill",
                                iconColor:.blue,
-                               title: "Help Centre") {
-                    handleHelpCenter()
+                               title: "Help & Support",
+                               value: "",
+                               showChevron: true) {
+                    // TODO: Handle help & support
                 }
                 
-                
-                ProfileRowView(icon: "envelope",
-                               iconColor:.green,
-                               title: "Contact Us") {
-                    handleContactUs()
+                ProfileRowView(icon: "doc.text.fill",
+                               iconColor: .gray,
+                               title: "Privacy Policy",
+                               value: "",
+                               showChevron: true) {
+                    // TODO: Handle privacy policy
                 }
                 
-                ProfileRowView(icon: "shield",
-                               iconColor:.purple,
-                               title: "Privacy Policy") {
-                    handlePrivacyPolicy()
+                ProfileRowView(icon: "doc.text.fill",
+                               iconColor: .gray,
+                               title: "Terms of Service",
+                               value: "",
+                               showChevron: true) {
+                    // TODO: Handle terms of service
                 }
-                
-                ProfileRowView(icon: "doc.text",
-                               iconColor:.orange,
-                               title: "Terms Of Use") {
-                    handleTermsOfUse()
-                }
-                
-                // Developer Panel (only show in debug builds)
-                #if DEBUG
-                ProfileRowView(icon: "hammer.circle.fill",
-                               iconColor: AppColors.primaryOrange,
-                               title: "Developer Panel") {
-                    showingDeveloperPanel = true
-                }
-                #endif
             }
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
-    
     
     // MARK: - Account Actions Section
     private var accountActionsSection: some View {
-        VStack(spacing: 8) {
-            Button(action: handleEditProfile) {
-                HStack {
-                    Image(systemName: "pencil")
-                    Text("Edit Profile")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(.primary)
-            .padding(.vertical, 8)
-            Button(action: handleUpdatePreferences) {
-                HStack {
-                    Image(systemName: "slider.horizontal.3")
-                    Text("Update Preferences")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(.primary)
-            .padding(.vertical, 8)
+        VStack(spacing: 16) {
+            // Log Out Button
             Button(action: handleLogout) {
-                HStack {
+                HStack(spacing: 12) {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 16, weight: .medium))
                     Text("Log Out")
+                        .font(.system(size: 16, weight: .medium))
+                    Spacer()
                 }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.orange.opacity(0.8), AppColors.primaryOrange]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+                .shadow(color: AppColors.primaryOrange.opacity(0.3), radius: 4, x: 0, y: 2)
             }
-            .font(.subheadline)
-            .foregroundColor(.red)
-            .padding(.vertical, 8)
+            
+            // Delete Account Button
             Button(action: handleDeleteAccount) {
-                HStack {
+                HStack(spacing: 12) {
                     Image(systemName: "trash")
+                        .font(.system(size: 16, weight: .medium))
                     Text("Delete Account")
+                        .font(.system(size: 16, weight: .medium))
+                    Spacer()
                 }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.red.opacity(0.8), Color.red]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+                .shadow(color: Color.red.opacity(0.3), radius: 4, x: 0, y: 2)
             }
-            .font(.subheadline)
-            .foregroundColor(.red)
-            .padding(.vertical, 8)
-            // Reset Onboarding Button for testing
-            Button(action: handleResetOnboarding) {
-                HStack {
-                    Image(systemName: "arrow.counterclockwise")
-                    Text("Reset Onboarding (Test)")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(AppColors.primaryOrange)
-            .padding(.vertical, 8)
         }
     }
     
-    // MARK: - Helper Views
     /// Helper view for section headers with an icon and title.
     private func sectionHeader(_ title: String, icon: String) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(Color(.systemOrange))
-                .font(.headline)
+                .foregroundColor(AppColors.primaryOrange)
+                .font(.system(size: 20, weight: .medium))
             Text(title)
-                .font(.headline)
+                .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
         }
-        .padding(.horizontal, 4)
     }
     
     // MARK: - Action Handlers
-    /// Handles the edit profile action.
-    private func handleEditProfile() {
-        Logger.debug("Edit Profile tapped")
-        // TODO: Navigate to edit profile screen
-    }
     
-    /// Handles the update preferences action.
-    private func handleUpdatePreferences() {
-        Logger.debug("Update Preferences tapped")
-        // TODO: Navigate to preferences screen
-    }
-    
-    /// Handles the upgrade to premium action.
-    private func handleUpgradeToPremium() {
-        Logger.debug("Upgrade to Premium tapped")
-        // TODO: Present premium upgrade flow
-    }
-    
-    /// Handles the manage subscription action.
-    private func handleManageSubscription() {
-        Logger.debug("Manage Subscription tapped")
-        // TODO: Present subscription management
-    }
-    
-    /// Handles the help center action.
-    private func handleHelpCenter() {
-        Logger.debug("Help Center tapped")
-        // TODO: Navigate to help center
-    }
-    
-    /// Handles the contact us action (opens WhatsApp).
-    private func handleContactUs() {
-        Logger.debug("Contact Us tapped")
-        // TODO: Open contact options (WhatsApp, email, etc.)
-        if let whatsappURL = URL(string: "https://wa.me/254728925915") {
-            UIApplication.shared.open(whatsappURL)
-        }
-    }
-    
-    /// Handles the privacy policy action.
-    private func handlePrivacyPolicy() {
-        Logger.debug("Privacy Policy tapped")
-        // TODO: Present privacy policy
-    }
-    
-    /// Handles the terms of use action.
-    private func handleTermsOfUse() {
-        Logger.debug("Terms of Use tapped")
-        // TODO: Present terms of use
-    }
-    
-    /// Handles the logout action.
+    /// Handles logout action
     private func handleLogout() {
-        Logger.authEvent("User logged out from profile")
         Task {
             await authViewModel.signOut()
         }
     }
     
-    /// Handles the delete account action.
+    /// Handles delete account action
     private func handleDeleteAccount() {
-        Logger.warning("Account deletion requested")
-        // TODO: Implement account deletion
-        // API call to delete user data, clear local storage
-    }
-
-    /// Handles the reset onboarding action (for testing)
-    private func handleResetOnboarding() {
-        Logger.debug("Reset Onboarding tapped")
-        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-        // Recreate the user with hasCompletedOnboarding: false
-        if let user = authViewModel.user {
-            let resetUser = User(
-                id: user.id,
-                email: user.email,
-                fullName: user.fullName,
-                profileImageUrl: user.profileImageUrl,
-                age: user.age,
-                gender: user.gender,
-                height: user.height,
-                weight: user.weight,
-                activityLevel: user.activityLevel,
-                fitnessGoal: user.fitnessGoal,
-                dietaryPreferences: user.dietaryPreferences,
-                budgetRange: user.budgetRange,
-                preferredCuisines: user.preferredCuisines,
-                cookingSkillLevel: user.cookingSkillLevel,
-                preferredPrepTime: user.preferredPrepTime,
-                preferredServings: user.preferredServings,
-                allergies: user.allergies,
-                favoriteIngredients: user.favoriteIngredients,
-                dislikedIngredients: user.dislikedIngredients,
-                hasCompletedOnboarding: false,
-                createdAt: user.createdAt,
-                updatedAt: Date()
-            )
-            authViewModel.user = resetUser
+        Task {
+            let success = await viewModel.deleteAccount(userId: user.id)
+            if success {
+                await authViewModel.signOut()
+            }
         }
-        // Optionally, update backend profile as well if needed
     }
     
+    /// Handles edit profile action
+    private func handleEditProfile() {
+        // TODO: Implement edit profile functionality
+        Logger.debug("Edit profile tapped")
+    }
     
+    // MARK: - Nutrition and Meal Plan Update Handlers
+    
+    /// Handles calorie target update
+    private func handleCalorieTargetUpdate(_ newValue: Int) {
+        Task {
+            let success = await viewModel.updateCalorieTarget(newValue)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles macro targets update
+    private func handleMacroTargetsUpdate(protein: Int, carbs: Int, fat: Int) {
+        Task {
+            let success = await viewModel.updateMacroTargets(protein: protein, carbs: carbs, fat: fat)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles diet preference update
+    private func handleDietPreferenceUpdate(_ newPreference: String) {
+        Task {
+            let success = await viewModel.updateDietPreference(newPreference)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles dislikes update
+    private func handleDislikesUpdate(_ newDislikes: [String]) {
+        Task {
+            let success = await viewModel.updateDislikedIngredients(newDislikes)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles favorite cuisines update
+    private func handleFavoriteCuisinesUpdate(_ newCuisines: [String]) {
+        Task {
+            let success = await viewModel.updatePreferredCuisines(newCuisines)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles cooking skills update
+    private func handleCookingSkillsUpdate(_ newSkill: String) {
+        Task {
+            let success = await viewModel.updateCookingSkill(newSkill)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles meals per day update
+    private func handleMealsPerDayUpdate(_ newMeals: Int) {
+        Task {
+            let success = await viewModel.updateMealsPerDay(newMeals)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles goal update
+    private func handleGoalUpdate(_ newGoal: String) {
+        Task {
+            let success = await viewModel.updateGoal(newGoal)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
+    
+    /// Handles budget update
+    private func handleBudgetUpdate(_ newBudget: String) {
+        Task {
+            let success = await viewModel.updateBudget(newBudget)
+            if success {
+                // Refresh the profile to show updated values
+                await profileViewModel.forceRefreshProfile()
+            }
+        }
+    }
 }
-
-
 
 
 #Preview {
     ProfileView()
+        .environmentObject(AuthViewModel())
+        .environmentObject(ThemeManager.shared)
 }
