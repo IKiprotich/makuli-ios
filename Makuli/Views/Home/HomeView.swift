@@ -20,15 +20,7 @@ struct HomeView: View {
         NavigationStack {
             ZStack {
                 // Enhanced background with subtle gradient
-                LinearGradient(
-                    colors: [
-                        AppColors.bgCream,
-                        AppColors.warmsand.opacity(0.3)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                        AppColors.background.ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 28) {
@@ -121,16 +113,16 @@ extension HomeView {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("\(viewModel.timeBasedGreeting)!")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     if let profile = profileViewModel.profile {
                         Text("Welcome back, \(profile.name ?? "there") 👋")
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                            .foregroundColor(AppColors.textSecondary)
                     } else {
                         Text("Ready to plan some amazing meals? 🍽️")
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                     
                     if !viewModel.todaysMeals.isEmpty {
@@ -165,15 +157,15 @@ extension HomeView {
                                 
                                 Text("\(Int(viewModel.todaysCompletionStatus.percentage))%")
                                     .font(.system(size: 10, weight: .medium))
-                                    .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                                    .foregroundColor(AppColors.textSecondary)
                             }
                         }
                     }
                     .padding(12)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(AppColors.bgCream)
-                            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+                            .fill(AppColors.card)
+                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                     )
                 }
             }
@@ -181,8 +173,8 @@ extension HomeView {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(AppColors.bgCream)
-                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                .fill(AppColors.card)
+                .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
         )
     }
     
@@ -192,11 +184,11 @@ extension HomeView {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Today's Meals")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Track your daily nutrition")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()
@@ -225,13 +217,13 @@ extension HomeView {
                         .tint(AppColors.primaryOrange)
                     Text("Loading meals...")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(20)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(AppColors.bgCream)
+                        .fill(AppColors.card)
                         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
                 )
             } else if viewModel.todaysMeals.isEmpty {
@@ -243,11 +235,11 @@ extension HomeView {
                     VStack(spacing: 8) {
                         Text("No meals planned for today")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal)
+                            .foregroundColor(AppColors.text)
                         
                         Text("Enjoy your free day or check tomorrow's plan!")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                            .foregroundColor(AppColors.textSecondary)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -255,7 +247,7 @@ extension HomeView {
                 .padding(24)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(AppColors.bgCream)
+                        .fill(AppColors.card)
                         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
                 )
             } else {
@@ -278,13 +270,13 @@ extension HomeView {
                         HStack {
                             Text("Coming Up")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(AppColors.textCharcoal)
+                                .foregroundColor(AppColors.text)
                             
                             Spacer()
                             
                             Text("Next 3 meals")
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(AppColors.textCharcoal.opacity(0.5))
+                                .foregroundColor(AppColors.textSecondary)
                         }
                         
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -318,11 +310,11 @@ extension HomeView {
                 VStack(spacing: 8) {
                     Text("Ready to start meal planning?")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Create your first meal plan and discover amazing recipes!")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -330,7 +322,7 @@ extension HomeView {
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(AppColors.bgCream)
+                    .fill(AppColors.card)
                     .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
             
@@ -381,11 +373,11 @@ extension HomeView {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Quick Recipes")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Discover new favorites")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()
@@ -485,7 +477,7 @@ struct TodaysMealCard: View {
             Button(action: onToggleCompletion) {
                 ZStack {
                     Circle()
-                        .fill(meal.isCompleted ? AppColors.successGreen : AppColors.textCharcoal.opacity(0.1))
+                        .fill(meal.isCompleted ? AppColors.successGreen : AppColors.border)
                         .frame(width: 32, height: 32)
                     
                     if meal.isCompleted {
@@ -500,7 +492,7 @@ struct TodaysMealCard: View {
                 HStack {
                     Text(meal.customMealName ?? "Meal")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .strikethrough(meal.isCompleted)
                     
                     Spacer()
@@ -520,11 +512,11 @@ struct TodaysMealCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: "clock")
                             .font(.system(size: 12))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.5))
+                            .foregroundColor(AppColors.textSecondary)
                         
                         Text("\(cookTime) min")
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
             }
@@ -534,7 +526,7 @@ struct TodaysMealCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.bgCream)
+                .fill(AppColors.card)
                 .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
         )
         .opacity(meal.isCompleted ? 0.7 : 1.0)
@@ -552,7 +544,7 @@ struct UpcomingMealCard: View {
                 Text(meal.customMealName ?? "Meal")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .lineLimit(2)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Spacer()
             }
@@ -575,7 +567,7 @@ struct UpcomingMealCard: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(AppColors.bgCream)
+                .fill(AppColors.card)
                 .shadow(color: .black.opacity(0.03), radius: 6, x: 0, y: 3)
         )
     }
@@ -607,17 +599,17 @@ struct QuickRecipeCard: View {
                 Text(recipe.title)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .lineLimit(2)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 if let cookTime = recipe.cookTime {
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
                             .font(.system(size: 10))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.5))
+                            .foregroundColor(AppColors.textSecondary)
                         
                         Text("\(cookTime) min")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
             }
@@ -626,7 +618,7 @@ struct QuickRecipeCard: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.bgCream)
+                .fill(AppColors.card)
                 .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
         )
     }

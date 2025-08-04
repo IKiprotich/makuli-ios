@@ -159,6 +159,61 @@ class PlanViewModel: ObservableObject {
         }
     }
     
+    /// Creates a new meal plan manually with selected meals
+    func createPlanManually(
+        for userId: String,
+        weekStart: Date,
+        weekEnd: Date,
+        selectedMeals: [String: [String: Bool]],
+        userProfile: UserProfile
+    ) async -> Bool {
+        
+        // Check subscription limits
+        if !userProfile.canCreateMorePlans {
+            let maxPlans = userProfile.hasPremiumAccess ? 
+                Configuration.maxPlansPerUser : 
+                Configuration.freePlanLimits.maxPlansPerMonth
+            
+            self.errorMessage = "You've reached your monthly limit of \(maxPlans) plans. Upgrade to premium for unlimited plans."
+            return false
+        }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            Logger.info("Creating manual plan for user \(userId)")
+            
+            let plan = try await supabaseManager.createMealPlanManually(
+                userId: userId,
+                weekStart: weekStart,
+                weekEnd: weekEnd,
+                title: "My Meal Plan",
+                selectedMeals: selectedMeals
+            )
+            
+            // Fetch the recipes for this new plan
+            let recipes = try await supabaseManager.fetchPlanRecipes(planId: plan.id)
+            let planWithRecipes = PlanWithRecipes(id: plan.id, plan: plan, recipes: recipes)
+            
+            // Add to local plans list
+            self.plans.insert(planWithRecipes, at: 0)
+            
+            // Set as selected plan
+            self.selectedPlan = planWithRecipes
+            
+            Logger.info("Successfully created manual plan")
+            isLoading = false
+            return true
+            
+        } catch {
+            Logger.error("Failed to create manual plan: \(error)")
+            self.errorMessage = error.localizedDescription
+            isLoading = false
+            return false
+        }
+    }
+    
     /// Generates an AI meal plan and saves it to the database
     func generateAIMealPlan(
         for userProfile: UserProfile,
