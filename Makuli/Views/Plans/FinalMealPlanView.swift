@@ -276,7 +276,7 @@ struct FinalMealPlanView: View {
             subscriptionType: nil,
             subscriptionRenewal: nil,
             plansCreatedThisMonth: 0,
-            aiGenerationsThisMonth: 0,
+            spoonacularGenerationsThisMonth: 0,
             lastPlanReset: Date(),
             profileImageUrl: user.profileImageUrl,
             bio: nil,
@@ -294,6 +294,8 @@ struct FinalMealPlanView: View {
             budgetPreferences: nil,
             achievements: nil,
             progressMetrics: nil,
+            spoonacularUsername: nil,
+            spoonacularHash: nil,
             createdAt: Date(),
             updatedAt: Date()
         )

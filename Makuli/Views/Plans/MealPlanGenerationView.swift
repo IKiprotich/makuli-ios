@@ -39,11 +39,13 @@ struct MealPlanGenerationView: View {
                             preferencesSection
                             generateButton
                             
+                            // Show error message if any
+                            if let errorMessage = planViewModel.errorMessage {
+                                errorMessageView(errorMessage)
+                            }
+                            
                         case .generating:
                             generatingView
-                            
-                        case .generated(let response):
-                            generatedPlanPreview(response)
                             
                         case .saving:
                             savingView
@@ -84,12 +86,12 @@ extension MealPlanGenerationView {
     
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("AI-Powered Meal Planning")
+            Text("Spoonacular Meal Planning")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(AppColors.textCharcoal)
             
-                                    Text("Let our AI create a personalized 7-day meal plan based on your preferences, featuring delicious Western cuisine within your budget.")
+            Text("Generate a personalized 7-day meal plan using Spoonacular's extensive recipe database, tailored to your dietary preferences and nutritional goals.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.leading)
@@ -167,11 +169,11 @@ extension MealPlanGenerationView {
                 .scaleEffect(1.2)
                 .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primaryOrange))
             
-            Text("Creating your personalized meal plan...")
+            Text("Generating your personalized meal plan...")
                 .font(.headline)
                 .foregroundColor(AppColors.textCharcoal)
             
-                                    Text("This may take a few moments while our AI analyzes your preferences and selects the best Western dishes for you.")
+            Text("This may take a few moments while we search Spoonacular's recipe database and create a plan tailored to your preferences.")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -181,67 +183,7 @@ extension MealPlanGenerationView {
         .cornerRadius(12)
     }
     
-    private func generatedPlanPreview(_ response: MealPlanGenerationResponse) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("✨ \(response.weekTitle)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
-                    
-                                                Text("Estimated Cost: $\(Int(response.totalEstimatedCost))")
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.primaryOrange)
-                }
-                
-                Spacer()
-            }
-            
-            // Show preview of first few meals
-            LazyVStack(spacing: 12) {
-                ForEach(response.meals.prefix(3), id: \.day) { dayPlan in
-                    DayPlanPreviewCard(dayPlan: dayPlan)
-                }
-                
-                if response.meals.count > 3 {
-                    Text("+ \(response.meals.count - 3) more days")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-            }
-            
-            HStack(spacing: 12) {
-                Button("Regenerate") {
-                    generateMealPlan()
-                }
-                .font(.headline)
-                .foregroundColor(AppColors.primaryOrange)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemBackground))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(AppColors.primaryOrange, lineWidth: 1)
-                )
-                .cornerRadius(12)
-                
-                Button("Save Plan") {
-                    saveMealPlan(response)
-                }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(AppColors.primaryOrange)
-                .cornerRadius(12)
-            }
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-    }
+
     
     private var savingView: some View {
         VStack(spacing: 20) {
@@ -269,15 +211,36 @@ extension MealPlanGenerationView {
                 .font(.system(size: 50))
                 .foregroundColor(AppColors.successGreen)
             
-            Text("Meal Plan Saved! 🎉")
+            Text("Spoonacular Plan Generated! 🎉")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(AppColors.textCharcoal)
             
-            Text("Your personalized meal plan has been added to your library. You can view it in the Plans tab.")
+            Text("Your personalized meal plan has been created using Spoonacular's recipe database and saved to your library.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+            
+            VStack(spacing: 8) {
+                Text("Plan Details:")
+                    .font(.headline)
+                    .foregroundColor(AppColors.textCharcoal)
+                
+                Text("• \(plan.title)")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                Text("• Generated using Spoonacular API")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                Text("• Cached for offline access")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(AppColors.successGreen.opacity(0.1))
+            .cornerRadius(8)
             
             Button("View My Plans") {
                 dismiss()
@@ -341,6 +304,40 @@ extension MealPlanGenerationView {
         .cornerRadius(12)
     }
     
+    private func errorMessageView(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(AppColors.warnRed)
+                
+                Text("Error")
+                    .font(.headline)
+                    .foregroundColor(AppColors.textCharcoal)
+                
+                Spacer()
+            }
+            
+            Text(message)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.leading)
+            
+            Button("Dismiss") {
+                planViewModel.errorMessage = nil
+            }
+            .font(.caption)
+            .foregroundColor(AppColors.primaryOrange)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding()
+        .background(AppColors.warnRed.opacity(0.1))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppColors.warnRed.opacity(0.3), lineWidth: 1)
+        )
+    }
+    
     // MARK: - Helper Methods
     
     private func formatDate(_ date: Date) -> String {
@@ -350,76 +347,34 @@ extension MealPlanGenerationView {
     }
     
     private func generateMealPlan() {
-        guard let profile = profileViewModel.profile else { return }
+        guard let profile = profileViewModel.profile else { 
+            // Show error if no profile
+            planViewModel.errorMessage = "Please complete your profile to generate a meal plan."
+            return 
+        }
+        
+        // Validate that user has sufficient preferences
+        guard profile.hasValidSpoonacularPreferences else {
+            planViewModel.errorMessage = "Please complete your dietary preferences in your profile to generate a meal plan."
+            return
+        }
         
         Task {
-            await planViewModel.generateAIMealPlanWithPreferences(
+            let success = await planViewModel.generateSpoonacularMealPlan(
                 for: profile,
-                preferences: preferences
+                weekStart: preferences.weekStartDate
             )
-        }
-    }
-    
-    private func saveMealPlan(_ response: MealPlanGenerationResponse) {
-        // Convert the AI response to a MealPlan and add to AI-generated plans
-        let mealPlan = convertToMealPlan(from: response)
-        planViewModel.addAIGeneratedPlan(mealPlan)
-        // Optionally, show a success state or dismiss
-        dismiss()
-    }
-
-    /// Helper to convert MealPlanGenerationResponse to MealPlan
-    private func convertToMealPlan(from response: MealPlanGenerationResponse) -> MealPlan {
-        // Generate a unique ID and planId for the new plan
-        let id = UUID().uuidString
-        let planId = id // Or use a different logic if needed
-        // Convert the response's meals to the [String: [String: [Meal]]] format expected by MealPlan
-        var mealsDict: [String: [String: [Meal]]] = [:]
-        for dayPlan in response.meals {
-            var mealTypes: [String: [Meal]] = [:]
-            mealTypes["breakfast"] = [dayPlan.breakfast.toMeal(category: .breakfast)]
-            mealTypes["lunch"] = [dayPlan.lunch.toMeal(category: .lunch)]
-            mealTypes["dinner"] = [dayPlan.dinner.toMeal(category: .dinner)]
-            mealsDict[dayPlan.day] = mealTypes
-        }
-        let now = Date()
-        return MealPlan(id: id, planId: planId, meals: mealsDict, createdAt: now, updatedAt: now, isAIGenerated: true)
-    }
-}
-
-// MARK: - Day Plan Preview Card
-struct DayPlanPreviewCard: View {
-    let dayPlan: DayMealPlan
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(dayPlan.day)
-                .font(.headline)
-                .foregroundColor(AppColors.textCharcoal)
             
-            VStack(alignment: .leading, spacing: 4) {
-                mealRow("🌅", dayPlan.breakfast.name, dayPlan.breakfast.cookingTime)
-                mealRow("☀️", dayPlan.lunch.name, dayPlan.lunch.cookingTime)
-                mealRow("🌙", dayPlan.dinner.name, dayPlan.dinner.cookingTime)
+            if success {
+                // Plan was generated successfully, dismiss the view
+                await MainActor.run {
+                    dismiss()
+                }
             }
         }
-        .padding()
-        .background(AppColors.warmsand.opacity(0.3))
-        .cornerRadius(8)
     }
     
-    private func mealRow(_ icon: String, _ name: String, _ time: Int) -> some View {
-        HStack {
-            Text(icon)
-            Text(name)
-                .font(.caption)
-                .foregroundColor(AppColors.textCharcoal)
-            Spacer()
-            Text("\(time)min")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        }
-    }
+
 }
 
 #Preview {

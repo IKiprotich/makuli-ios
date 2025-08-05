@@ -241,7 +241,7 @@ extension TemplateSelectionView {
                 subscriptionType: "free",
                 subscriptionRenewal: nil,
                 plansCreatedThisMonth: 0,
-                aiGenerationsThisMonth: 0,
+                spoonacularGenerationsThisMonth: 0,
                 lastPlanReset: Date(),
                 profileImageUrl: user.profileImageUrl,
                 bio: nil,
@@ -311,6 +311,8 @@ extension TemplateSelectionView {
                 ),
                 achievements: [],
                 progressMetrics: [],
+                spoonacularUsername: nil,
+                spoonacularHash: nil,
                 createdAt: Date(),
                 updatedAt: Date()
             )

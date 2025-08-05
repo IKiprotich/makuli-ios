@@ -4,7 +4,7 @@
 //
 //  Created by AI Assistant on 2025-01-03.
 //
-//  Customizable preferences view for AI meal plan generation.
+//  Customizable preferences view for Spoonacular meal plan generation.
 //
 
 import SwiftUI
