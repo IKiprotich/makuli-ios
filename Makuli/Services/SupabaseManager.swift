@@ -277,13 +277,14 @@ class SupabaseManager: ObservableObject {
         }, context: "createMealPlanManually")
     }
     
-    /// Fetch user's meal plans
+    /// Fetch user's meal plans (only Spoonacular-generated plans)
     func fetchUserPlans(userId: String) async throws -> [Plan] {
         return try await performDatabaseOperation({
             let response = try await client
                 .from("plans")
                 .select("*")
                 .eq("user_id", value: userId)
+                .eq("generation_method", value: "spoonacular")
                 .order("created_at", ascending: false)
                 .execute()
             
@@ -581,6 +582,292 @@ class SupabaseManager: ObservableObject {
         case "snack": return 5
         default: return 20
         }
+    }
+    
+    // MARK: - Spoonacular Integration Methods
+    
+    /// Saves a plan to the database
+    func savePlan(_ plan: Plan) async throws {
+        try await performDatabaseOperation({
+            try await client
+                .from("plans")
+                .upsert(plan)
+                .execute()
+        }, context: "savePlan")
+    }
+    
+    /// Saves a plan recipe to the database
+    func savePlanRecipe(_ planRecipe: PlanRecipe) async throws {
+        try await performDatabaseOperation({
+            try await client
+                .from("plan_recipes")
+                .upsert(planRecipe)
+                .execute()
+        }, context: "savePlanRecipe")
+    }
+    
+    /// Saves a recipe to the database
+    func saveRecipe(_ recipe: Recipe) async throws {
+        try await performDatabaseOperation({
+            try await client
+                .from("recipes")
+                .upsert(recipe)
+                .execute()
+        }, context: "saveRecipe")
+    }
+    
+    /// Saves a grocery item to the database
+    func saveGroceryItem(_ groceryItem: GroceryItem) async throws {
+        try await performDatabaseOperation({
+            try await client
+                .from("grocery_items")
+                .upsert(groceryItem)
+                .execute()
+        }, context: "saveGroceryItem")
+    }
+    
+    // MARK: - Caching & Fallback Methods
+    
+    /// Retrieves cached meal plan data for a user
+    func getCachedMealPlan(userId: String, weekStart: Date) async throws -> (plan: Plan, recipes: [PlanRecipe])? {
+        let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
+        
+        return try await performDatabaseOperation({
+            // Find plan for the specific week
+            let plans: [Plan] = try await client
+                .from("plans")
+                .select()
+                .eq("user_id", value: userId)
+                .gte("week_start", value: weekStart)
+                .lte("week_end", value: weekEnd)
+                .eq("generation_method", value: "spoonacular")
+                .order("created_at", ascending: false)
+                .limit(1)
+                .execute()
+                .value
+            
+            guard let plan = plans.first else { return nil }
+            
+            // Fetch associated recipes
+            let planRecipes: [PlanRecipe] = try await client
+                .from("plan_recipes")
+                .select()
+                .eq("plan_id", value: plan.id)
+                .order("day_of_week", ascending: true)
+                .order("position", ascending: true)
+                .execute()
+                .value
+            
+            return (plan: plan, recipes: planRecipes)
+        }, context: "getCachedMealPlan")
+    }
+    
+    /// Retrieves cached recipes for a plan
+    func getCachedRecipes(planId: String) async throws -> [Recipe] {
+        return try await performDatabaseOperation({
+            let planRecipes: [PlanRecipe] = try await client
+                .from("plan_recipes")
+                .select()
+                .eq("plan_id", value: planId)
+                .not("recipe_id", operator: .is, value: "null")
+                .execute()
+                .value
+            
+            let recipeIds = planRecipes.compactMap { $0.recipeId }
+            
+            guard !recipeIds.isEmpty else { return [] }
+            
+            let recipes: [Recipe] = try await client
+                .from("recipes")
+                .select()
+                .in("id", values: recipeIds)
+                .execute()
+                .value
+            
+            return recipes
+        }, context: "getCachedRecipes")
+    }
+    
+    /// Retrieves a cached recipe by Spoonacular ID
+    func getCachedRecipe(spoonacularId: String) async throws -> Recipe? {
+        return try await performDatabaseOperation({
+            let recipes: [Recipe] = try await client
+                .from("recipes")
+                .select()
+                .eq("spoonacular_id", value: spoonacularId)
+                .limit(1)
+                .execute()
+                .value
+            
+            return recipes.first
+        }, context: "getCachedRecipe")
+    }
+    
+    /// Retrieves cached grocery list for a plan
+    func getCachedGroceryList(planId: String, userId: String) async throws -> [GroceryItem] {
+        return try await performDatabaseOperation({
+            let groceryItems: [GroceryItem] = try await client
+                .from("grocery_items")
+                .select()
+                .eq("plan_id", value: planId)
+                .eq("user_id", value: userId)
+                .order("category", ascending: true)
+                .order("name", ascending: true)
+                .execute()
+                .value
+            
+            return groceryItems
+        }, context: "getCachedGroceryList")
+    }
+    
+    /// Checks if cached data exists and is fresh (within cache expiration time)
+    func hasFreshCachedData(userId: String, weekStart: Date) async throws -> Bool {
+        let cacheExpirationHours: Double = 24 // Cache for 24 hours
+        let expirationDate = Date().addingTimeInterval(-cacheExpirationHours * 3600)
+        
+        return try await performDatabaseOperation({
+            // Use a simple struct to check for existence without decoding full Plan objects
+            struct CacheCheck: Codable {
+                let id: String
+            }
+            
+            let plans: [CacheCheck] = try await client
+                .from("plans")
+                .select("id")
+                .eq("user_id", value: userId)
+                .gte("week_start", value: weekStart)
+                .eq("generation_method", value: "spoonacular")
+                .gte("created_at", value: expirationDate)
+                .limit(1)
+                .execute()
+                .value
+            
+            let hasCache = !plans.isEmpty
+            Logger.info("Cache check for user \(userId), week \(weekStart): \(hasCache ? "found fresh cache" : "no fresh cache")")
+            return hasCache
+        }, context: "hasFreshCachedData")
+    }
+    
+    /// Clears old cached data (older than specified days)
+    func clearOldCachedData(olderThanDays days: Int = 7) async throws {
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        
+        try await performDatabaseOperation({
+            // Delete old plans
+            try await client
+                .from("plans")
+                .delete()
+                .lt("created_at", value: cutoffDate)
+                .eq("generation_method", value: "spoonacular")
+                .execute()
+            
+            // Delete old recipes (orphaned)
+            try await client
+                .from("recipes")
+                .delete()
+                .lt("created_at", value: cutoffDate)
+                .execute()
+            
+            // Delete old grocery items
+            try await client
+                .from("grocery_items")
+                .delete()
+                .lt("created_at", value: cutoffDate)
+                .execute()
+            
+            ProductionLogger.logInfo("Cleared cached data older than \(days) days", context: "SupabaseManager")
+        }, context: "clearOldCachedData")
+    }
+    
+    /// Saves complete Spoonacular meal plan data to cache
+    func saveSpoonacularMealPlanToCache(
+        plan: Plan,
+        planRecipes: [PlanRecipe],
+        recipes: [Recipe],
+        groceryItems: [GroceryItem]? = nil
+    ) async throws {
+        try await performDatabaseOperation({
+            Logger.info("Saving Spoonacular meal plan to cache: plan ID \(plan.id), \(planRecipes.count) plan recipes, \(recipes.count) recipes")
+            
+            // Save plan
+            try await client
+                .from("plans")
+                .upsert(plan)
+                .execute()
+            
+            Logger.info("Saved plan to database")
+            
+            // Save recipes FIRST (before plan recipes that reference them)
+            for recipe in recipes {
+                try await client
+                    .from("recipes")
+                    .upsert(recipe)
+                    .execute()
+            }
+            
+            Logger.info("Saved \(recipes.count) recipes to database")
+            
+            // Save plan recipes AFTER recipes (so foreign key references exist)
+            for planRecipe in planRecipes {
+                try await client
+                    .from("plan_recipes")
+                    .upsert(planRecipe)
+                    .execute()
+            }
+            
+            Logger.info("Saved \(planRecipes.count) plan recipes to database")
+            
+            // Save grocery items if provided
+            if let groceryItems = groceryItems {
+                for groceryItem in groceryItems {
+                    try await client
+                        .from("grocery_items")
+                        .upsert(groceryItem)
+                        .execute()
+                }
+                Logger.info("Saved \(groceryItems.count) grocery items to database")
+            }
+            
+            ProductionLogger.logInfo("Saved Spoonacular meal plan to cache", context: "SupabaseManager")
+        }, context: "saveSpoonacularMealPlanToCache")
+    }
+    
+    /// Retrieves user's Spoonacular credentials
+    func getUserSpoonacularCredentials(userId: String) async throws -> (username: String, hash: String)? {
+        return try await performDatabaseOperation({
+            let profiles: [UserProfile] = try await client
+                .from("profiles")
+                .select("spoonacular_username, spoonacular_hash")
+                .eq("id", value: userId)
+                .limit(1)
+                .execute()
+                .value
+            
+            guard let profile = profiles.first,
+                  let username = profile.spoonacularUsername,
+                  let hash = profile.spoonacularHash else {
+                return nil
+            }
+            
+            return (username: username, hash: hash)
+        }, context: "getUserSpoonacularCredentials")
+    }
+    
+    /// Updates user's Spoonacular credentials
+    func updateUserSpoonacularCredentials(userId: String, username: String, hash: String) async throws {
+        try await performDatabaseOperation({
+            try await client
+                .from("profiles")
+                .update([
+                    "spoonacular_username": username,
+                    "spoonacular_hash": hash,
+                    "updated_at": ISO8601DateFormatter().string(from: Date())
+                ])
+                .eq("id", value: userId)
+                .execute()
+            
+            ProductionLogger.logInfo("Updated Spoonacular credentials for user \(userId)", context: "SupabaseManager")
+        }, context: "updateUserSpoonacularCredentials")
     }
 }
 
