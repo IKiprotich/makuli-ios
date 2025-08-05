@@ -46,9 +46,9 @@ class ProfileViewModel: ObservableObject {
         return profile?.plansRemainingThisMonth ?? 0
     }
     
-    /// AI generations remaining this month
-    var aiGenerationsRemainingThisMonth: Int {
-        return profile?.aiGenerationsRemainingThisMonth ?? 0
+    /// Spoonacular generations remaining this month
+    var spoonacularGenerationsRemainingThisMonth: Int {
+        return profile?.spoonacularGenerationsRemainingThisMonth ?? 0
     }
     
     /// Whether profile is complete
@@ -119,7 +119,73 @@ class ProfileViewModel: ObservableObject {
             errorMessage = nil
             successMessage = nil
             
-            // Create updated profile
+            // Create updated profile with default preferences
+            let defaultNotificationPreferences = NotificationPreferences(
+                mealReminders: true,
+                groceryReminders: true,
+                achievementNotifications: true,
+                weeklyReports: true,
+                newRecipeNotifications: true,
+                preferredNotificationTime: "18:00",
+                pushNotificationsEnabled: true,
+                emailNotificationsEnabled: true
+            )
+            
+            let defaultPrivacySettings = PrivacySettings(
+                isProfilePublic: false,
+                mealPlansVisible: false,
+                progressSharingEnabled: false,
+                achievementsPublic: false,
+                locationSharingEnabled: false
+            )
+            
+            let defaultFitnessGoals = FitnessGoals(
+                targetWeight: nil,
+                targetCalories: nil,
+                targetProtein: nil,
+                targetCarbohydrates: nil,
+                targetFat: nil,
+                weeklyWorkoutMinutes: nil,
+                targetStepsPerDay: nil
+            )
+            
+            let defaultMealPlanningPreferences = MealPlanningPreferences(
+                mealsPerDay: 3,
+                preferredPrepTime: 30,
+                includeSnacks: false,
+                preferredCuisines: ["american", "italian"],
+                rotateMeals: true,
+                includeLeftovers: true,
+                preferredComplexity: "balanced"
+            )
+            
+            let defaultDietaryPreferences = DietaryPreferences(
+                restrictions: [],
+                allergies: [],
+                favoriteIngredients: [],
+                dislikedIngredients: [],
+                avoidIngredients: [],
+                preferredCookingMethods: ["stovetop", "baking"]
+            )
+            
+            let defaultCookingPreferences = CookingPreferences(
+                skillLevel: "beginner",
+                preferredCookingTime: 30,
+                useAppliances: true,
+                preferredMethods: ["stovetop", "baking"],
+                usePreMadeIngredients: false,
+                batchCooking: false
+            )
+            
+            let defaultBudgetPreferences = BudgetPreferences(
+                weeklyBudget: 100.0,
+                monthlyBudget: 400.0,
+                preferredMealPrice: 8.0,
+                prioritizeBudget: true,
+                includePremiumIngredients: false,
+                suggestAlternatives: true
+            )
+            
             let updatedProfile = UserProfile(
                 id: userId,
                 userId: userId,
@@ -135,7 +201,7 @@ class ProfileViewModel: ObservableObject {
                 subscriptionType: profile?.subscriptionType ?? "free",
                 subscriptionRenewal: profile?.subscriptionRenewal,
                 plansCreatedThisMonth: profile?.plansCreatedThisMonth ?? 0,
-                aiGenerationsThisMonth: profile?.aiGenerationsThisMonth ?? 0,
+                spoonacularGenerationsThisMonth: profile?.spoonacularGenerationsThisMonth ?? 0,
                 lastPlanReset: profile?.lastPlanReset ?? Date(),
                 profileImageUrl: profileImageUrl,
                 bio: profile?.bio,
@@ -144,67 +210,17 @@ class ProfileViewModel: ObservableObject {
                 timezone: profile?.timezone ?? "UTC",
                 measurementSystem: profile?.measurementSystem ?? "metric",
                 preferredCurrency: profile?.preferredCurrency ?? "USD",
-                notificationPreferences: profile?.notificationPreferences ?? NotificationPreferences(
-                    mealReminders: true,
-                    groceryReminders: true,
-                    achievementNotifications: true,
-                    weeklyReports: true,
-                    newRecipeNotifications: true,
-                    preferredNotificationTime: "18:00",
-                    pushNotificationsEnabled: true,
-                    emailNotificationsEnabled: true
-                ),
-                privacySettings: profile?.privacySettings ?? PrivacySettings(
-                    isProfilePublic: false,
-                    mealPlansVisible: false,
-                    progressSharingEnabled: false,
-                    achievementsPublic: false,
-                    locationSharingEnabled: false
-                ),
-                fitnessGoals: profile?.fitnessGoals ?? FitnessGoals(
-                    targetWeight: nil,
-                    targetCalories: nil,
-                    targetProtein: nil,
-                    targetCarbohydrates: nil,
-                    targetFat: nil,
-                    weeklyWorkoutMinutes: nil,
-                    targetStepsPerDay: nil
-                ),
-                mealPlanningPreferences: profile?.mealPlanningPreferences ?? MealPlanningPreferences(
-                    mealsPerDay: 3,
-                    preferredPrepTime: 30,
-                    includeSnacks: false,
-                    preferredCuisines: ["american", "italian"],
-                    rotateMeals: true,
-                    includeLeftovers: true,
-                    preferredComplexity: "balanced"
-                ),
-                dietaryPreferences: profile?.dietaryPreferences ?? DietaryPreferences(
-                    restrictions: [],
-                    allergies: [],
-                    favoriteIngredients: [],
-                    dislikedIngredients: [],
-                    avoidIngredients: [],
-                    preferredCookingMethods: ["stovetop", "baking"]
-                ),
-                cookingPreferences: profile?.cookingPreferences ?? CookingPreferences(
-                    skillLevel: "beginner",
-                    preferredCookingTime: 30,
-                    useAppliances: true,
-                    preferredMethods: ["stovetop", "baking"],
-                    usePreMadeIngredients: false,
-                    batchCooking: false
-                ),
-                budgetPreferences: profile?.budgetPreferences ?? BudgetPreferences(
-                    weeklyBudget: 100.0,
-                    monthlyBudget: 400.0,
-                    preferredMealPrice: 8.0,
-                    prioritizeBudget: true,
-                    includePremiumIngredients: false,
-                    suggestAlternatives: true
-                ),
+                notificationPreferences: profile?.notificationPreferences ?? defaultNotificationPreferences,
+                privacySettings: profile?.privacySettings ?? defaultPrivacySettings,
+                fitnessGoals: profile?.fitnessGoals ?? defaultFitnessGoals,
+                mealPlanningPreferences: profile?.mealPlanningPreferences ?? defaultMealPlanningPreferences,
+                dietaryPreferences: profile?.dietaryPreferences ?? defaultDietaryPreferences,
+                cookingPreferences: profile?.cookingPreferences ?? defaultCookingPreferences,
+                budgetPreferences: profile?.budgetPreferences ?? defaultBudgetPreferences,
                 achievements: profile?.achievements ?? [],
                 progressMetrics: profile?.progressMetrics ?? [],
+                spoonacularUsername: profile?.spoonacularUsername,
+                spoonacularHash: profile?.spoonacularHash,
                 createdAt: profile?.createdAt ?? Date(),
                 updatedAt: Date()
             )
@@ -244,7 +260,73 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Create updated profile for onboarding completion
+            // Create updated profile for onboarding completion with default preferences
+            let onboardingNotificationPreferences = NotificationPreferences(
+                mealReminders: true,
+                groceryReminders: true,
+                achievementNotifications: true,
+                weeklyReports: true,
+                newRecipeNotifications: true,
+                preferredNotificationTime: "18:00",
+                pushNotificationsEnabled: true,
+                emailNotificationsEnabled: true
+            )
+            
+            let onboardingPrivacySettings = PrivacySettings(
+                isProfilePublic: false,
+                mealPlansVisible: false,
+                progressSharingEnabled: false,
+                achievementsPublic: false,
+                locationSharingEnabled: false
+            )
+            
+            let onboardingFitnessGoals = FitnessGoals(
+                targetWeight: nil,
+                targetCalories: nil,
+                targetProtein: nil,
+                targetCarbohydrates: nil,
+                targetFat: nil,
+                weeklyWorkoutMinutes: nil,
+                targetStepsPerDay: nil
+            )
+            
+            let onboardingMealPlanningPreferences = MealPlanningPreferences(
+                mealsPerDay: 3,
+                preferredPrepTime: 30,
+                includeSnacks: false,
+                preferredCuisines: ["american", "italian"],
+                rotateMeals: true,
+                includeLeftovers: true,
+                preferredComplexity: "balanced"
+            )
+            
+            let onboardingDietaryPreferences = DietaryPreferences(
+                restrictions: [],
+                allergies: [],
+                favoriteIngredients: [],
+                dislikedIngredients: [],
+                avoidIngredients: [],
+                preferredCookingMethods: ["stovetop", "baking"]
+            )
+            
+            let onboardingCookingPreferences = CookingPreferences(
+                skillLevel: "beginner",
+                preferredCookingTime: 30,
+                useAppliances: true,
+                preferredMethods: ["stovetop", "baking"],
+                usePreMadeIngredients: false,
+                batchCooking: false
+            )
+            
+            let onboardingBudgetPreferences = BudgetPreferences(
+                weeklyBudget: 100.0,
+                monthlyBudget: 400.0,
+                preferredMealPrice: 8.0,
+                prioritizeBudget: true,
+                includePremiumIngredients: false,
+                suggestAlternatives: true
+            )
+            
             let updatedProfile = UserProfile(
                 id: userId,
                 userId: userId,
@@ -260,7 +342,7 @@ class ProfileViewModel: ObservableObject {
                 subscriptionType: profile?.subscriptionType ?? "free",
                 subscriptionRenewal: profile?.subscriptionRenewal,
                 plansCreatedThisMonth: profile?.plansCreatedThisMonth ?? 0,
-                aiGenerationsThisMonth: profile?.aiGenerationsThisMonth ?? 0,
+                spoonacularGenerationsThisMonth: profile?.spoonacularGenerationsThisMonth ?? 0,
                 lastPlanReset: profile?.lastPlanReset ?? Date(),
                 profileImageUrl: profile?.profileImageUrl,
                 bio: profile?.bio,
@@ -269,67 +351,17 @@ class ProfileViewModel: ObservableObject {
                 timezone: profile?.timezone ?? "UTC",
                 measurementSystem: profile?.measurementSystem ?? "metric",
                 preferredCurrency: profile?.preferredCurrency ?? "USD",
-                notificationPreferences: profile?.notificationPreferences ?? NotificationPreferences(
-                    mealReminders: true,
-                    groceryReminders: true,
-                    achievementNotifications: true,
-                    weeklyReports: true,
-                    newRecipeNotifications: true,
-                    preferredNotificationTime: "18:00",
-                    pushNotificationsEnabled: true,
-                    emailNotificationsEnabled: true
-                ),
-                privacySettings: profile?.privacySettings ?? PrivacySettings(
-                    isProfilePublic: false,
-                    mealPlansVisible: false,
-                    progressSharingEnabled: false,
-                    achievementsPublic: false,
-                    locationSharingEnabled: false
-                ),
-                fitnessGoals: profile?.fitnessGoals ?? FitnessGoals(
-                    targetWeight: nil,
-                    targetCalories: nil,
-                    targetProtein: nil,
-                    targetCarbohydrates: nil,
-                    targetFat: nil,
-                    weeklyWorkoutMinutes: nil,
-                    targetStepsPerDay: nil
-                ),
-                mealPlanningPreferences: profile?.mealPlanningPreferences ?? MealPlanningPreferences(
-                    mealsPerDay: 3,
-                    preferredPrepTime: 30,
-                    includeSnacks: false,
-                    preferredCuisines: ["american", "italian"],
-                    rotateMeals: true,
-                    includeLeftovers: true,
-                    preferredComplexity: "balanced"
-                ),
-                dietaryPreferences: profile?.dietaryPreferences ?? DietaryPreferences(
-                    restrictions: [],
-                    allergies: [],
-                    favoriteIngredients: [],
-                    dislikedIngredients: [],
-                    avoidIngredients: [],
-                    preferredCookingMethods: ["stovetop", "baking"]
-                ),
-                cookingPreferences: profile?.cookingPreferences ?? CookingPreferences(
-                    skillLevel: "beginner",
-                    preferredCookingTime: 30,
-                    useAppliances: true,
-                    preferredMethods: ["stovetop", "baking"],
-                    usePreMadeIngredients: false,
-                    batchCooking: false
-                ),
-                budgetPreferences: profile?.budgetPreferences ?? BudgetPreferences(
-                    weeklyBudget: 100.0,
-                    monthlyBudget: 400.0,
-                    preferredMealPrice: 8.0,
-                    prioritizeBudget: true,
-                    includePremiumIngredients: false,
-                    suggestAlternatives: true
-                ),
+                notificationPreferences: profile?.notificationPreferences ?? onboardingNotificationPreferences,
+                privacySettings: profile?.privacySettings ?? onboardingPrivacySettings,
+                fitnessGoals: profile?.fitnessGoals ?? onboardingFitnessGoals,
+                mealPlanningPreferences: profile?.mealPlanningPreferences ?? onboardingMealPlanningPreferences,
+                dietaryPreferences: profile?.dietaryPreferences ?? onboardingDietaryPreferences,
+                cookingPreferences: profile?.cookingPreferences ?? onboardingCookingPreferences,
+                budgetPreferences: profile?.budgetPreferences ?? onboardingBudgetPreferences,
                 achievements: profile?.achievements ?? [],
                 progressMetrics: profile?.progressMetrics ?? [],
+                spoonacularUsername: profile?.spoonacularUsername,
+                spoonacularHash: profile?.spoonacularHash,
                 createdAt: profile?.createdAt ?? Date(),
                 updatedAt: Date()
             )
@@ -410,12 +442,12 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Increments AI generation count
-    func incrementAIGenerationCount() async {
+    /// Increments Spoonacular generation count
+    func incrementSpoonacularGenerationCount() async {
         guard var currentProfile = profile else { return }
         
         do {
-            currentProfile.incrementAIGenerationCount()
+            currentProfile.incrementSpoonacularGenerationCount()
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
@@ -423,7 +455,7 @@ class ProfileViewModel: ObservableObject {
             self.profile = currentProfile
             
         } catch {
-            Logger.error("Failed to increment AI generation count: \(error)")
+            Logger.error("Failed to increment Spoonacular generation count: \(error)")
         }
     }
     
@@ -433,7 +465,7 @@ class ProfileViewModel: ObservableObject {
     }
     
     /// Gets usage stats for the current month
-    func getUsageStats() -> (plans: Int, maxPlans: Int, aiGenerations: Int, maxAIGenerations: Int) {
+    func getUsageStats() -> (plans: Int, maxPlans: Int, spoonacularGenerations: Int, maxSpoonacularGenerations: Int) {
         guard let profile = profile else {
             return (0, 0, 0, 0)
         }
@@ -442,15 +474,15 @@ class ProfileViewModel: ObservableObject {
             Configuration.maxPlansPerUser : 
             Configuration.freePlanLimits.maxPlansPerMonth
         
-        let maxAIGenerations = profile.hasPremiumAccess ? 
+        let maxSpoonacularGenerations = profile.hasPremiumAccess ? 
             Int.max : 
-            Configuration.freePlanLimits.maxAIGenerationsPerMonth
+            Configuration.freePlanLimits.maxSpoonacularGenerationsPerMonth
         
         return (
             plans: profile.plansCreatedThisMonth,
             maxPlans: maxPlans,
-            aiGenerations: profile.aiGenerationsThisMonth,
-            maxAIGenerations: maxAIGenerations
+            spoonacularGenerations: profile.spoonacularGenerationsThisMonth,
+            maxSpoonacularGenerations: maxSpoonacularGenerations
         )
     }
     
@@ -901,22 +933,22 @@ class ProfileViewModel: ObservableObject {
         guard let profile = profile, !profile.hasPremiumAccess else { return nil }
         
         let planLimit = Configuration.freePlanLimits.maxPlansPerMonth
-        let aiLimit = Configuration.freePlanLimits.maxAIGenerationsPerMonth
+        let spoonacularLimit = Configuration.freePlanLimits.maxSpoonacularGenerationsPerMonth
         
         if profile.plansCreatedThisMonth >= planLimit {
             return "You've reached your monthly plan limit. Upgrade to premium for unlimited plans."
         }
         
-        if profile.aiGenerationsThisMonth >= aiLimit {
-            return "You've reached your monthly AI generation limit. Upgrade to premium for unlimited AI meal plans."
+        if profile.spoonacularGenerationsThisMonth >= spoonacularLimit {
+            return "You've reached your monthly Spoonacular generation limit. Upgrade to premium for unlimited meal plans."
         }
         
         if profile.plansCreatedThisMonth >= planLimit - 1 {
             return "You have 1 plan remaining this month. Upgrade to premium for unlimited plans."
         }
         
-        if profile.aiGenerationsThisMonth >= aiLimit - 1 {
-            return "You have 1 AI generation remaining this month. Upgrade to premium for unlimited access."
+        if profile.spoonacularGenerationsThisMonth >= spoonacularLimit - 1 {
+            return "You have 1 Spoonacular generation remaining this month. Upgrade to premium for unlimited access."
         }
         
         return nil

@@ -23,12 +23,19 @@ class PlanViewModel: ObservableObject {
     @Published var isLoadingTemplates = false
     @Published var templateErrorMessage: String?
     
-    // MARK: - AI-Generated Meal Plans
-    /// Holds all AI-generated meal plans (local only)
-    @Published var aiGeneratedPlans: [MealPlan] = []
+
     
     private let supabaseManager = SupabaseManager.shared
+    private let spoonacularService: SpoonacularServiceProtocol
     private var fetchTask: Task<Void, Never>?
+    
+    // MARK: - Initialization
+    
+    /// Creates a new PlanViewModel instance.
+    /// - Parameter spoonacularService: The Spoonacular service to use for API calls (defaults to shared instance)
+    init(spoonacularService: SpoonacularServiceProtocol = SpoonacularService()) {
+        self.spoonacularService = spoonacularService
+    }
 
     // MARK: - Computed Properties
     
@@ -69,7 +76,7 @@ class PlanViewModel: ObservableObject {
     }
     
     private func performFetch(for userId: String) async {
-        isLoading = true
+        // Don't show loading for initial fetches - show content immediately
         errorMessage = nil
         do {
             Logger.info("Fetching plans for user: \(userId)")
@@ -92,6 +99,9 @@ class PlanViewModel: ObservableObject {
             }
             
             Logger.info("Successfully loaded \(fetchedPlans.count) plans")
+            Logger.info("Active plan: \(activePlan?.plan.title ?? "none")")
+            Logger.info("Selected plan: \(selectedPlan?.plan.title ?? "none")")
+            Logger.info("Total plans in array: \(plans.count)")
             
         } catch is CancellationError {
             // Task was cancelled (e.g., user navigated away)
@@ -102,8 +112,6 @@ class PlanViewModel: ObservableObject {
             self.errorMessage = "Failed to load meal plans. Please check your connection and try again."
             self.plans = []
         }
-        
-        isLoading = false
     }
     
     /// Creates a new meal plan from a template
@@ -214,16 +222,22 @@ class PlanViewModel: ObservableObject {
         }
     }
     
-    /// Generates an AI meal plan and saves it to the database
-    func generateAIMealPlan(
+    /// Generates a Spoonacular meal plan with cache-first strategy
+    func generateSpoonacularMealPlan(
         for userProfile: UserProfile,
-        preferences: MealPlanPreferences
+        weekStart: Date
     ) async -> Bool {
         
+        // Validate user preferences
+        guard userProfile.hasValidSpoonacularPreferences else {
+            self.errorMessage = "Please complete your dietary preferences in your profile to generate a meal plan."
+            return false
+        }
+        
         // Check subscription limits
-        if !userProfile.canUseAIGeneration {
-            let maxGenerations = Configuration.freePlanLimits.maxAIGenerationsPerMonth
-            self.errorMessage = "You've reached your monthly limit of \(maxGenerations) AI generations. Upgrade to premium for unlimited AI meal plans."
+        if !userProfile.canUseSpoonacularGeneration {
+            let maxGenerations = Configuration.freePlanLimits.maxSpoonacularGenerationsPerMonth
+            self.errorMessage = "You've reached your monthly limit of \(maxGenerations) Spoonacular generations. Upgrade to premium for unlimited meal plans."
             return false
         }
         
@@ -239,45 +253,220 @@ class PlanViewModel: ObservableObject {
         generationState = .generating
         
         do {
-            Logger.info("Generating AI meal plan for user \(userProfile.id)")
+            Logger.info("Generating Spoonacular meal plan for user \(userProfile.id)")
+            Logger.info("User preferences: \(userProfile.spoonacularPreferencesSummary)")
             
-            // TODO: Implement AI meal plan generation in SupabaseManager
-            // For now, create a basic plan as placeholder
-            let weekStart = preferences.weekStartDate
-            let plan = Plan(
-                id: UUID().uuidString,
+            // Step 1: Check for fresh cached data first
+            let hasFreshCache = try await supabaseManager.hasFreshCachedData(userId: userProfile.id, weekStart: weekStart)
+            
+            if hasFreshCache {
+                Logger.info("Found fresh cached data, loading from cache")
+                if let cachedData = try await supabaseManager.getCachedMealPlan(userId: userProfile.id, weekStart: weekStart) {
+                    // Only use cache if it has meals
+                    if !cachedData.recipes.isEmpty {
+                        let planWithRecipes = PlanWithRecipes(id: cachedData.plan.id, plan: cachedData.plan, recipes: cachedData.recipes)
+                        
+                        // Add to local plans list
+                        self.plans.insert(planWithRecipes, at: 0)
+                        self.selectedPlan = planWithRecipes
+                        
+                        Logger.info("Added cached plan to array: \(planWithRecipes.plan.title)")
+                        Logger.info("Cached plan week: \(planWithRecipes.plan.weekStart) to \(planWithRecipes.plan.weekEnd)")
+                        Logger.info("Is current week: \(planWithRecipes.isCurrentWeek)")
+                        Logger.info("Total plans in array: \(self.plans.count)")
+                        
+                        generationState = .saved(cachedData.plan)
+                        Logger.info("Successfully loaded cached meal plan with \(cachedData.recipes.count) meals")
+                        return true
+                    } else {
+                        Logger.warning("Cached meal plan has no meals, generating new plan")
+                    }
+                }
+            }
+            
+            // Step 2: Generate new meal plan from Spoonacular
+            let spoonacularMealPlan = try await spoonacularService.generateWeeklyMealPlan(preferences: userProfile)
+            
+            // Step 3: Map to app models
+            let (plan, planRecipes, spoonacularIds) = SpoonacularMapper.mapMealPlan(
+                spoonacularMealPlan,
                 userId: userProfile.id,
-                title: "AI Generated Plan",
-                weekStart: weekStart,
-                weekEnd: Calendar.current.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart,
-                totalCost: 75.0,
-                isCompleted: false,
-                createdAt: Date(),
-                updatedAt: Date(),
-                templateId: nil,
-                generationMethod: "ai",
-                isFavorite: false,
-                completionPercentage: 0.0
+                weekStart: weekStart
             )
             
-            let planWithRecipes = PlanWithRecipes(id: plan.id, plan: plan, recipes: [])
+            // Step 4: Fetch recipe details for each meal (optimized to reduce API calls)
+            var recipes: [Recipe] = []
+            var updatedPlanRecipes: [PlanRecipe] = []
+            
+            // First, check if we already have these recipes cached
+            let uniqueRecipeIds = Set(spoonacularIds)
+            
+            // Check cache for existing recipes
+            var cachedRecipes: [Int: Recipe] = [:]
+            for recipeId in uniqueRecipeIds {
+                if let cachedRecipe = try? await supabaseManager.getCachedRecipe(spoonacularId: String(recipeId)) {
+                    cachedRecipes[recipeId] = cachedRecipe
+                }
+            }
+            
+            // Fetch only new recipes that aren't cached
+            let uncachedRecipeIds = uniqueRecipeIds.filter { !cachedRecipes.keys.contains($0) }
+            
+            Logger.info("Found \(cachedRecipes.count) cached recipes, fetching \(uncachedRecipeIds.count) new recipes")
+            
+            // Fetch new recipes with rate limiting
+            for recipeId in uncachedRecipeIds {
+                do {
+                    // Add longer delay between requests to respect rate limits
+                    if recipeId != uncachedRecipeIds.first {
+                        try await Task.sleep(nanoseconds: 500_000_000) // 500ms delay
+                    }
+                    
+                    let spoonacularRecipe = try await spoonacularService.fetchRecipeDetails(recipeId: recipeId)
+                    let recipe = SpoonacularMapper.mapRecipe(spoonacularRecipe)
+                    cachedRecipes[recipeId] = recipe
+                    recipes.append(recipe)
+                    
+                    Logger.info("Successfully fetched recipe \(recipeId)")
+                } catch let error as SpoonacularError {
+                    if error.localizedDescription.contains("402") {
+                        Logger.warning("API rate limit hit for recipe \(recipeId), stopping recipe fetching")
+                        break // Stop fetching more recipes to avoid hitting rate limits
+                    } else {
+                        Logger.warning("Failed to fetch recipe details for recipe \(recipeId): \(error)")
+                    }
+                } catch {
+                    Logger.warning("Failed to fetch recipe details for recipe \(recipeId): \(error)")
+                }
+            }
+            
+            // Add cached recipes to the recipes array
+            recipes.append(contentsOf: cachedRecipes.values)
+            
+            // Create mapping from Spoonacular recipe ID to Recipe UUID
+            var spoonacularToRecipeUUID: [Int: String] = [:]
+            for recipe in recipes {
+                if let spoonacularId = recipe.spoonacularId,
+                   let spoonacularIdInt = Int(spoonacularId) {
+                    spoonacularToRecipeUUID[spoonacularIdInt] = recipe.id
+                }
+            }
+            
+            Logger.info("Created mapping for \(spoonacularToRecipeUUID.count) recipes")
+            
+            // Update plan recipes with recipe details and proper UUID linking
+            for (index, planRecipe) in planRecipes.enumerated() {
+                let spoonacularId = spoonacularIds[index]
+                let recipeUUID = spoonacularToRecipeUUID[spoonacularId]
+                let recipe = recipes.first { $0.id == recipeUUID }
+                
+                let updatedPlanRecipe = PlanRecipe(
+                    id: planRecipe.id,
+                    planId: planRecipe.planId,
+                    recipeId: recipeUUID, // Use the Recipe UUID (may be nil if recipe fetch failed)
+                    dayOfWeek: planRecipe.dayOfWeek,
+                    mealType: planRecipe.mealType,
+                    position: planRecipe.position,
+                    day: planRecipe.day,
+                    isCompleted: planRecipe.isCompleted,
+                    completedAt: planRecipe.completedAt,
+                    customMealName: planRecipe.customMealName,
+                    customIngredients: recipe?.ingredients ?? [],
+                    customInstructions: recipe?.steps ?? [],
+                    customCookTime: planRecipe.customCookTime,
+                    notes: planRecipe.notes
+                )
+                updatedPlanRecipes.append(updatedPlanRecipe)
+            }
+            
+            // Filter out plan recipes that don't have valid recipe references
+            let validPlanRecipes = updatedPlanRecipes.filter { $0.recipeId != nil }
+            Logger.info("Created \(validPlanRecipes.count) valid plan recipes out of \(updatedPlanRecipes.count) total")
+            
+            // Step 5: Save to Supabase for caching
+            try await supabaseManager.saveSpoonacularMealPlanToCache(
+                plan: plan,
+                planRecipes: validPlanRecipes,
+                recipes: recipes
+            )
+            
+            // Step 6: Update local state
+            let planWithRecipes = PlanWithRecipes(id: plan.id, plan: plan, recipes: validPlanRecipes)
             
             // Add to local plans list
             self.plans.insert(planWithRecipes, at: 0)
-            
-            // Set as selected plan
             self.selectedPlan = planWithRecipes
             
+            Logger.info("Added plan to array: \(planWithRecipes.plan.title)")
+            Logger.info("Plan week: \(planWithRecipes.plan.weekStart) to \(planWithRecipes.plan.weekEnd)")
+            Logger.info("Is current week: \(planWithRecipes.isCurrentWeek)")
+            Logger.info("Total plans in array: \(self.plans.count)")
+            
             generationState = .saved(plan)
-            Logger.info("Successfully generated AI meal plan")
+            Logger.info("Successfully generated Spoonacular meal plan with \(validPlanRecipes.count) meals")
             return true
             
+        } catch let error as SpoonacularError {
+            Logger.error("Spoonacular API error: \(error.localizedDescription)")
+            
+            // Try to load from cache as fallback
+            Logger.info("Attempting to load from cache as fallback")
+            if let cachedData = try? await supabaseManager.getCachedMealPlan(userId: userProfile.id, weekStart: weekStart) {
+                let planWithRecipes = PlanWithRecipes(id: cachedData.plan.id, plan: cachedData.plan, recipes: cachedData.recipes)
+                
+                self.plans.insert(planWithRecipes, at: 0)
+                self.selectedPlan = planWithRecipes
+                
+                generationState = .saved(cachedData.plan)
+                Logger.info("Successfully loaded cached meal plan as fallback")
+                return true
+            }
+            
+            generationState = .error(error.localizedDescription)
+            self.errorMessage = error.localizedDescription
+            return false
         } catch {
-            Logger.error("Failed to generate AI meal plan: \(error)")
+            Logger.error("Failed to generate Spoonacular meal plan: \(error)")
+            
+            // Try to load from cache as fallback
+            Logger.info("Attempting to load from cache as fallback")
+            if let cachedData = try? await supabaseManager.getCachedMealPlan(userId: userProfile.id, weekStart: weekStart) {
+                let planWithRecipes = PlanWithRecipes(id: cachedData.plan.id, plan: cachedData.plan, recipes: cachedData.recipes)
+                
+                self.plans.insert(planWithRecipes, at: 0)
+                self.selectedPlan = planWithRecipes
+                
+                generationState = .saved(cachedData.plan)
+                Logger.info("Successfully loaded cached meal plan as fallback")
+                return true
+            }
+            
             generationState = .error(error.localizedDescription)
             self.errorMessage = error.localizedDescription
             return false
         }
+    }
+    
+    /// Generates a Spoonacular meal plan with preferences (convenience method)
+    func generateSpoonacularMealPlanWithPreferences(
+        for userProfile: UserProfile,
+        preferences: MealPlanPreferences
+    ) async -> Bool {
+        return await generateSpoonacularMealPlan(
+            for: userProfile,
+            weekStart: preferences.weekStartDate
+        )
+    }
+    
+    /// Legacy method for backward compatibility - now uses Spoonacular
+    func generateAIMealPlan(
+        for userProfile: UserProfile,
+        preferences: MealPlanPreferences
+    ) async -> Bool {
+        return await generateSpoonacularMealPlanWithPreferences(
+            for: userProfile,
+            preferences: preferences
+        )
     }
     
     /// Marks a meal as completed or uncompleted
@@ -355,13 +544,7 @@ class PlanViewModel: ObservableObject {
         generationState = .idle
     }
     
-    /// Generates an AI meal plan with preferences (convenience method)
-    func generateAIMealPlanWithPreferences(
-        for userProfile: UserProfile,
-        preferences: MealPlanPreferences
-    ) async -> Bool {
-        return await generateAIMealPlan(for: userProfile, preferences: preferences)
-    }
+
     
     /// Clears any error messages
     func clearError() {
@@ -446,7 +629,132 @@ class PlanViewModel: ObservableObject {
         }
     }
     
-    /// Generates grocery list for a plan
+    // MARK: - Spoonacular Integration
+    
+    /// Generates a Spoonacular shopping list for a plan with cache-first strategy
+    func generateSpoonacularGroceryList(for planId: String, userProfile: UserProfile) async -> [GroceryItem]? {
+        do {
+            Logger.info("Generating Spoonacular shopping list for plan: \(planId)")
+            
+            // Step 1: Check for cached grocery list first
+            if let cachedGroceryList = try? await supabaseManager.getCachedGroceryList(planId: planId, userId: userProfile.id),
+               !cachedGroceryList.isEmpty {
+                Logger.info("Found cached grocery list with \(cachedGroceryList.count) items")
+                return cachedGroceryList
+            }
+            
+            // Step 2: Check if user has Spoonacular credentials
+            guard let username = userProfile.spoonacularUsername,
+                  let hash = userProfile.spoonacularHash else {
+                Logger.warning("User missing Spoonacular credentials, falling back to manual grocery list")
+                return await generateGroceryList(for: planId)
+            }
+            
+            // Step 3: Find the plan
+            guard let plan = plans.first(where: { $0.id == planId }) else {
+                self.errorMessage = "Plan not found"
+                return nil
+            }
+            
+            // Step 4: Generate shopping list from Spoonacular
+            let spoonacularShoppingList = try await spoonacularService.generateShoppingList(
+                mealPlan: createMockSpoonacularMealPlan(from: plan),
+                username: username,
+                hash: hash
+            )
+            
+            // Step 5: Map to grocery items
+            let groceryItems = SpoonacularMapper.mapGroceryList(
+                spoonacularShoppingList,
+                userId: plan.plan.userId,
+                planId: planId
+            )
+            
+            // Step 6: Save to Supabase for caching
+            for groceryItem in groceryItems {
+                try await supabaseManager.saveGroceryItem(groceryItem)
+            }
+            
+            Logger.info("Successfully generated Spoonacular shopping list with \(groceryItems.count) items")
+            return groceryItems
+            
+        } catch let error as SpoonacularError {
+            Logger.error("Spoonacular shopping list error: \(error.localizedDescription)")
+            
+            // Try to load from cache as fallback
+            Logger.info("Attempting to load cached grocery list as fallback")
+            if let cachedGroceryList = try? await supabaseManager.getCachedGroceryList(planId: planId, userId: userProfile.id),
+               !cachedGroceryList.isEmpty {
+                Logger.info("Successfully loaded cached grocery list as fallback")
+                return cachedGroceryList
+            }
+            
+            // Fall back to manual grocery list generation
+            Logger.info("Falling back to manual grocery list generation")
+            return await generateGroceryList(for: planId)
+        } catch {
+            Logger.error("Failed to generate Spoonacular shopping list: \(error)")
+            
+            // Try to load from cache as fallback
+            Logger.info("Attempting to load cached grocery list as fallback")
+            if let cachedGroceryList = try? await supabaseManager.getCachedGroceryList(planId: planId, userId: userProfile.id),
+               !cachedGroceryList.isEmpty {
+                Logger.info("Successfully loaded cached grocery list as fallback")
+                return cachedGroceryList
+            }
+            
+            // Fall back to manual grocery list generation
+            Logger.info("Falling back to manual grocery list generation")
+            return await generateGroceryList(for: planId)
+        }
+    }
+    
+    /// Creates a mock Spoonacular meal plan from an existing plan for shopping list generation
+    private func createMockSpoonacularMealPlan(from plan: PlanWithRecipes) -> SpoonacularMealPlan {
+        // This is a simplified mock - in production, you might want to store the original response
+        let mockWeek = SpoonacularWeek(
+            monday: nil, tuesday: nil, wednesday: nil, thursday: nil,
+            friday: nil, saturday: nil, sunday: nil
+        )
+        
+        return SpoonacularMealPlan(week: mockWeek)
+    }
+    
+    /// Cleans up old cached data to free up storage
+    func cleanupOldCachedData() async {
+        do {
+            Logger.info("Cleaning up old cached data")
+            try await supabaseManager.clearOldCachedData(olderThanDays: 7)
+            Logger.info("Successfully cleaned up old cached data")
+        } catch {
+            Logger.error("Failed to cleanup old cached data: \(error)")
+        }
+    }
+    
+    /// Checks if user has valid Spoonacular credentials
+    func hasValidSpoonacularCredentials(userId: String) async -> Bool {
+        do {
+            let credentials = try await supabaseManager.getUserSpoonacularCredentials(userId: userId)
+            return credentials != nil
+        } catch {
+            Logger.error("Failed to check Spoonacular credentials: \(error)")
+            return false
+        }
+    }
+    
+    /// Updates user's Spoonacular credentials
+    func updateSpoonacularCredentials(userId: String, username: String, hash: String) async -> Bool {
+        do {
+            try await supabaseManager.updateUserSpoonacularCredentials(userId: userId, username: username, hash: hash)
+            Logger.info("Successfully updated Spoonacular credentials for user \(userId)")
+            return true
+        } catch {
+            Logger.error("Failed to update Spoonacular credentials: \(error)")
+            return false
+        }
+    }
+    
+    /// Generates grocery list for a plan (legacy method - now tries Spoonacular first)
     func generateGroceryList(for planId: String) async -> [GroceryItem]? {
         do {
             Logger.info("Generating grocery list for plan: \(planId)")
@@ -526,32 +834,7 @@ class PlanViewModel: ObservableObject {
         return upcomingMeals
     }
     
-    // MARK: - AI-Generated Plan Management
-    /// Loads AI-generated plans from UserDefaults
-    func loadAIGeneratedPlans() {
-        if let data = UserDefaults.standard.data(forKey: "AIGeneratedPlans"),
-           let plans = try? JSONDecoder().decode([MealPlan].self, from: data) {
-            aiGeneratedPlans = plans
-        }
-    }
-    /// Saves AI-generated plans to UserDefaults
-    func saveAIGeneratedPlans() {
-        if let data = try? JSONEncoder().encode(aiGeneratedPlans) {
-            UserDefaults.standard.set(data, forKey: "AIGeneratedPlans")
-        }
-    }
-    /// Adds a new AI-generated plan and persists it
-    func addAIGeneratedPlan(_ plan: MealPlan) {
-        var aiPlan = plan
-        aiPlan.isAIGenerated = true
-        aiGeneratedPlans.append(aiPlan)
-        saveAIGeneratedPlans()
-    }
-    
-    // Load AI-generated plans on initialization
-    init() {
-        loadAIGeneratedPlans()
-    }
+
 }
 
 // MARK: - Generation State

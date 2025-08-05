@@ -331,7 +331,7 @@ class OnboardingViewModel: ObservableObject {
                 subscriptionType: "free",
                 subscriptionRenewal: nil,
                 plansCreatedThisMonth: 0,
-                aiGenerationsThisMonth: 0,
+                spoonacularGenerationsThisMonth: 0,
                 lastPlanReset: Date(),
                 profileImageUrl: nil,
                 bio: nil,
@@ -401,6 +401,8 @@ class OnboardingViewModel: ObservableObject {
                 ),
                 achievements: [],
                 progressMetrics: [],
+                spoonacularUsername: nil,
+                spoonacularHash: nil,
                 createdAt: Date(),
                 updatedAt: Date()
             )

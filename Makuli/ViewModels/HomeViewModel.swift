@@ -27,7 +27,7 @@ class HomeViewModel: ObservableObject {
     
     // Quick actions state
     @Published var showingPlanCreation = false
-    @Published var showingAIGeneration = false
+    @Published var showingSpoonacularGeneration = false
     @Published var showingGroceryList = false
     
     private let supabaseManager = SupabaseManager.shared
@@ -355,8 +355,8 @@ class HomeViewModel: ObservableObject {
         showingPlanCreation = true
     }
     
-    func handleAIGenerationTap() {
-        showingAIGeneration = true
+    func handleSpoonacularGenerationTap() {
+        showingSpoonacularGeneration = true
     }
     
     func handleCurrentPlanTap() {
