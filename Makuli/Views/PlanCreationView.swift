@@ -55,7 +55,7 @@ struct PlanCreationView: View {
                     if selectedCreationMethod == .template {
                         templateSelection
                     } else {
-                        aiGenerationSection
+                        spoonacularGenerationSection
                     }
                     
                     weekSelectionSection
@@ -177,7 +177,7 @@ extension PlanCreationView {
                 .padding()
             } else if planViewModel.templates.isEmpty {
                 VStack(spacing: 8) {
-                    Image(systemName: "doc.text.badge.ellipsis")
+                                            Image(systemName: "doc.text")
                         .font(.system(size: 30))
                         .foregroundColor(.gray)
                     
@@ -212,14 +212,14 @@ extension PlanCreationView {
         }
     }
     
-    private var aiGenerationSection: some View {
+    private var spoonacularGenerationSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("AI Generation")
+            Text("Spoonacular Generation")
                 .font(.headline)
             
             VStack(spacing: 12) {
                 HStack {
-                    Image(systemName: "wand.and.stars.inverse")
+                    Image(systemName: "fork.knife")
                         .foregroundColor(AppColors.primaryOrange)
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -227,7 +227,7 @@ extension PlanCreationView {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         
-                        Text("AI will create a custom plan based on your profile")
+                        Text("Spoonacular will create a custom plan based on your profile")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -244,7 +244,7 @@ extension PlanCreationView {
                         Image(systemName: "info.circle")
                             .foregroundColor(.blue)
                         
-                        Text("You have \(profile.aiGenerationsRemainingThisMonth) AI generations remaining this month")
+                        Text("You have \(profile.spoonacularGenerationsRemainingThisMonth) Spoonacular generations remaining this month")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
@@ -305,7 +305,7 @@ extension PlanCreationView {
         case .template:
             return selectedTemplate != nil && profile.canCreateMorePlans
         case .ai:
-            return profile.canUseAIGeneration && profile.canCreateMorePlans
+            return profile.canUseSpoonacularGeneration && profile.canCreateMorePlans
         }
     }
     
@@ -342,14 +342,14 @@ extension PlanCreationView {
                     excludedIngredients: []
                 )
                 
-                success = await planViewModel.generateAIMealPlan(
+                success = await planViewModel.generateSpoonacularMealPlanWithPreferences(
                     for: profile,
                     preferences: preferences
                 )
                 
                 if success {
                     await profileViewModel.incrementPlanCreationCount()
-                    await profileViewModel.incrementAIGenerationCount()
+                    await profileViewModel.incrementSpoonacularGenerationCount()
                 }
             }
             

@@ -68,8 +68,8 @@ struct HomeView: View {
             .sheet(isPresented: $viewModel.showingPlanCreation) {
                 PlanCreationView()
             }
-            .sheet(isPresented: $viewModel.showingAIGeneration) {
-                AIGenerationView()
+            .sheet(isPresented: $viewModel.showingSpoonacularGeneration) {
+                MealPlanGenerationView()
             }
             .sheet(isPresented: $viewModel.showingGroceryList) {
                 GroceryListView()
@@ -344,7 +344,7 @@ extension HomeView {
                     )
                 }
                 
-                Button(action: viewModel.handleAIGenerationTap) {
+                Button(action: viewModel.handleSpoonacularGenerationTap) {
                     HStack(spacing: 8) {
                         Image(systemName: "wand.and.stars")
                             .font(.system(size: 16, weight: .semibold))
@@ -578,7 +578,7 @@ struct QuickRecipeCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            AsyncImage(url: URL(string: recipe.imageUrl ?? "")) { image in
+            AsyncImage(url: recipe.validImageURL) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
