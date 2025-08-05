@@ -44,24 +44,33 @@ struct Configuration {
         }
     }
     
-    // MARK: - API Configuration
-    static var openAIAPIKey: String {
-        if isProduction {
-            // In production, retrieve from Keychain or environment
-            return KeychainManager.shared.getAPIKey("openai_production") ?? ""
-        } else {
-            // For development - set your development key here
-            return ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-        }
+
+    
+    // MARK: - Spoonacular Configuration
+    static var spoonacularApiKey: String {
+        // For now, using the provided API key
+        // In production, this should be stored securely
+        return "0fb3b79782eb4a3987adbf8c65e0ddee"
+    }
+    
+    static var spoonacularBaseURL: String {
+        return "https://api.spoonacular.com"
+    }
+    
+    static var spoonacularEndpoints: SpoonacularEndpoints {
+        return SpoonacularEndpoints()
+    }
+    
+    struct SpoonacularEndpoints {
+        let mealPlannerGenerate = "/mealplanner/generate"
+        let recipeInformation = "/recipes/{id}/information"
+        let shoppingList = "/mealplanner/{username}/shopping-list"
+        let connectUser = "/users/connect"
     }
     
     // MARK: - Feature Flags
-    static var enableAI: Bool {
-        return !openAIAPIKey.isEmpty
-    }
-    
-    static var useMockAIResponses: Bool {
-        return !enableAI && !isProduction
+    static var enableSpoonacular: Bool {
+        return !spoonacularApiKey.isEmpty
     }
     
     static var enableAnalytics: Bool { isProduction }
@@ -88,46 +97,8 @@ struct Configuration {
     
     struct FreePlanLimits {
         let maxPlansPerMonth = 5
-        let maxAIGenerationsPerMonth = 3
+        let maxSpoonacularGenerationsPerMonth = 10
         let maxRecipesPerPlan = 21
-    }
-    
-    // MARK: - Mock Data for Development
-    static var mockAIResponse: MealPlanGenerationResponse {
-        return MealPlanGenerationResponse(
-            weekTitle: "Development Week",
-            totalEstimatedCost: 75.0,
-            meals: [
-                DayMealPlan(
-                    day: "Monday",
-                    dayOfWeek: 0,
-                    breakfast: GeneratedMeal(
-                        name: "Avocado Toast",
-                        cookingTime: 10,
-                        difficulty: "easy",
-                        ingredients: ["bread", "avocado", "salt"],
-                        instructions: ["Toast bread", "Mash avocado", "Spread on toast"],
-                        estimatedCost: 8.0
-                    ),
-                    lunch: GeneratedMeal(
-                        name: "Caesar Salad",
-                        cookingTime: 15,
-                        difficulty: "easy",
-                        ingredients: ["lettuce", "croutons", "dressing"],
-                        instructions: ["Mix ingredients", "Add dressing"],
-                        estimatedCost: 12.0
-                    ),
-                    dinner: GeneratedMeal(
-                        name: "Grilled Chicken",
-                        cookingTime: 25,
-                        difficulty: "medium",
-                        ingredients: ["chicken", "herbs", "oil"],
-                        instructions: ["Season chicken", "Grill until done"],
-                        estimatedCost: 15.0
-                    )
-                )
-            ]
-        )
     }
     
     // MARK: - App Store Configuration
