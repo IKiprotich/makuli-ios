@@ -70,8 +70,8 @@ struct UserProfile: Identifiable, Codable {
     /// Number of plans created this month
     var plansCreatedThisMonth: Int
     
-    /// Number of AI generations this month
-    var aiGenerationsThisMonth: Int
+    /// Number of Spoonacular generations this month
+    var spoonacularGenerationsThisMonth: Int
     
     /// Last plan reset date
     var lastPlanReset: Date
@@ -124,6 +124,12 @@ struct UserProfile: Identifiable, Codable {
     /// User's progress metrics over time (optional, backend may omit this field)
     var progressMetrics: [ProgressMetrics]?
     
+    /// Spoonacular username for API operations (optional)
+    var spoonacularUsername: String?
+    
+    /// Spoonacular user hash for API operations (optional)
+    var spoonacularHash: String?
+    
     /// Timestamp when the profile was created
     var createdAt: Date
     
@@ -147,7 +153,7 @@ struct UserProfile: Identifiable, Codable {
         case subscriptionType = "subscription_type"
         case subscriptionRenewal = "subscription_renewal"
         case plansCreatedThisMonth = "plans_created_this_month"
-        case aiGenerationsThisMonth = "ai_generations_this_month"
+        case spoonacularGenerationsThisMonth = "spoonacular_generations_this_month"
         case lastPlanReset = "last_plan_reset"
         case profileImageUrl = "profile_image_url"
         case bio
@@ -165,6 +171,8 @@ struct UserProfile: Identifiable, Codable {
         case budgetPreferences = "budget_preferences"
         case achievements
         case progressMetrics = "progress_metrics"
+        case spoonacularUsername = "spoonacular_username"
+        case spoonacularHash = "spoonacular_hash"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -190,7 +198,7 @@ struct UserProfile: Identifiable, Codable {
         subscriptionType = try container.decodeIfPresent(String.self, forKey: .subscriptionType)
         subscriptionRenewal = try container.decodeIfPresent(Date.self, forKey: .subscriptionRenewal)
         plansCreatedThisMonth = try container.decode(Int.self, forKey: .plansCreatedThisMonth)
-        aiGenerationsThisMonth = try container.decode(Int.self, forKey: .aiGenerationsThisMonth)
+        spoonacularGenerationsThisMonth = try container.decode(Int.self, forKey: .spoonacularGenerationsThisMonth)
         lastPlanReset = try container.decode(Date.self, forKey: .lastPlanReset)
         profileImageUrl = try container.decodeIfPresent(String.self, forKey: .profileImageUrl)
         bio = try container.decodeIfPresent(String.self, forKey: .bio)
@@ -216,6 +224,8 @@ struct UserProfile: Identifiable, Codable {
         budgetPreferences = try container.decodeIfPresent(BudgetPreferences.self, forKey: .budgetPreferences)
         achievements = try container.decodeIfPresent([Achievement].self, forKey: .achievements)
         progressMetrics = try container.decodeIfPresent([ProgressMetrics].self, forKey: .progressMetrics)
+        spoonacularUsername = try container.decodeIfPresent(String.self, forKey: .spoonacularUsername)
+        spoonacularHash = try container.decodeIfPresent(String.self, forKey: .spoonacularHash)
         
         // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
@@ -254,7 +264,7 @@ struct UserProfile: Identifiable, Codable {
      *   - subscriptionType: User's subscription type
      *   - subscriptionRenewal: User's subscription renewal date
      *   - plansCreatedThisMonth: Number of plans created this month
-     *   - aiGenerationsThisMonth: Number of AI generations this month
+     *   - spoonacularGenerationsThisMonth: Number of Spoonacular generations this month
      *   - lastPlanReset: Last plan reset date
      *   - profileImageUrl: User's profile picture URL
      *   - bio: User's bio or description
@@ -272,10 +282,12 @@ struct UserProfile: Identifiable, Codable {
      *   - budgetPreferences: User's budget and cost preferences
      *   - achievements: Array of achievements
      *   - progressMetrics: Array of progress metrics
+     *   - spoonacularUsername: Spoonacular username for API operations
+     *   - spoonacularHash: Spoonacular user hash for API operations
      *   - createdAt: Creation timestamp
      *   - updatedAt: Last update timestamp
      */
-    init(id: String, userId: String?, name: String?, email: String?, age: Int?, gender: String?, goal: String?, diet: String?, budget: String?, isPremium: Bool, isOnboardingCompleted: Bool, subscriptionType: String?, subscriptionRenewal: Date?, plansCreatedThisMonth: Int, aiGenerationsThisMonth: Int, lastPlanReset: Date, profileImageUrl: String?, bio: String?, location: String?, preferredLanguage: String?, timezone: String?, measurementSystem: String?, preferredCurrency: String?, notificationPreferences: NotificationPreferences?, privacySettings: PrivacySettings?, fitnessGoals: FitnessGoals?, mealPlanningPreferences: MealPlanningPreferences?, dietaryPreferences: DietaryPreferences?, cookingPreferences: CookingPreferences?, budgetPreferences: BudgetPreferences?, achievements: [Achievement]?, progressMetrics: [ProgressMetrics]?, createdAt: Date, updatedAt: Date) {
+    init(id: String, userId: String?, name: String?, email: String?, age: Int?, gender: String?, goal: String?, diet: String?, budget: String?, isPremium: Bool, isOnboardingCompleted: Bool, subscriptionType: String?, subscriptionRenewal: Date?, plansCreatedThisMonth: Int, spoonacularGenerationsThisMonth: Int, lastPlanReset: Date, profileImageUrl: String?, bio: String?, location: String?, preferredLanguage: String?, timezone: String?, measurementSystem: String?, preferredCurrency: String?, notificationPreferences: NotificationPreferences?, privacySettings: PrivacySettings?, fitnessGoals: FitnessGoals?, mealPlanningPreferences: MealPlanningPreferences?, dietaryPreferences: DietaryPreferences?, cookingPreferences: CookingPreferences?, budgetPreferences: BudgetPreferences?, achievements: [Achievement]?, progressMetrics: [ProgressMetrics]?, spoonacularUsername: String?, spoonacularHash: String?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.userId = userId
         self.name = name
@@ -290,7 +302,7 @@ struct UserProfile: Identifiable, Codable {
         self.subscriptionType = subscriptionType
         self.subscriptionRenewal = subscriptionRenewal
         self.plansCreatedThisMonth = plansCreatedThisMonth
-        self.aiGenerationsThisMonth = aiGenerationsThisMonth
+        self.spoonacularGenerationsThisMonth = spoonacularGenerationsThisMonth
         self.lastPlanReset = lastPlanReset
         self.profileImageUrl = profileImageUrl
         self.bio = bio
@@ -308,6 +320,8 @@ struct UserProfile: Identifiable, Codable {
         self.budgetPreferences = budgetPreferences
         self.achievements = achievements
         self.progressMetrics = progressMetrics
+        self.spoonacularUsername = spoonacularUsername
+        self.spoonacularHash = spoonacularHash
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -433,7 +447,7 @@ struct UserProfile: Identifiable, Codable {
             subscriptionType: subscriptionType,
             subscriptionRenewal: subscriptionRenewal,
             plansCreatedThisMonth: plansCreatedThisMonth,
-            aiGenerationsThisMonth: aiGenerationsThisMonth,
+            spoonacularGenerationsThisMonth: spoonacularGenerationsThisMonth,
             lastPlanReset: lastPlanReset,
             profileImageUrl: profileImageUrl,
             bio: newBio,
@@ -451,6 +465,8 @@ struct UserProfile: Identifiable, Codable {
             budgetPreferences: budgetPreferences,
             achievements: achievements,
             progressMetrics: progressMetrics,
+            spoonacularUsername: spoonacularUsername,
+            spoonacularHash: spoonacularHash,
             createdAt: createdAt,
             updatedAt: Date()
         )
@@ -478,7 +494,7 @@ struct UserProfile: Identifiable, Codable {
             subscriptionType: subscriptionType,
             subscriptionRenewal: subscriptionRenewal,
             plansCreatedThisMonth: plansCreatedThisMonth,
-            aiGenerationsThisMonth: aiGenerationsThisMonth,
+            spoonacularGenerationsThisMonth: spoonacularGenerationsThisMonth,
             lastPlanReset: lastPlanReset,
             profileImageUrl: profileImageUrl,
             bio: bio,
@@ -496,6 +512,8 @@ struct UserProfile: Identifiable, Codable {
             budgetPreferences: budgetPreferences,
             achievements: achievements,
             progressMetrics: progressMetrics,
+            spoonacularUsername: spoonacularUsername,
+            spoonacularHash: spoonacularHash,
             createdAt: createdAt,
             updatedAt: Date()
         )
@@ -1246,10 +1264,10 @@ extension UserProfile {
         return max(0, maxPlans - plansCreatedThisMonth)
     }
     
-    /// Number of AI generations remaining this month
-    var aiGenerationsRemainingThisMonth: Int {
+    /// Number of Spoonacular generations remaining this month
+    var spoonacularGenerationsRemainingThisMonth: Int {
         let maxGenerations = hasPremiumAccess ? 20 : 5
-        return max(0, maxGenerations - aiGenerationsThisMonth)
+        return max(0, maxGenerations - spoonacularGenerationsThisMonth)
     }
     
     /// Whether profile is complete
@@ -1272,9 +1290,9 @@ extension UserProfile {
         return plansCreatedThisMonth < (hasPremiumAccess ? 10 : 3)
     }
     
-    /// Whether user can use AI generation
-    var canUseAIGeneration: Bool {
-        return aiGenerationsThisMonth < (hasPremiumAccess ? 20 : 5)
+    /// Whether user can use Spoonacular generation
+    var canUseSpoonacularGeneration: Bool {
+        return spoonacularGenerationsThisMonth < (hasPremiumAccess ? 20 : 5)
     }
     
     /// Check if user needs to reset monthly limits
@@ -1292,8 +1310,8 @@ extension UserProfile {
         // Note: This would need to be handled differently since these are let properties
     }
     
-    /// Increment AI generation count
-    mutating func incrementAIGenerationCount() {
+    /// Increment Spoonacular generation count
+    mutating func incrementSpoonacularGenerationCount() {
         resetMonthlyLimitsIfNeeded()
         // Note: This would need to be handled differently since these are let properties
     }
@@ -1303,8 +1321,8 @@ extension UserProfile {
         switch action {
         case .createPlan:
             return canCreateMorePlans
-        case .useAIGeneration:
-            return canUseAIGeneration
+        case .useSpoonacularGeneration:
+            return canUseSpoonacularGeneration
         case .accessPremiumTemplates:
             return hasPremiumAccess
         case .exportGroceryList:
@@ -1313,11 +1331,227 @@ extension UserProfile {
             return hasPremiumAccess
         }
     }
+    
+    // MARK: - Spoonacular Integration
+    
+    /// Maps user diet preferences to Spoonacular diet parameter
+    var spoonacularDiet: String? {
+        // Check dietary restrictions first (more specific)
+        let restrictions = dietaryPreferences?.restrictions ?? []
+        
+        if restrictions.contains("vegan") {
+            return "vegan"
+        } else if restrictions.contains("vegetarian") {
+            return "vegetarian"
+        } else if restrictions.contains("keto") {
+            return "ketogenic"
+        } else if restrictions.contains("paleo") {
+            return "paleo"
+        } else if restrictions.contains("mediterranean") {
+            return "mediterranean"
+        }
+        
+        // Fall back to main diet field
+        switch diet?.lowercased() {
+        case "vegan":
+            return "vegan"
+        case "vegetarian":
+            return "vegetarian"
+        case "keto":
+            return "ketogenic"
+        case "paleo":
+            return "paleo"
+        case "mediterranean":
+            return "mediterranean"
+        default:
+            return nil
+        }
+    }
+    
+    /// Maps user exclusions to Spoonacular exclude parameter
+    var spoonacularExclusions: String? {
+        var exclusions: [String] = []
+        
+        // Add allergies
+        exclusions.append(contentsOf: dietaryPreferences?.allergies ?? [])
+        
+        // Add disliked ingredients
+        exclusions.append(contentsOf: dietaryPreferences?.dislikedIngredients ?? [])
+        
+        // Add ingredients to avoid
+        exclusions.append(contentsOf: dietaryPreferences?.avoidIngredients ?? [])
+        
+        // Remove duplicates and filter out empty strings
+        let uniqueExclusions = Array(Set(exclusions)).filter { !$0.isEmpty }
+        
+        return uniqueExclusions.isEmpty ? nil : uniqueExclusions.joined(separator: ",")
+    }
+    
+    /// Maps user calorie target to Spoonacular targetCalories parameter
+    var spoonacularTargetCalories: Int? {
+        return fitnessGoals?.targetCalories
+    }
+    
+    /// Maps user cuisine preferences to Spoonacular cuisine parameter
+    var spoonacularCuisines: [String] {
+        return mealPlanningPreferences?.preferredCuisines ?? []
+    }
+    
+    /// Maps user cooking skill level to recipe complexity
+    var spoonacularRecipeComplexity: String {
+        let skillLevel = cookingPreferences?.skillLevel ?? "beginner"
+        
+        switch skillLevel.lowercased() {
+        case "beginner", "some experience":
+            return "easy"
+        case "intermediate":
+            return "medium"
+        case "advanced", "expert chef":
+            return "hard"
+        default:
+            return "medium"
+        }
+    }
+    
+    /// Maps user cooking time preferences to maxReadyTime parameter
+    var spoonacularMaxReadyTime: Int? {
+        let preferredTime = cookingPreferences?.preferredCookingTime ?? 30
+        let mealPrepTime = mealPlanningPreferences?.preferredPrepTime ?? 30
+        
+        // Return the higher of the two, but cap at 60 minutes
+        return min(max(preferredTime, mealPrepTime), 60)
+    }
+    
+    /// Maps user budget preferences to Spoonacular maxPrice parameter
+    var spoonacularMaxPrice: Double? {
+        guard let budgetPrefs = budgetPreferences else { return nil }
+        
+        // Use weekly budget divided by 21 meals (3 meals/day * 7 days)
+        if let weeklyBudget = budgetPrefs.weeklyBudget {
+            return weeklyBudget / 21.0
+        }
+        
+        // Fall back to preferred meal price
+        if let mealPrice = budgetPrefs.preferredMealPrice {
+            return mealPrice
+        }
+        
+        // Default based on budget category
+        switch budget?.lowercased() {
+        case "low":
+            return 3.0 // $3 per meal
+        case "medium":
+            return 5.0 // $5 per meal
+        case "high":
+            return 8.0 // $8 per meal
+        default:
+            return 5.0 // Default to medium
+        }
+    }
+    
+    /// Maps user meal planning preferences to Spoonacular parameters
+    var spoonacularMealPlanningParams: [String: Any] {
+        var params: [String: Any] = [:]
+        
+        // Add meals per day
+        if let mealsPerDay = mealPlanningPreferences?.mealsPerDay {
+            params["mealsPerDay"] = mealsPerDay
+        }
+        
+        // Add cuisine preferences
+        if !spoonacularCuisines.isEmpty {
+            params["cuisine"] = spoonacularCuisines.joined(separator: ",")
+        }
+        
+        // Add recipe complexity
+        params["maxReadyTime"] = spoonacularMaxReadyTime
+        
+        // Add price limit
+        if let maxPrice = spoonacularMaxPrice {
+            params["maxPrice"] = maxPrice
+        }
+        
+        return params
+    }
+    
+    /// Creates a comprehensive Spoonacular request parameters dictionary
+    func createSpoonacularRequestParams() -> [String: String] {
+        var params: [String: String] = [
+            "timeFrame": "week",
+            "apiKey": Configuration.spoonacularApiKey
+        ]
+        
+        // Add diet
+        if let diet = spoonacularDiet {
+            params["diet"] = diet
+        }
+        
+        // Add exclusions
+        if let exclusions = spoonacularExclusions {
+            params["exclude"] = exclusions
+        }
+        
+        // Add target calories
+        if let targetCalories = spoonacularTargetCalories {
+            params["targetCalories"] = String(targetCalories)
+        }
+        
+        // Add cuisine preferences
+        if !spoonacularCuisines.isEmpty {
+            params["cuisine"] = spoonacularCuisines.joined(separator: ",")
+        }
+        
+        // Add max ready time
+        if let maxReadyTime = spoonacularMaxReadyTime {
+            params["maxReadyTime"] = String(maxReadyTime)
+        }
+        
+        // Add max price
+        if let maxPrice = spoonacularMaxPrice {
+            params["maxPrice"] = String(Int(maxPrice * 100)) // Convert to cents
+        }
+        
+        return params
+    }
+    
+    /// Validates if user has sufficient preferences for Spoonacular meal planning
+    var hasValidSpoonacularPreferences: Bool {
+        // Check if we have at least basic dietary information
+        let hasDietaryInfo = diet != nil || !(dietaryPreferences?.restrictions ?? []).isEmpty
+        
+        // Check if we have calorie target or budget info
+        let hasNutritionalInfo = fitnessGoals?.targetCalories != nil || budget != nil
+        
+        return hasDietaryInfo && hasNutritionalInfo
+    }
+    
+    /// Gets a summary of user preferences for debugging/logging
+    var spoonacularPreferencesSummary: String {
+        var summary: [String] = []
+        
+        if let diet = spoonacularDiet {
+            summary.append("Diet: \(diet)")
+        }
+        
+        if let targetCalories = spoonacularTargetCalories {
+            summary.append("Target Calories: \(targetCalories)")
+        }
+        
+        if let exclusions = spoonacularExclusions {
+            summary.append("Exclusions: \(exclusions)")
+        }
+        
+        if !spoonacularCuisines.isEmpty {
+            summary.append("Cuisines: \(spoonacularCuisines.joined(separator: ", "))")
+        }
+        
+        return summary.isEmpty ? "No preferences set" : summary.joined(separator: ", ")
+    }
 }
 
 enum UserAction {
     case createPlan
-    case useAIGeneration
+    case useSpoonacularGeneration
     case accessPremiumTemplates
     case exportGroceryList
     case customizeRecipes

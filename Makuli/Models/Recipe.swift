@@ -98,6 +98,9 @@ struct Recipe: Identifiable, Codable {
     /// ID of the user who created this recipe (may be nil for system recipes)
     let createdBy: String?
     
+    /// Spoonacular recipe ID (for external API reference)
+    let spoonacularId: String?
+    
     /// Whether this recipe is publicly visible
     let isPublic: Bool
     
@@ -128,6 +131,7 @@ struct Recipe: Identifiable, Codable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case createdBy = "created_by"
+        case spoonacularId = "spoonacular_id"
         case isPublic = "is_public"
         case rating
         case ratingCount = "rating_count"
@@ -158,6 +162,7 @@ struct Recipe: Identifiable, Codable {
     ///   - createdAt: Creation timestamp
     ///   - updatedAt: Last update timestamp
     ///   - createdBy: Creator's user ID
+    ///   - spoonacularId: Spoonacular recipe ID for external API reference
     ///   - isPublic: Public visibility flag
     ///   - rating: Average rating
     ///   - ratingCount: Number of ratings
@@ -179,6 +184,7 @@ struct Recipe: Identifiable, Codable {
         createdAt: Date,
         updatedAt: Date,
         createdBy: String? = nil,
+        spoonacularId: String? = nil,
         isPublic: Bool,
         rating: Double,
         ratingCount: Int
@@ -200,6 +206,7 @@ struct Recipe: Identifiable, Codable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.createdBy = createdBy
+        self.spoonacularId = spoonacularId
         self.isPublic = isPublic
         self.rating = rating
         self.ratingCount = ratingCount
@@ -231,6 +238,7 @@ struct Recipe: Identifiable, Codable {
         cuisineType = try container.decodeIfPresent(String.self, forKey: .cuisineType)
         costEstimate = try container.decodeIfPresent(Double.self, forKey: .costEstimate)
         createdBy = try container.decodeIfPresent(String.self, forKey: .createdBy)
+        spoonacularId = try container.decodeIfPresent(String.self, forKey: .spoonacularId)
         isPublic = try container.decode(Bool.self, forKey: .isPublic)
         rating = try container.decode(Double.self, forKey: .rating)
         ratingCount = try container.decode(Int.self, forKey: .ratingCount)
