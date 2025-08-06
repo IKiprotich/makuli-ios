@@ -452,6 +452,7 @@ extension Plan {
         case "template": return "Template"
         case "ai": return "AI Generated"
         case "manual": return "Manual"
+        case "spoonacular": return "Spoonacular"
         default: return generationMethod.capitalized
         }
     }
