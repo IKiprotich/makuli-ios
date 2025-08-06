@@ -789,13 +789,42 @@ class SupabaseManager: ObservableObject {
         try await performDatabaseOperation({
             Logger.info("Saving Spoonacular meal plan to cache: plan ID \(plan.id), \(planRecipes.count) plan recipes, \(recipes.count) recipes")
             
-            // Save plan
-            try await client
-                .from("plans")
-                .upsert(plan)
-                .execute()
-            
-            Logger.info("Saved plan to database")
+            // Try to save plan with fallback for generation_method constraint issue
+            do {
+                try await client
+                    .from("plans")
+                    .upsert(plan)
+                    .execute()
+                
+                Logger.info("Saved plan to database")
+            } catch {
+                // If generation_method constraint fails, try with manual fallback
+                Logger.warning("Plan save failed, trying with manual generation_method: \(error)")
+                
+                // Create a new plan with manual generation method
+                let fallbackPlan = Plan(
+                    id: plan.id,
+                    userId: plan.userId,
+                    title: plan.title,
+                    weekStart: plan.weekStart,
+                    weekEnd: plan.weekEnd,
+                    totalCost: plan.totalCost,
+                    isCompleted: plan.isCompleted,
+                    createdAt: plan.createdAt,
+                    updatedAt: plan.updatedAt,
+                    templateId: plan.templateId,
+                    generationMethod: "manual", // Fallback to manual
+                    isFavorite: plan.isFavorite,
+                    completionPercentage: plan.completionPercentage
+                )
+                
+                try await client
+                    .from("plans")
+                    .upsert(fallbackPlan)
+                    .execute()
+                
+                Logger.info("Saved plan to database with manual generation_method fallback")
+            }
             
             // Save recipes FIRST (before plan recipes that reference them)
             for recipe in recipes {
