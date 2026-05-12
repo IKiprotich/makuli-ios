@@ -25,11 +25,11 @@ struct CookingSkillsView: View {
                     Text("Cooking Skills")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("How would you rate your cooking skills?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -43,10 +43,10 @@ struct CookingSkillsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(option.0)
                                     .font(.headline)
-                                    .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                    .foregroundColor(isSelected ? .white : AppColors.text)
                                 Text(option.1)
                                     .font(.caption)
-                                    .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textCharcoal.opacity(0.6))
+                                    .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textSecondary)
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -77,7 +77,7 @@ struct CookingSkillsView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

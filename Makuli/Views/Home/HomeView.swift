@@ -116,11 +116,11 @@ extension HomeView {
                         .foregroundColor(AppColors.text)
                     
                     if let profile = profileViewModel.profile {
-                        Text("Welcome back, \(profile.name ?? "there") 👋")
+                        Text("Welcome back, \(profile.name ?? "there")")
                             .font(.system(size: 18, weight: .medium, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     } else {
-                        Text("Ready to plan some amazing meals? 🍽️")
+                        Text("Ready to plan some amazing meals?")
                             .font(.system(size: 18, weight: .medium, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -408,13 +408,13 @@ extension HomeView {
     
     // MARK: - Helper Methods
     
-    private func generateProgressMetrics() -> [UIProgressMetrics] {
+    private func generateProgressMetrics() -> [ProgressMetric] {
         if !viewModel.hasActivePlan {
             return [
-                UIProgressMetrics(title: "This Week", value: "0/0", change: "", isPositive: true),
-                UIProgressMetrics(title: "Get Started", value: "Create Plan", change: "", isPositive: true),
-                UIProgressMetrics(title: "Recipes", value: "\(viewModel.quickRecipes.count)", change: "", isPositive: true),
-                UIProgressMetrics(title: "Groceries", value: "\(viewModel.groceryStats.totalItems)", change: "", isPositive: true),
+                ProgressMetric(title: "This Week", value: "0/0", change: "", isPositive: true),
+                ProgressMetric(title: "Get Started", value: "Create Plan", change: "", isPositive: true),
+                ProgressMetric(title: "Recipes", value: "\(viewModel.quickRecipes.count)", change: "", isPositive: true),
+                ProgressMetric(title: "Groceries", value: "\(viewModel.groceryStats.totalItems)", change: "", isPositive: true),
             ]
         }
         
@@ -422,25 +422,25 @@ extension HomeView {
         let todaysProgress = viewModel.todaysCompletionStatus
         
         return [
-            UIProgressMetrics(
+            ProgressMetric(
                 title: "This Week",
                 value: "\(completed)/\(total)",
                 change: "+\(completed)",
                 isPositive: true
             ),
-            UIProgressMetrics(
+            ProgressMetric(
                 title: "Today",
                 value: "\(todaysProgress.completed)/\(todaysProgress.total)",
                 change: "\(Int(todaysProgress.percentage))%",
                 isPositive: todaysProgress.percentage >= 50
             ),
-            UIProgressMetrics(
+            ProgressMetric(
                 title: "Progress",
                 value: "\(Int(percentage))%",
                 change: percentage >= 70 ? "Great!" : "Keep going",
                 isPositive: percentage >= 50
             ),
-            UIProgressMetrics(
+            ProgressMetric(
                 title: "Groceries",
                 value: "\(viewModel.groceryStats.checkedItems)/\(viewModel.groceryStats.totalItems)",
                 change: viewModel.groceryStats.totalItems > 0 ? "Ready" : "Generate",
@@ -450,179 +450,17 @@ extension HomeView {
     }
 }
 
-// MARK: - Supporting Views
+// MARK: - Supporting Types
 
-// Move UIProgressMetrics to be accessible by other files
-public struct UIProgressMetrics {
+/// Lightweight display model for the progress tracker dashboard cards.
+struct ProgressMetric {
     let title: String
     let value: String
     let change: String
     let isPositive: Bool
-    
-    public init(title: String, value: String, change: String, isPositive: Bool) {
-        self.title = title
-        self.value = value
-        self.change = change
-        self.isPositive = isPositive
-    }
 }
 
-struct TodaysMealCard: View {
-    let meal: PlanRecipe
-    let onToggleCompletion: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            // Enhanced meal completion toggle
-            Button(action: onToggleCompletion) {
-                ZStack {
-                    Circle()
-                        .fill(meal.isCompleted ? AppColors.successGreen : AppColors.border)
-                        .frame(width: 32, height: 32)
-                    
-                    if meal.isCompleted {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                }
-            }
-            
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text(meal.customMealName ?? "Meal")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(AppColors.text)
-                        .strikethrough(meal.isCompleted)
-                    
-                    Spacer()
-                    
-                    Text(meal.mealType.capitalized)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(AppColors.primaryOrange.opacity(0.15))
-                        )
-                        .foregroundColor(AppColors.primaryOrange)
-                }
-                
-                if let cookTime = meal.customCookTime {
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppColors.textSecondary)
-                        
-                        Text("\(cookTime) min")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                }
-            }
-            
-            Spacer()
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.card)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-        )
-        .opacity(meal.isCompleted ? 0.7 : 1.0)
-        .scaleEffect(meal.isCompleted ? 0.98 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: meal.isCompleted)
-    }
-}
-
-struct UpcomingMealCard: View {
-    let meal: PlanRecipe
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(meal.customMealName ?? "Meal")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .lineLimit(2)
-                    .foregroundColor(AppColors.text)
-                
-                Spacer()
-            }
-            
-            HStack {
-                Text(meal.mealType.capitalized)
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule()
-                            .fill(AppColors.primaryOrange.opacity(0.1))
-                    )
-                    .foregroundColor(AppColors.primaryOrange)
-                
-                Spacer()
-            }
-        }
-        .frame(width: 120)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(AppColors.card)
-                .shadow(color: .black.opacity(0.03), radius: 6, x: 0, y: 3)
-        )
-    }
-}
-
-struct QuickRecipeCard: View {
-    let recipe: Recipe
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            AsyncImage(url: recipe.validImageURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(AppColors.primaryOrange.opacity(0.2))
-                    .overlay(
-                        Image(systemName: "photo")
-                            .font(.system(size: 24))
-                            .foregroundColor(AppColors.primaryOrange.opacity(0.5))
-                    )
-            }
-            .frame(width: 140, height: 90)
-            .clipped()
-            .cornerRadius(12)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(recipe.title)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .lineLimit(2)
-                    .foregroundColor(AppColors.text)
-                
-                if let cookTime = recipe.cookTime {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppColors.textSecondary)
-                        
-                        Text("\(cookTime) min")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                }
-            }
-        }
-        .frame(width: 140)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.card)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-        )
-    }
-}
+// MARK: - Empty Plan Destination
 
 struct EmptyPlanView: View {
     var body: some View {

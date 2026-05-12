@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ProgressCard: View {
     
-    let metric: UIProgressMetrics
+    let metric: ProgressMetric
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(metric.title)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                    .foregroundColor(AppColors.textSecondary)
                 
                 Spacer()
                 
@@ -28,7 +28,7 @@ struct ProgressCard: View {
             
             Text(metric.value)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             if !metric.change.isEmpty {
                 HStack(spacing: 4) {
@@ -46,14 +46,14 @@ struct ProgressCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.bgCream)
+                .fill(AppColors.card)
                 .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
         )
     }
 }
 
 #Preview {
-    ProgressCard(metric: UIProgressMetrics(
+    ProgressCard(metric: ProgressMetric(
         title: "This Week",
         value: "12/15",
         change: "+3",

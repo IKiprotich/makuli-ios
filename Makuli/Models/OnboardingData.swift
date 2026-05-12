@@ -7,133 +7,47 @@
 
 import Foundation
 
-/**
- * OnboardingData Model
- * 
- * Represents the data collected during the user onboarding process.
- * This model captures user preferences, goals, and initial setup information
- * that will be used to personalize their meal planning experience.
- * 
- * Key Features:
- * - User demographic information
- * - Fitness and health goals
- * - Dietary preferences and restrictions
- * - Budget and lifestyle preferences
- * - Cooking experience and preferences
- * 
- * Database Relationships:
- * - Belongs to a User (via user_id)
- * - Used to create initial UserProfile
- * - Used to generate personalized meal plans
- */
+/// Data collected across all onboarding screens. Used to personalize the user's
+/// initial meal plan and to populate their profile in the database.
 final class OnboardingData: Identifiable, Codable, ObservableObject {
-    /// Unique identifier for the onboarding data
     let id: String
-    
-    /// Reference to the user this onboarding data belongs to
     let userId: String
-    
-    /// User's age in years
     var age: Int
-    
-    /// User's gender (Male, Female, Other, Prefer not to say)
     var gender: String
-    
-    /// User's height in centimeters
     var height: Double
-    
-    /// User's weight in kilograms
     var weight: Double
-    
-    /// User's activity level (Sedentary, Lightly Active, Moderately Active, Very Active, Extremely Active)
     var activityLevel: String
-    
-    /// User's fitness goal (Lose Weight, Maintain Weight, Gain Weight, Build Muscle)
     var fitnessGoal: String
-    
-    /// User's dietary preferences (e.g., ["Vegetarian", "Gluten-Free"])
     var dietaryPreferences: [String]
-    
-    /// User's budget range for meal planning (Low, Medium, High)
     var budgetRange: String
-    
-    /// User's preferred cuisine types (e.g., ["Italian", "Mexican", "Asian"])
     var preferredCuisines: [String]
-    
-    /// User's cooking skill level (Beginner, Intermediate, Advanced)
     var cookingSkillLevel: String
-    
-    /// User's preferred meal prep time in minutes
     var preferredPrepTime: Int
-    
-    /// User's preferred number of servings per meal
     var preferredServings: Int
-    
-    /// User's allergies and intolerances (e.g., ["Peanuts", "Lactose"])
     var allergies: [String]
-    
-    /// User's favorite ingredients (e.g., ["Chicken", "Quinoa", "Avocado"])
     var favoriteIngredients: [String]
-    
-    /// User's disliked ingredients (e.g., ["Mushrooms", "Olives"])
     var dislikedIngredients: [String]
-    
-    /// Whether the user wants to include meal prep instructions
     var includeMealPrep: Bool
-    
-    /// Whether the user wants to include shopping lists
     var includeShoppingList: Bool
-    
-    /// Whether the user wants to include nutritional information
     var includeNutritionInfo: Bool
-    
-    /// Whether the user wants to rotate meals to avoid repetition
     var rotateMeals: Bool
-    
-    /// Whether the user wants to include leftovers in planning
     var includeLeftovers: Bool
-    
-    /// User's preferred meal complexity (Easy, Medium, Hard)
     var preferredComplexity: String
-    
-    /// Additional notes or preferences from the user
     var additionalNotes: String?
-    
-    /// Whether the user has completed the onboarding process
     var isCompleted: Bool
-    
-    /// Current step in the onboarding process
     var currentStep: Int
-    
-    /// Total number of steps in the onboarding process
     let totalSteps: Int
-    
-    /// Timestamp when the onboarding data was created
     let createdAt: Date
-    
-    /// Timestamp when the onboarding data was last updated
     var updatedAt: Date
-    
-    /// User's selected onboarding goals (e.g., ["Plan my meals", "Eat healthy"])
     var onboardingGoals: [String]
-    
-    /// User's main food preference (Flexible, Vegetarian, Vegan, Pescatarian)
     var foodPreference: String
-    
-    /// User's disliked cuisine types (e.g., ["Mexican", "Thai"])
     var dislikedCuisines: [String]
-    
-    /// User's pantry status (Basic, Average, Well-stocked)
     var pantryStatus: String
-    
-    /// User's selected avatar emoji
     var avatarEmoji: String
-    
-    /// User's explicit daily calorie goal (optional, can override calculated value)
+    /// Explicit daily calorie override; falls back to `estimatedDailyCalories` when nil.
     var calorieGoal: Int?
-    
-    // MARK: - Coding Keys
-    
+
+    // Maps Swift property names to Supabase column names for decoding/encoding.
     enum CodingKeys: String, CodingKey {
         case id
         case userId = "user_id"
@@ -171,8 +85,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         case avatarEmoji = "avatar_emoji"
         case calorieGoal = "calorie_goal"
     }
-    
-    // MARK: - Custom Decoder
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -229,48 +141,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         }
     }
     
-    // MARK: - Convenience Initializer
-    
-    /**
-     * Creates a new OnboardingData instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - userId: Reference to the user
-     *   - age: User's age in years
-     *   - gender: User's gender
-     *   - height: User's height in centimeters
-     *   - weight: User's weight in kilograms
-     *   - activityLevel: User's activity level
-     *   - fitnessGoal: User's fitness goal
-     *   - dietaryPreferences: Array of dietary preferences
-     *   - budgetRange: User's budget range
-     *   - preferredCuisines: Array of preferred cuisines
-     *   - cookingSkillLevel: User's cooking skill level
-     *   - preferredPrepTime: Preferred meal prep time in minutes
-     *   - preferredServings: Preferred number of servings
-     *   - allergies: Array of allergies and intolerances
-     *   - favoriteIngredients: Array of favorite ingredients
-     *   - dislikedIngredients: Array of disliked ingredients
-     *   - includeMealPrep: Whether to include meal prep
-     *   - includeShoppingList: Whether to include shopping list
-     *   - includeNutritionInfo: Whether to include nutrition info
-     *   - rotateMeals: Whether to rotate meals
-     *   - includeLeftovers: Whether to include leftovers
-     *   - preferredComplexity: Preferred meal complexity
-     *   - additionalNotes: Optional additional notes
-     *   - isCompleted: Whether onboarding is completed
-     *   - currentStep: Current step in onboarding
-     *   - totalSteps: Total number of steps
-     *   - createdAt: Creation timestamp
-     *   - updatedAt: Last update timestamp
-     *   - onboardingGoals: User's selected onboarding goals
-     *   - foodPreference: User's main food preference
-     *   - dislikedCuisines: User's disliked cuisine types
-     *   - pantryStatus: User's pantry status
-     *   - avatarEmoji: User's selected avatar emoji
-     *   - calorieGoal: User's explicit daily calorie goal
-     */
     init(id: String, userId: String, age: Int, gender: String, height: Double, weight: Double, activityLevel: String, fitnessGoal: String, dietaryPreferences: [String], budgetRange: String, preferredCuisines: [String], cookingSkillLevel: String, preferredPrepTime: Int, preferredServings: Int, allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], includeMealPrep: Bool, includeShoppingList: Bool, includeNutritionInfo: Bool, rotateMeals: Bool, includeLeftovers: Bool, preferredComplexity: String, additionalNotes: String?, isCompleted: Bool, currentStep: Int, totalSteps: Int, createdAt: Date, updatedAt: Date, onboardingGoals: [String] = [], foodPreference: String = "Flexible", dislikedCuisines: [String] = [], pantryStatus: String = "Basic", avatarEmoji: String = "", calorieGoal: Int? = nil) {
         self.id = id
         self.userId = userId
@@ -310,22 +180,12 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     }
     
     // MARK: - Computed Properties
-    
-    /**
-     * User's Body Mass Index (BMI)
-     * 
-     * - Returns: BMI value calculated from height and weight
-     */
+
     var bmi: Double {
         let heightInMeters = height / 100.0
         return weight / (heightInMeters * heightInMeters)
     }
     
-    /**
-     * User's BMI category
-     * 
-     * - Returns: BMI category string (Underweight, Normal, Overweight, Obese)
-     */
     var bmiCategory: String {
         switch bmi {
         case ..<18.5:
@@ -339,11 +199,7 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         }
     }
     
-    /**
-     * User's estimated daily calorie needs based on BMR and activity level
-     * 
-     * - Returns: Estimated daily calorie needs
-     */
+    /// Estimated daily calorie needs using Mifflin-St Jeor equation + activity multiplier.
     var estimatedDailyCalories: Int {
         // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor Equation
         let bmr: Double
@@ -373,84 +229,19 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         return Int(bmr * activityMultiplier)
     }
     
-    /**
-     * Onboarding progress percentage
-     * 
-     * - Returns: Percentage of onboarding completion
-     */
     var progressPercentage: Double {
         guard totalSteps > 0 else { return 0.0 }
         return Double(currentStep) / Double(totalSteps) * 100.0
     }
-    
-    /**
-     * Whether onboarding is in progress
-     * 
-     * - Returns: True if onboarding is not completed
-     */
-    var isInProgress: Bool {
-        return !isCompleted && currentStep > 0
-    }
-    
-    /**
-     * Whether onboarding has started
-     * 
-     * - Returns: True if current step is greater than 0
-     */
-    var hasStarted: Bool {
-        return currentStep > 0
-    }
-    
-    /**
-     * Whether user has any dietary restrictions
-     * 
-     * - Returns: True if user has dietary preferences
-     */
-    var hasDietaryRestrictions: Bool {
-        return !dietaryPreferences.isEmpty
-    }
-    
-    /**
-     * Whether user has any allergies
-     * 
-     * - Returns: True if user has allergies
-     */
-    var hasAllergies: Bool {
-        return !allergies.isEmpty
-    }
-    
-    /**
-     * Whether user has favorite ingredients
-     * 
-     * - Returns: True if user has favorite ingredients
-     */
-    var hasFavoriteIngredients: Bool {
-        return !favoriteIngredients.isEmpty
-    }
-    
-    /**
-     * Whether user has disliked ingredients
-     * 
-     * - Returns: True if user has disliked ingredients
-     */
-    var hasDislikedIngredients: Bool {
-        return !dislikedIngredients.isEmpty
-    }
-    
-    /**
-     * Whether user has preferred cuisines
-     * 
-     * - Returns: True if user has preferred cuisines
-     */
-    var hasPreferredCuisines: Bool {
-        return !preferredCuisines.isEmpty
-    }
-    
-    /**
-     * Formatted height string
-     * 
-     * - Returns: Height formatted as "X cm" or "X'Y\""
-     */
+
+    var isInProgress: Bool { !isCompleted && currentStep > 0 }
+    var hasStarted: Bool { currentStep > 0 }
+    var hasDietaryRestrictions: Bool { !dietaryPreferences.isEmpty }
+    var hasAllergies: Bool { !allergies.isEmpty }
+    var hasFavoriteIngredients: Bool { !favoriteIngredients.isEmpty }
+    var hasDislikedIngredients: Bool { !dislikedIngredients.isEmpty }
+    var hasPreferredCuisines: Bool { !preferredCuisines.isEmpty }
+
     var formattedHeight: String {
         // Convert to feet and inches for display
         let totalInches = height / 2.54
@@ -459,21 +250,11 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         return "\(feet)'\(inches)\" (\(Int(height)) cm)"
     }
     
-    /**
-     * Formatted weight string
-     * 
-     * - Returns: Weight formatted as "X kg" or "X lbs"
-     */
     var formattedWeight: String {
         let pounds = weight * 2.20462
         return "\(Int(pounds)) lbs (\(Int(weight)) kg)"
     }
     
-    /**
-     * Formatted prep time string
-     * 
-     * - Returns: Prep time formatted as "X minutes" or "X hours Y minutes"
-     */
     var formattedPrepTime: String {
         let hours = preferredPrepTime / 60
         let minutes = preferredPrepTime % 60
@@ -486,63 +267,27 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     }
     
     // MARK: - Helper Methods
-    
-    /**
-     * Checks if user has a specific dietary preference
-     * 
-     * - Parameter preference: The dietary preference to check
-     * - Returns: True if user has this preference
-     */
+
     func hasDietaryPreference(_ preference: String) -> Bool {
         return dietaryPreferences.contains { $0.lowercased() == preference.lowercased() }
     }
-    
-    /**
-     * Checks if user has a specific allergy
-     * 
-     * - Parameter allergy: The allergy to check
-     * - Returns: True if user has this allergy
-     */
+
     func hasAllergy(_ allergy: String) -> Bool {
         return allergies.contains { $0.lowercased() == allergy.lowercased() }
     }
-    
-    /**
-     * Checks if user likes a specific ingredient
-     * 
-     * - Parameter ingredient: The ingredient to check
-     * - Returns: True if user likes this ingredient
-     */
+
     func likesIngredient(_ ingredient: String) -> Bool {
         return favoriteIngredients.contains { $0.lowercased() == ingredient.lowercased() }
     }
-    
-    /**
-     * Checks if user dislikes a specific ingredient
-     * 
-     * - Parameter ingredient: The ingredient to check
-     * - Returns: True if user dislikes this ingredient
-     */
+
     func dislikesIngredient(_ ingredient: String) -> Bool {
         return dislikedIngredients.contains { $0.lowercased() == ingredient.lowercased() }
     }
-    
-    /**
-     * Checks if user prefers a specific cuisine
-     * 
-     * - Parameter cuisine: The cuisine to check
-     * - Returns: True if user prefers this cuisine
-     */
+
     func prefersCuisine(_ cuisine: String) -> Bool {
         return preferredCuisines.contains { $0.lowercased() == cuisine.lowercased() }
     }
-    
-    /**
-     * Creates a copy of this onboarding data with updated step
-     * 
-     * - Parameter newStep: New current step
-     * - Returns: New OnboardingData instance with updated step
-     */
+
     func withStep(_ newStep: Int) -> OnboardingData {
         return OnboardingData(
             id: id,
@@ -577,12 +322,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         )
     }
     
-    /**
-     * Creates a copy of this onboarding data with completion status
-     * 
-     * - Parameter completed: New completion status
-     * - Returns: New OnboardingData instance with updated completion status
-     */
     func withCompletionStatus(_ completed: Bool) -> OnboardingData {
         return OnboardingData(
             id: id,
@@ -618,153 +357,19 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     }
 }
 
-// MARK: - OnboardingData Extensions
+// MARK: - Static Options
 
 extension OnboardingData {
-    /**
-     * Standard gender options
-     */
-    static let genderOptions = [
-        "Male",
-        "Female",
-        "Other",
-        "Prefer not to say"
-    ]
-    
-    /**
-     * Standard activity levels
-     */
-    static let activityLevels = [
-        "Sedentary",
-        "Lightly Active",
-        "Moderately Active",
-        "Very Active",
-        "Extremely Active"
-    ]
-    
-    /**
-     * Standard fitness goals
-     */
-    static let fitnessGoals = [
-        "Lose Weight",
-        "Maintain Weight",
-        "Gain Weight",
-        "Build Muscle"
-    ]
-    
-    /**
-     * Standard dietary preferences
-     */
-    static let dietaryPreferences = [
-        "Vegetarian",
-        "Vegan",
-        "Gluten-Free",
-        "Dairy-Free",
-        "Keto",
-        "Paleo",
-        "Mediterranean",
-        "Low Carb",
-        "High Protein",
-        "Low Fat",
-        "Low Sodium",
-        "None"
-    ]
-    
-    /**
-     * Standard budget ranges
-     */
+    static let genderOptions = ["Male", "Female", "Other", "Prefer not to say"]
+    static let activityLevels = ["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Extremely Active"]
+    static let fitnessGoals = ["Lose Weight", "Maintain Weight", "Gain Weight", "Build Muscle"]
+    static let dietaryPreferences = ["Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Keto", "Paleo", "Mediterranean", "Low Carb", "High Protein", "Low Fat", "Low Sodium", "None"]
     static let budgetRanges = ["Low", "Medium", "High"]
-    
-    /**
-     * Standard cuisine types
-     */
-    static let cuisineTypes = [
-        "Italian",
-        "Mexican",
-        "Asian",
-        "Mediterranean",
-        "American",
-        "Indian",
-        "French",
-        "Thai",
-        "Japanese",
-        "Greek",
-        "Spanish",
-        "Middle Eastern",
-        "African",
-        "Caribbean",
-        "Other"
-    ]
-    
-    /**
-     * Standard cooking skill levels
-     */
+    static let cuisineTypes = ["Italian", "Mexican", "Asian", "Mediterranean", "American", "Indian", "French", "Thai", "Japanese", "Greek", "Spanish", "Middle Eastern", "African", "Caribbean", "Other"]
     static let cookingSkillLevels = ["Beginner", "Intermediate", "Advanced"]
-    
-    /**
-     * Standard meal complexities
-     */
     static let mealComplexities = ["Easy", "Medium", "Hard"]
-    
-    /**
-     * Standard prep time options in minutes
-     */
     static let prepTimeOptions = [15, 30, 45, 60, 90, 120]
-    
-    /**
-     * Standard serving size options
-     */
     static let servingSizeOptions = [1, 2, 3, 4, 5, 6, 8, 10]
-    
-    /**
-     * Common allergies
-     */
-    static let commonAllergies = [
-        "Peanuts",
-        "Tree Nuts",
-        "Milk",
-        "Eggs",
-        "Soy",
-        "Fish",
-        "Shellfish",
-        "Wheat",
-        "Gluten",
-        "Lactose",
-        "Sesame",
-        "None"
-    ]
-    
-    /**
-     * Common ingredients for favorites/dislikes
-     */
-    static let commonIngredients = [
-        "Chicken",
-        "Beef",
-        "Fish",
-        "Shrimp",
-        "Tofu",
-        "Quinoa",
-        "Rice",
-        "Pasta",
-        "Bread",
-        "Avocado",
-        "Tomatoes",
-        "Onions",
-        "Garlic",
-        "Mushrooms",
-        "Spinach",
-        "Kale",
-        "Broccoli",
-        "Carrots",
-        "Potatoes",
-        "Sweet Potatoes",
-        "Olives",
-        "Cheese",
-        "Yogurt",
-        "Eggs",
-        "Nuts",
-        "Seeds",
-        "Herbs",
-        "Spices"
-    ]
+    static let commonAllergies = ["Peanuts", "Tree Nuts", "Milk", "Eggs", "Soy", "Fish", "Shellfish", "Wheat", "Gluten", "Lactose", "Sesame", "None"]
+    static let commonIngredients = ["Chicken", "Beef", "Fish", "Shrimp", "Tofu", "Quinoa", "Rice", "Pasta", "Bread", "Avocado", "Tomatoes", "Onions", "Garlic", "Mushrooms", "Spinach", "Kale", "Broccoli", "Carrots", "Potatoes", "Sweet Potatoes", "Olives", "Cheese", "Yogurt", "Eggs", "Nuts", "Seeds", "Herbs", "Spices"]
 }

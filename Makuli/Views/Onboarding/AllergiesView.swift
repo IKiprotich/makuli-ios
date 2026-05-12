@@ -12,7 +12,7 @@ struct AllergiesView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -21,11 +21,11 @@ struct AllergiesView: View {
                 VStack(spacing: 12) {
                     Text("Allergies")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("Any allergies?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)
@@ -47,7 +47,7 @@ struct AllergiesView: View {
                             }) {
                                 Text(allergy)
                                     .font(.headline)
-                                    .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                    .foregroundColor(isSelected ? .white : AppColors.text)
                                     .padding(.vertical, 14)
                                     .frame(maxWidth: .infinity)
                                     .background(isSelected ? AppColors.primaryOrange : Color.white)

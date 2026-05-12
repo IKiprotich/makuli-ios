@@ -66,7 +66,7 @@ struct WeekCarouselCard: View {
             VStack(spacing: 4) {
                 Text(week.weekTitle)
                     .font(.headline)
-                    .foregroundColor(isSelected ? Color(AppColors.primaryOrange) : Color(AppColors.textCharcoal))
+                    .foregroundColor(isSelected ? Color(AppColors.primaryOrange) : Color(AppColors.text))
                 
                 Text(week.formattedTotalCost)
                     .font(.caption)

@@ -28,7 +28,7 @@ struct MealPlanGenerationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppColors.bgCream.ignoresSafeArea()
+                AppColors.background.ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -89,7 +89,7 @@ extension MealPlanGenerationView {
             Text("Spoonacular Meal Planning")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Text("Generate a personalized 7-day meal plan using Spoonacular's extensive recipe database, tailored to your dietary preferences and nutritional goals.")
                 .font(.body)
@@ -104,7 +104,7 @@ extension MealPlanGenerationView {
             HStack {
                 Text("Preferences")
                     .font(.headline)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Spacer()
                 
@@ -142,7 +142,7 @@ extension MealPlanGenerationView {
             Text(value)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .multilineTextAlignment(.trailing)
         }
     }
@@ -171,7 +171,7 @@ extension MealPlanGenerationView {
             
             Text("Generating your personalized meal plan...")
                 .font(.headline)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Text("This may take a few moments while we search Spoonacular's recipe database and create a plan tailored to your preferences.")
                 .font(.caption)
@@ -193,7 +193,7 @@ extension MealPlanGenerationView {
             
             Text("Saving your meal plan...")
                 .font(.headline)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Text("Adding meals to your plan library and generating grocery lists.")
                 .font(.caption)
@@ -214,7 +214,7 @@ extension MealPlanGenerationView {
             Text("Spoonacular Plan Generated! 🎉")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Text("Your personalized meal plan has been created using Spoonacular's recipe database and saved to your library.")
                 .font(.body)
@@ -224,7 +224,7 @@ extension MealPlanGenerationView {
             VStack(spacing: 8) {
                 Text("Plan Details:")
                     .font(.headline)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Text("• \(plan.title)")
                     .font(.body)
@@ -266,7 +266,7 @@ extension MealPlanGenerationView {
             Text("Generation Failed")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Text(message)
                 .font(.body)
@@ -312,7 +312,7 @@ extension MealPlanGenerationView {
                 
                 Text("Error")
                     .font(.headline)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Spacer()
             }

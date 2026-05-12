@@ -28,9 +28,9 @@ struct Configuration {
     static var supabaseURL: String {
         switch environment {
         case .production:
-            return "https://tcuhvrhorccrhmjiyrub.supabase.co" // Your production URL
+            return "https://mbotzyrpzblbmesnfqix.supabase.co" // Your production URL
         case .development:
-            return "https://tcuhvrhorccrhmjiyrub.supabase.co" // Same for now, can be different
+            return "https://mbotzyrpzblbmesnfqix.supabase.co" // Same for now, can be different
         }
     }
     
@@ -38,9 +38,9 @@ struct Configuration {
         switch environment {
         case .production:
             // In production, this should ideally come from secure storage
-            return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdWh2cmhvcmNjcmhtaml5cnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NjIxMTgsImV4cCI6MjA2NjUzODExOH0.YDPvgfRWVzNFh-iDuU49bhhz5Y-ALS1u3-TqK3A74gk"
+            return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ib3R6eXJwemJsYm1lc25mcWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTA4ODksImV4cCI6MjA5NDE2Njg4OX0.-87OvopCtecr9VXO4RIVO3h2-aRBo9JusxdaFvLwi2w"
         case .development:
-            return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdWh2cmhvcmNjcmhtaml5cnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NjIxMTgsImV4cCI6MjA2NjUzODExOH0.YDPvgfRWVzNFh-iDuU49bhhz5Y-ALS1u3-TqK3A74gk"
+            return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ib3R6eXJwemJsYm1lc25mcWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTA4ODksImV4cCI6MjA5NDE2Njg4OX0.-87OvopCtecr9VXO4RIVO3h2-aRBo9JusxdaFvLwi2w"
         }
     }
     

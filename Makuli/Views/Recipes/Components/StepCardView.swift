@@ -22,7 +22,7 @@ struct StepCardView: View {
                 .frame(width: 32, height: 32)
                 .background(
                     Circle()
-                        .fill(AppColors.bgCream)
+                        .fill(AppColors.background)
                         .overlay(
                             Circle()
                                 .stroke(AppColors.primaryOrange, lineWidth: 2)
@@ -31,7 +31,7 @@ struct StepCardView: View {
             
             Text(instruction)
                 .font(AppFonts.body())
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .fixedSize(horizontal: false, vertical: true)
             
             Spacer()
@@ -40,7 +40,7 @@ struct StepCardView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(AppColors.bgCream.opacity(0.5))
+                .fill(AppColors.background.opacity(0.5))
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Step \(stepNumber): \(instruction)")

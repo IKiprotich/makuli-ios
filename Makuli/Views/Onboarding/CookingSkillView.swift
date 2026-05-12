@@ -14,7 +14,7 @@ struct CookingSkillView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -23,11 +23,11 @@ struct CookingSkillView: View {
                 VStack(spacing: 12) {
                     Text("Cooking skills")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("How would you rate your cooking skills?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)
@@ -40,10 +40,10 @@ struct CookingSkillView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(option.0)
                                     .font(.headline)
-                                    .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                    .foregroundColor(isSelected ? .white : AppColors.text)
                                 Text(option.1)
                                     .font(.caption)
-                                    .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textCharcoal.opacity(0.6))
+                                    .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textSecondary)
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)

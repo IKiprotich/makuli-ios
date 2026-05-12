@@ -191,7 +191,7 @@ extension PlanCreationView {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(AppColors.bgCream)
+                .background(AppColors.background)
                 .cornerRadius(12)
             } else {
                 LazyVGrid(columns: [
@@ -269,7 +269,7 @@ extension PlanCreationView {
             )
             .datePickerStyle(.compact)
             .padding()
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .cornerRadius(12)
         }
     }
@@ -411,7 +411,7 @@ struct SelectableTemplateCard: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? AppColors.primaryOrange.opacity(0.1) : AppColors.bgCream)
+            .background(isSelected ? AppColors.primaryOrange.opacity(0.1) : AppColors.background)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(isSelected ? AppColors.primaryOrange : Color.clear, lineWidth: 2)

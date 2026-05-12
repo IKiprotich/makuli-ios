@@ -10,7 +10,7 @@ struct CuisinePreferenceView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream.ignoresSafeArea()
+            AppColors.background.ignoresSafeArea()
             VStack(spacing: 30) {
                 ProgressView(value: 11, total: 15)
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -19,11 +19,11 @@ struct CuisinePreferenceView: View {
                 VStack(spacing: 12) {
                     Text("Cuisine")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("Any cuisines you like or dislike?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)
@@ -33,7 +33,7 @@ struct CuisinePreferenceView: View {
                             HStack {
                                 Text(cuisine)
                                     .font(.headline)
-                                    .foregroundColor(AppColors.textCharcoal)
+                                    .foregroundColor(AppColors.text)
                                 Spacer()
                                 Button(action: {
                                     if onboardingData.preferredCuisines.contains(cuisine) {

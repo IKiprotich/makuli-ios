@@ -2,122 +2,91 @@
 //  AppTabView.swift
 //  Makuli
 //
-//  Created by Ian   on 18/06/2025.
-//
 
 import SwiftUI
 
 struct AppTabView: View {
-    @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedTab = 0
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
-                HomeView(selectedTab: $selectedTab)
-                    .tag(0)
-                
-                PlansView()
-                    .tag(1)
-                
-                RecipesView()
-                    .tag(2)
-                
-                ProfileView()
-                    .tag(3)
+                HomeView(selectedTab: $selectedTab).tag(0)
+                PlansView().tag(1)
+                RecipesView().tag(2)
+                ProfileView().tag(3)
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            
-            // Custom Tab Bar
+
             CustomTabBar(selectedTab: $selectedTab)
         }
         .ignoresSafeArea(.keyboard)
     }
 }
 
+// MARK: - Custom Tab Bar
+
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
-    @Environment(\.colorScheme) var colorScheme
-    
-    private let tabs = [
-        TabItem(title: "Home", emoji: "🏠"),
-        TabItem(title: "Plans", emoji: "🍽️"),
-        TabItem(title: "Recipes", emoji: "📖"),
-        TabItem(title: "Profile", emoji: "👤")
+    @Namespace private var animation
+
+    private let tabs: [TabItem] = [
+        TabItem(title: "Home",    icon: "house.fill",          activeIcon: "house.fill"),
+        TabItem(title: "Plans",   icon: "calendar",            activeIcon: "calendar.badge.clock"),
+        TabItem(title: "Recipes", icon: "book.closed",         activeIcon: "book.fill"),
+        TabItem(title: "Profile", icon: "person.crop.circle",  activeIcon: "person.crop.circle.fill"),
     ]
-    
+
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(0..<tabs.count, id: \.self) { index in
-                let tab = tabs[index]
-                let isSelected = selectedTab == index
-                
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        selectedTab = index
-                    }
-                }) {
-                    VStack(spacing: 4) {
-                        // Emoji with animation
-                        Text(tab.emoji)
-                            .font(.system(size: 22))
-                            .scaleEffect(isSelected ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSelected)
-                        
-                        // Title
-                        Text(tab.title)
-                            .font(.system(size: 10, weight: isSelected ? .semibold : .medium, design: .rounded))
-                            .foregroundColor(isSelected ? AppColors.primaryOrange : AppColors.textSecondary)
-                            .opacity(isSelected ? 1.0 : 0.8)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(
-                        // Selection indicator
-                        VStack {
-                            Spacer()
-                            if isSelected {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(AppColors.primaryOrange)
-                                    .frame(width: 20, height: 3)
-                                    .matchedGeometryEffect(id: "tab_indicator", in: namespace)
-                            } else {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color.clear)
-                                    .frame(width: 20, height: 3)
-                            }
-                        }
-                    )
-                }
-                .buttonStyle(PlainButtonStyle())
+            ForEach(tabs.indices, id: \.self) { index in
+                tabButton(for: tabs[index], at: index)
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 8)
         .padding(.bottom, 4)
         .background(
-            // Tab bar background with blur effect
-            Rectangle()
-                .fill(AppColors.surface)
-                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: -2)
+            AppColors.surface
+                .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: -2)
         )
-        .overlay(
-            // Top border
-            Rectangle()
-                .fill(AppColors.border)
-                .frame(height: 0.5),
-            alignment: .top
-        )
+        .overlay(Divider(), alignment: .top)
     }
-    
-    @Namespace private var namespace
+
+    private func tabButton(for tab: TabItem, at index: Int) -> some View {
+        let isSelected = selectedTab == index
+
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedTab = index
+            }
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: isSelected ? tab.activeIcon : tab.icon)
+                    .font(.system(size: 22, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? AppColors.primaryOrange : AppColors.textSecondary)
+                    .symbolEffect(.bounce, value: isSelected)
+
+                Text(tab.title)
+                    .font(.system(size: 10, weight: isSelected ? .semibold : .regular, design: .rounded))
+                    .foregroundColor(isSelected ? AppColors.primaryOrange : AppColors.textSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+        }
+        .buttonStyle(.plain)
+    }
 }
 
-struct TabItem {
+// MARK: - Model
+
+private struct TabItem {
     let title: String
-    let emoji: String
+    let icon: String
+    let activeIcon: String
 }
 
 #Preview {
     AppTabView()
+        .environmentObject(AuthViewModel())
         .environmentObject(ThemeManager.shared)
 }

@@ -14,7 +14,7 @@ struct BudgetInputView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             
             VStack(spacing: 30) {
                 // Progress bar
@@ -26,13 +26,13 @@ struct BudgetInputView: View {
                 VStack(spacing: 16) {
                     Text("What's your weekly food budget?")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     
                     Text("We'll suggest meals that fit your budget")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 
@@ -53,13 +53,13 @@ struct BudgetInputView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(option.0)
                                         .font(.headline)
-                                        .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                        .foregroundColor(isSelected ? .white : AppColors.text)
                                     
                                     Text(option.1)
                                         .font(.caption)
                                         .foregroundColor(isSelected
                                             ? .white.opacity(0.85)
-                                            : AppColors.textCharcoal.opacity(0.6))
+                                            : AppColors.textSecondary)
                                 }
                                 
                                 Spacer()
@@ -91,7 +91,7 @@ struct BudgetInputView: View {
                 Button(action: {
                     if !onboardingData.budgetRange.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            currentPage = 5
+                            currentPage += 1
                         }
                     }
                 }) {

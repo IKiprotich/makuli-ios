@@ -18,13 +18,9 @@ class AuthManager: ObservableObject {
     private let supabase = SupabaseManager.shared.client
     
     init() {
-        // checks for existing session
-        Task {
-            await getCurrentUser()
-        }
+        Task { await getCurrentUser() }
     }
-    
-    //MARK: Gets the current user
+
     func getCurrentUser() async {
         do {
             let session = try await supabase.auth.session
@@ -36,7 +32,6 @@ class AuthManager: ObservableObject {
         }
     }
     
-    //MARK: Sign Up
     func signUp(email: String, password: String) async {
         isLoading = true
         errorMessage = nil
@@ -61,7 +56,6 @@ class AuthManager: ObservableObject {
         isLoading = false
     }
     
-    //MARK: Sign In Function
     func signIn(email: String, password: String) async {
         isLoading = true
         errorMessage = nil
@@ -91,7 +85,6 @@ class AuthManager: ObservableObject {
         isLoading = false
     }
     
-    //MARK: SiGN in with Google
     func signInWithGoogle() async {
         isLoading = true
         errorMessage = nil
@@ -141,7 +134,6 @@ class AuthManager: ObservableObject {
         isLoading = false
     }
     
-    //MARK: Sign out
     func signOut() async {
         do {
             try await supabase.auth.signOut()
@@ -153,7 +145,6 @@ class AuthManager: ObservableObject {
         }
     }
     
-    //MARK: Complete onboarding
     func completeOnboarding(age: Int, gender: String, diet: String, budget: String, goal: String) async {
         guard let currentUser = user else { 
             Logger.error("Cannot complete onboarding - no current user")
@@ -170,8 +161,8 @@ class AuthManager: ObservableObject {
             // Try upsert approach - create or update in one operation
             Logger.debug("Using upsert approach for user ID: \(userId)")
             
-            // Check if profile exists to preserve createdAt
-            let existingProfiles: [DatabaseProfile] = try await supabase
+            // Fetch only created_at so we can preserve it in the upsert.
+            let existingProfiles: [ProfileTimestamp] = try await supabase
                 .from("profiles")
                 .select("created_at")
                 .eq("id", value: userId)
@@ -271,7 +262,6 @@ class AuthManager: ObservableObject {
         }
     }
     
-    //MARK: Verify onboarding completion
     private func verifyOnboardingCompletion(userId: String) async {
         do {
             Logger.debug("Verifying onboarding completion in database")
@@ -297,7 +287,6 @@ class AuthManager: ObservableObject {
         }
     }
     
-    //MARK: Load user profile from database
     private func loadUserProfile(supabaseUser: Supabase.User) async {
         do {
             let response: [DatabaseProfile] = try await supabase
@@ -352,13 +341,11 @@ class AuthManager: ObservableObject {
         }
     }
     
-    //MARK: Check if user needs onboarding (utility method for debugging)
     func checkOnboardingStatus() -> String {
         guard let user = user else { return "No user logged in" }
         return "Onboarding completed: \(user.isOnboardingCompleted)"
     }
     
-    //MARK: Convert to user after onboarding
     private func convertToCustomUser(_ supabaseUser: Supabase.User) -> User {
         let name = anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? ""
         let profileImageURL = anyJSONToString(supabaseUser.userMetadata["avatar_url"]) ?? ""
@@ -388,7 +375,6 @@ class AuthManager: ObservableObject {
         )
     }
     
-    //MARK: Handle authentication errors
     private func handleAuthError(_ error: Error) -> String {
         if let authError = error as? AuthError {
             switch authError {
@@ -408,7 +394,6 @@ class AuthManager: ObservableObject {
         return error.localizedDescription
     }
     
-    //MARK: Create user profile if not exists
     private func createUserProfileIfNotExists(_ supabaseUser: Supabase.User) async throws -> Bool {
         // First, check if profile already exists
         do {
@@ -459,8 +444,16 @@ class AuthManager: ObservableObject {
         }
     }
     
-    // MARK: - Profile Data Structure
-    /// Represents a user profile as stored in the database (decodable from Supabase).
+    // MARK: - Profile Data Structures
+
+    // Lightweight struct used only to read back created_at without fetching the full row.
+    private struct ProfileTimestamp: Decodable {
+        let createdAt: String
+        enum CodingKeys: String, CodingKey {
+            case createdAt = "created_at"
+        }
+    }
+
     private struct DatabaseProfile: Decodable {
         let id: String
         let name: String
@@ -552,7 +545,6 @@ class AuthManager: ObservableObject {
         return nil
     }
     
-    //MARK: Refresh user profile from database
     func refreshUserProfile() async {
         do {
             let session = try await supabase.auth.session

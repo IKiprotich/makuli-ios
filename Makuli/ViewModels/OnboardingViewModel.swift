@@ -4,8 +4,6 @@
 //
 //  Created by Ian on 2025-01-13.
 //
-//  Production-ready onboarding view model for user profile setup.
-//
 
 import Foundation
 
@@ -16,8 +14,8 @@ class OnboardingViewModel: ObservableObject {
     @Published var completionSuccess = false
     @Published var currentStep = 0
     @Published var validationErrors: [String: String] = [:]
-    
-    // Form data
+
+    // Form data (used by the multi-step form flow)
     @Published var name = ""
     @Published var age = ""
     @Published var selectedGender = ""
@@ -27,15 +25,15 @@ class OnboardingViewModel: ObservableObject {
     @Published var cookingExperience = ""
     @Published var allergens: [String] = []
     @Published var householdSize = ""
-    
+
     private let supabaseManager = SupabaseManager.shared
-    
-    // MARK: - Constants
-    
+
     let totalSteps = 5
     
+    // MARK: - Options
+
     let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
-    
+
     let dietOptions = [
         "No restrictions",
         "Vegetarian",
@@ -89,8 +87,7 @@ class OnboardingViewModel: ObservableObject {
     ]
     
     // MARK: - Computed Properties
-    
-    /// Whether current step is valid
+
     var isCurrentStepValid: Bool {
         switch currentStep {
         case 0: // Personal info
@@ -133,29 +130,16 @@ class OnboardingViewModel: ObservableObject {
                Int(householdSize)! <= 20
     }
     
-    /// Progress percentage
     var progressPercentage: Double {
         return Double(currentStep) / Double(totalSteps) * 100.0
     }
-    
-    /// Whether we can proceed to next step
-    var canProceed: Bool {
-        return isCurrentStepValid
-    }
-    
-    /// Whether we can go back
-    var canGoBack: Bool {
-        return currentStep > 0
-    }
-    
-    /// Whether this is the final step
-    var isFinalStep: Bool {
-        return currentStep >= totalSteps - 1
-    }
-    
-    // MARK: - Navigation Methods
-    
-    /// Proceeds to next step
+
+    var canProceed: Bool { isCurrentStepValid }
+    var canGoBack: Bool { currentStep > 0 }
+    var isFinalStep: Bool { currentStep >= totalSteps - 1 }
+
+    // MARK: - Navigation
+
     func nextStep() {
         guard canProceed && !isFinalStep else { return }
         
@@ -166,23 +150,19 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
-    /// Goes back to previous step
     func previousStep() {
         guard canGoBack else { return }
-        
         currentStep -= 1
         clearValidationErrors()
     }
-    
-    /// Skips to a specific step (for testing)
+
     func goToStep(_ step: Int) {
         guard step >= 0 && step < totalSteps else { return }
         currentStep = step
     }
-    
-    // MARK: - Validation Methods
-    
-    /// Validates the current step
+
+    // MARK: - Validation
+
     private func validateCurrentStep() {
         clearValidationErrors()
         
@@ -261,10 +241,9 @@ class OnboardingViewModel: ObservableObject {
     private func clearValidationErrors() {
         validationErrors.removeAll()
     }
-    
-    // MARK: - Selection Methods
-    
-    /// Toggles a goal selection
+
+    // MARK: - Selection
+
     func toggleGoal(_ goal: String) {
         if selectedGoals.contains(goal) {
             selectedGoals.removeAll { $0 == goal }
@@ -273,7 +252,6 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
-    /// Toggles an allergen selection
     func toggleAllergen(_ allergen: String) {
         if allergens.contains(allergen) {
             allergens.removeAll { $0 == allergen }
@@ -282,211 +260,55 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Completion Methods
-    
-    /// Completes the onboarding process
-    func completeOnboarding(authViewModel: AuthViewModel) async {
-        guard !isCompleting else {
-            Logger.warning("Onboarding completion already in progress")
-            return
-        }
-        
-        guard let userId = authViewModel.user?.id else {
+    // MARK: - Completion
+
+    /// Completes onboarding using data collected from the onboarding screens.
+    /// This is the primary path called from PlanSummaryView.
+    func completeOnboarding(authViewModel: AuthViewModel, onboardingData: OnboardingData) async {
+        guard !isCompleting else { return }
+        guard authViewModel.user != nil else {
             errorMessage = "User not authenticated. Please try logging in again."
             return
         }
-        
-        // Final validation
-        validateAllSteps()
-        guard validationErrors.isEmpty else {
-            errorMessage = "Please complete all required fields"
-            return
-        }
-        
+
         isCompleting = true
         errorMessage = nil
         completionSuccess = false
-        
-        Logger.info("Starting onboarding completion for user: \(userId)")
-        
-        do {
-            // Create user profile with all collected data
-            guard let user = authViewModel.user else {
-                errorMessage = "User data not available"
-                return
-            }
-            
-            let updatedProfile = UserProfile(
-                id: userId,
-                userId: userId,
-                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-                email: user.email,
-                age: Int(age) ?? 25,
-                gender: extractGenderCategory(from: selectedGender),
-                goal: extractGoalCategory(from: selectedGoals),
-                diet: extractDietCategory(from: selectedDiet),
-                budget: extractBudgetCategory(from: selectedBudget),
-                isPremium: false,
-                isOnboardingCompleted: true,
-                subscriptionType: "free",
-                subscriptionRenewal: nil,
-                plansCreatedThisMonth: 0,
-                spoonacularGenerationsThisMonth: 0,
-                lastPlanReset: Date(),
-                profileImageUrl: nil,
-                bio: nil,
-                location: nil,
-                preferredLanguage: "en",
-                timezone: "UTC",
-                measurementSystem: "metric",
-                preferredCurrency: "USD",
-                notificationPreferences: NotificationPreferences(
-                    mealReminders: true,
-                    groceryReminders: true,
-                    achievementNotifications: true,
-                    weeklyReports: true,
-                    newRecipeNotifications: true,
-                    preferredNotificationTime: "18:00",
-                    pushNotificationsEnabled: true,
-                    emailNotificationsEnabled: true
-                ),
-                privacySettings: PrivacySettings(
-                    isProfilePublic: false,
-                    mealPlansVisible: false,
-                    progressSharingEnabled: false,
-                    achievementsPublic: false,
-                    locationSharingEnabled: false
-                ),
-                fitnessGoals: FitnessGoals(
-                    targetWeight: nil,
-                    targetCalories: nil,
-                    targetProtein: nil,
-                    targetCarbohydrates: nil,
-                    targetFat: nil,
-                    weeklyWorkoutMinutes: nil,
-                    targetStepsPerDay: nil
-                ),
-                mealPlanningPreferences: MealPlanningPreferences(
-                    mealsPerDay: 3,
-                    preferredPrepTime: 30,
-                    includeSnacks: false,
-                    preferredCuisines: ["american", "italian"],
-                    rotateMeals: true,
-                    includeLeftovers: true,
-                    preferredComplexity: "balanced"
-                ),
-                dietaryPreferences: DietaryPreferences(
-                    restrictions: [],
-                    allergies: [],
-                    favoriteIngredients: [],
-                    dislikedIngredients: [],
-                    avoidIngredients: [],
-                    preferredCookingMethods: ["stovetop", "baking"]
-                ),
-                cookingPreferences: CookingPreferences(
-                    skillLevel: "beginner",
-                    preferredCookingTime: 30,
-                    useAppliances: true,
-                    preferredMethods: ["stovetop", "baking"],
-                    usePreMadeIngredients: false,
-                    batchCooking: false
-                ),
-                budgetPreferences: BudgetPreferences(
-                    weeklyBudget: 75.0,
-                    monthlyBudget: 300.0,
-                    preferredMealPrice: 8.0,
-                    prioritizeBudget: true,
-                    includePremiumIngredients: false,
-                    suggestAlternatives: true
-                ),
-                achievements: [],
-                progressMetrics: [],
-                spoonacularUsername: nil,
-                spoonacularHash: nil,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-            
-            try await supabaseManager.updateUserProfile(updatedProfile)
-            
-            // Update auth view model with completed profile
-            authViewModel.user = User(
-                id: updatedProfile.id,
-                email: updatedProfile.email ?? "",
-                fullName: updatedProfile.name ?? "Name",
-                profileImageUrl: updatedProfile.profileImageUrl,
-                age: updatedProfile.age ?? 25,
-                gender: updatedProfile.gender ?? "",
-                height: 170.0, // Default height
-                weight: 70.0, // Default weight
-                activityLevel: "Moderately Active", // Default activity level
-                fitnessGoal: updatedProfile.goal ?? "",
-                dietaryPreferences: [updatedProfile.diet ?? "Balanced"],
-                budgetRange: updatedProfile.budget ?? "Medium",
-                preferredCuisines: [],
-                cookingSkillLevel: "Beginner",
-                preferredPrepTime: 30,
-                preferredServings: 2,
-                allergies: [],
-                favoriteIngredients: [],
-                dislikedIngredients: [],
-                hasCompletedOnboarding: true,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-            
+
+        let diet = mapDietToDBValue(onboardingData.dietaryPreferences)
+        let gender = mapGenderToDBValue(onboardingData.gender)
+        let goal = mapGoalToDBValue(onboardingData.fitnessGoal)
+        let budget = mapBudgetToDBValue(onboardingData.budgetRange)
+
+        await authViewModel.completeOnboarding(
+            age: onboardingData.age,
+            gender: gender,
+            diet: diet,
+            budget: budget,
+            goal: goal
+        )
+
+        if authViewModel.user?.isOnboardingCompleted == true {
             completionSuccess = true
-            Logger.info("Successfully completed onboarding")
-            
-            // Track onboarding completion
-            await trackOnboardingCompletion(userId: userId)
-            
-        } catch {
-            Logger.error("Failed to complete onboarding: \(error)")
-            errorMessage = "Failed to complete onboarding: \(error.localizedDescription)"
-            completionSuccess = false
+        } else {
+            errorMessage = authViewModel.errorMessage ?? "Failed to complete onboarding. Please try again."
         }
-        
+
         isCompleting = false
     }
-    
-    /// Validates all steps for final submission
-    private func validateAllSteps() {
-        clearValidationErrors()
-        
-        // Validate all steps
-        let originalStep = currentStep
-        
-        for step in 0..<totalSteps {
-            currentStep = step
-            validateCurrentStep()
-        }
-        
-        currentStep = originalStep
-    }
-    
-    /// Tracks onboarding completion for analytics
-    private func trackOnboardingCompletion(userId: String) async {
-        // This would integrate with analytics service
-        Logger.info("Onboarding completed - userId: \(userId), goals: \(selectedGoals), diet: \(selectedDiet)")
-    }
-    
+
     // MARK: - Helper Methods
-    
-    /// Clears error message
+
     func clearError() {
         errorMessage = nil
     }
-    
-    /// Resets all onboarding state
+
     func resetState() {
         isCompleting = false
         errorMessage = nil
         completionSuccess = false
         currentStep = 0
         validationErrors.removeAll()
-        
-        // Clear form data
         name = ""
         age = ""
         selectedGender = ""
@@ -497,100 +319,113 @@ class OnboardingViewModel: ObservableObject {
         allergens.removeAll()
         householdSize = ""
     }
-    
-    /// Extracts budget category from full budget string
-    private func extractBudgetCategory(from fullBudget: String) -> String {
-        if fullBudget.contains("Budget-friendly") {
-            return "low"
-        } else if fullBudget.contains("Moderate") {
-            return "medium"
-        } else if fullBudget.contains("Flexible") {
-            return "high"
-        } else if fullBudget.contains("Premium") {
-            return "high"  // Map Premium to 'high' since DB only allows 'low', 'medium', 'high'
-        } else {
-            return "medium" // Default
+
+    // MARK: - Value Mapping
+
+    // Maps onboarding screen values to their database-constraint equivalents.
+
+    private func mapGenderToDBValue(_ gender: String) -> String {
+        switch gender {
+        case "Male": return "male"
+        case "Female": return "female"
+        case "Non-binary": return "other"
+        case "Prefer not to say": return "prefer_not_to_say"
+        default: return "prefer_not_to_say"
         }
     }
-    
-    /// Extracts diet category from full diet string to match database constraints
+
+    // Takes an array because DietPreferenceView allows multi-select; first DB-supported value wins.
+    private func mapDietToDBValue(_ preferences: [String]) -> String {
+        for pref in preferences {
+            switch pref {
+            case "Vegetarian": return "vegetarian"
+            case "Vegan": return "vegan"
+            case "Keto": return "keto"
+            case "Paleo": return "paleo"
+            case "Mediterranean": return "mediterranean"
+            case "Gluten-free": return "gluten_free"
+            default: continue
+            }
+        }
+        return "none"
+    }
+
+    private func mapBudgetToDBValue(_ budget: String) -> String {
+        switch budget {
+        case "$50 - $100": return "low"
+        case "$100 - $200": return "medium"
+        case "$200 - $300", "$300+": return "high"
+        default: return "medium"
+        }
+    }
+
+    private func mapGoalToDBValue(_ goal: String) -> String {
+        switch goal {
+        case "Lose Weight": return "lose_weight"
+        case "Gain Weight": return "gain_weight"
+        case "Maintain Weight": return "maintain_weight"
+        case "Build Muscle": return "build_muscle"
+        case "Improve Health": return "improve_health"
+        default: return "maintain_weight"
+        }
+    }
+
+    // Legacy helpers used by the multi-step form (not called from onboarding screens).
+    private func extractBudgetCategory(from fullBudget: String) -> String {
+        if fullBudget.contains("Budget-friendly") { return "low" }
+        if fullBudget.contains("Moderate") { return "medium" }
+        if fullBudget.contains("Flexible") || fullBudget.contains("Premium") { return "high" }
+        return "medium"
+    }
+
     private func extractDietCategory(from dietSelection: String) -> String {
         switch dietSelection {
-        case "No restrictions":
-            return "none"
-        case "Vegetarian":
-            return "vegetarian"
-        case "Vegan":
-            return "vegan"
-        case "Keto":
-            return "keto"
-        case "Paleo":
-            return "paleo"
-        case "Mediterranean":
-            return "mediterranean"
-        case "Gluten-free":
-            return "gluten_free"
-        case "Pescatarian":
-            return "none" // Map to 'none' since pescatarian is not in DB constraints
-        case "Low-carb":
-            return "keto" // Map to 'keto' since it's low-carb focused
-        case "Dairy-free":
-            return "none" // Map to 'none' since dairy-free is not a primary diet category in DB
-        default:
-            return "none" // Default fallback
+        case "No restrictions": return "none"
+        case "Vegetarian": return "vegetarian"
+        case "Vegan": return "vegan"
+        case "Keto", "Low-carb": return "keto"
+        case "Paleo": return "paleo"
+        case "Mediterranean": return "mediterranean"
+        case "Gluten-free": return "gluten_free"
+        default: return "none"
         }
     }
-    
-    /// Extracts gender category from selection to match database constraints
+
     private func extractGenderCategory(from genderSelection: String) -> String {
         switch genderSelection {
-        case "Male":
-            return "male"
-        case "Female":
-            return "female"
-        case "Non-binary":
-            return "other"
-        case "Prefer not to say":
-            return "prefer_not_to_say"
-        default:
-            return "prefer_not_to_say" // Default fallback
+        case "Male": return "male"
+        case "Female": return "female"
+        case "Non-binary": return "other"
+        default: return "prefer_not_to_say"
         }
     }
-    
-    /// Extracts goal category from selected goals to match database constraints
+
     private func extractGoalCategory(from selectedGoals: [String]) -> String {
-        // If multiple goals are selected, prioritize by health/fitness importance
-        let goalPriority = [
+        let priority: [String: String] = [
             "Weight loss": "lose_weight",
-            "Weight gain": "gain_weight", 
+            "Weight gain": "gain_weight",
             "Muscle building": "build_muscle",
             "Maintain weight": "maintain_weight",
             "Eat healthier": "improve_health"
         ]
-        
-        // Find the first goal that matches our database constraints
         for goal in selectedGoals {
-            if let dbGoal = goalPriority[goal] {
-                return dbGoal
-            }
+            if let dbGoal = priority[goal] { return dbGoal }
         }
-        
-        // If no direct match, map remaining goals to closest equivalents
-        for goal in selectedGoals {
-            switch goal {
-            case "Save time cooking", "Learn new recipes", "Meal prep":
-                return "improve_health" // Focus on overall health improvement
-            case "Family meals", "Special occasions":
-                return "maintain_weight" // Maintain current weight while accommodating social eating
-            default:
-                continue
-            }
-        }
-        
-        return "maintain_weight" // Default fallback
+        return "maintain_weight"
     }
-    
-    /// Gets current step title
+
+    private func validateAllSteps() {
+        clearValidationErrors()
+        let originalStep = currentStep
+        for step in 0..<totalSteps {
+            currentStep = step
+            validateCurrentStep()
+        }
+        currentStep = originalStep
+    }
+
+    // MARK: - Step Descriptions
+
     func getCurrentStepTitle() -> String {
         switch currentStep {
         case 0:
@@ -608,7 +443,6 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
-    /// Gets current step description
     func getCurrentStepDescription() -> String {
         switch currentStep {
         case 0:
@@ -626,12 +460,10 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
-    /// Gets validation error for a field
     func getValidationError(for field: String) -> String? {
         return validationErrors[field]
     }
-    
-    /// Checks if a field has a validation error
+
     func hasValidationError(for field: String) -> Bool {
         return validationErrors[field] != nil
     }

@@ -36,7 +36,7 @@ struct MealRowView: View {
                     
                     Text(meal.name)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     
                     HStack(spacing: 8) {
@@ -128,7 +128,7 @@ extension MealRowView {
                     Text(meal.difficulty.rawValue)
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                 }
                 
                 

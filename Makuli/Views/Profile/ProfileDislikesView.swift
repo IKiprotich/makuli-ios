@@ -22,11 +22,11 @@ struct ProfileDislikesView: View {
                     Text("Dislikes")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Select ingredients you don't like")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -44,7 +44,7 @@ struct ProfileDislikesView: View {
                             }) {
                                 Text(item)
                                     .font(.headline)
-                                    .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                    .foregroundColor(isSelected ? .white : AppColors.text)
                                     .padding(.vertical, 12)
                                     .frame(maxWidth: .infinity)
                                     .background(isSelected ? AppColors.warnRed : Color.white)
@@ -73,7 +73,7 @@ struct ProfileDislikesView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

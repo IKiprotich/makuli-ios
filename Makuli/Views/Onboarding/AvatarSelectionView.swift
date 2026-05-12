@@ -11,7 +11,7 @@ struct AvatarSelectionView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -20,11 +20,11 @@ struct AvatarSelectionView: View {
                 VStack(spacing: 12) {
                     Text("Most important step…")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("Pick your avatar")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)

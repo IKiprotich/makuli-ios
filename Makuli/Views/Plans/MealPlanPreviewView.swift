@@ -42,7 +42,7 @@ struct MealPlanPreviewView: View {
                     VStack(spacing: 8) {
                         Text("Here are the recipes we've chosen for your meal plan. Feel free to swap out any that you don't like!")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textCharcoal)
+                            .foregroundColor(AppColors.text)
                             .multilineTextAlignment(.leading)
                             .padding(.horizontal, 20)
                     }
@@ -86,7 +86,7 @@ struct MealPlanPreviewView: View {
                     }) {
                         Image(systemName: "arrow.left")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(AppColors.textCharcoal)
+                            .foregroundColor(AppColors.text)
                     }
                 }
             }
@@ -111,7 +111,7 @@ struct MealPlanPreviewView: View {
             // Day header
             Text(formatDayHeader(date))
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .padding(.horizontal, 20)
             
             // Meals for this day
@@ -162,7 +162,7 @@ struct MealPlanPreviewView: View {
                 // Meal name
                 Text(mealName)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                     .lineLimit(2)
             }
             
@@ -219,7 +219,7 @@ struct MealPlanPreviewView: View {
         case "Dinner":
             return AppColors.primaryOrange
         default:
-            return AppColors.textCharcoal
+            return AppColors.text
         }
     }
     

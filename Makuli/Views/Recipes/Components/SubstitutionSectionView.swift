@@ -23,7 +23,7 @@ struct SubstitutionSectionView: View {
                 HStack {
                     Text("local Swaps")
                         .font(AppFonts.headline())
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Spacer()
                     
@@ -48,7 +48,7 @@ struct SubstitutionSectionView: View {
                             
                             Text(substitutions[index])
                                 .font(AppFonts.body())
-                                .foregroundColor(AppColors.textCharcoal.opacity(0.8))
+                                .foregroundColor(AppColors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                             
                         }
@@ -66,7 +66,7 @@ struct SubstitutionSectionView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(AppColors.bgCream.opacity(0.7))
+                .fill(AppColors.background.opacity(0.7))
         )
     }
 }

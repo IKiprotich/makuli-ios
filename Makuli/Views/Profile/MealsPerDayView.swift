@@ -20,11 +20,11 @@ struct MealsPerDayView: View {
                     Text("Meals Per Day")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("How many meals do you eat per day?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -36,7 +36,7 @@ struct MealsPerDayView: View {
                     
                     Text("meal\(selectedMeals == 1 ? "" : "s") per day")
                         .font(.headline)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 // Meal options
@@ -49,7 +49,7 @@ struct MealsPerDayView: View {
                             HStack {
                                 Text("\(meals) meal\(meals == 1 ? "" : "s")")
                                     .font(.headline)
-                                    .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                    .foregroundColor(isSelected ? .white : AppColors.text)
                                 
                                 Spacer()
                                 
@@ -86,7 +86,7 @@ struct MealsPerDayView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

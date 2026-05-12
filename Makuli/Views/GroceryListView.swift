@@ -20,7 +20,7 @@ struct GroceryListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppColors.bgCream
+                AppColors.background
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -173,7 +173,7 @@ extension GroceryListView {
                 }
             }
             .listStyle(.insetGrouped)
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
         }
     }
     

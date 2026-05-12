@@ -103,7 +103,7 @@ struct FinalMealPlanView: View {
             // Day header
             Text(formatDayHeader(date))
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .padding(.horizontal, 20)
             
             // Meals for this day
@@ -154,7 +154,7 @@ struct FinalMealPlanView: View {
                 // Meal name
                 Text(mealName)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                     .lineLimit(2)
             }
             
@@ -230,7 +230,7 @@ struct FinalMealPlanView: View {
         case "Dinner":
             return AppColors.primaryOrange
         default:
-            return AppColors.textCharcoal
+            return AppColors.text
         }
     }
     

@@ -24,11 +24,11 @@ struct BudgetView: View {
                     Text("Budget Preference")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Choose your weekly grocery budget")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -43,18 +43,18 @@ struct BudgetView: View {
                                 HStack {
                                     Text(option.0)
                                         .font(.headline)
-                                        .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                        .foregroundColor(isSelected ? .white : AppColors.text)
                                     
                                     Spacer()
                                     
                                     Text(option.1)
                                         .font(.subheadline)
-                                        .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textCharcoal.opacity(0.6))
+                                        .foregroundColor(isSelected ? .white.opacity(0.8) : AppColors.textSecondary)
                                 }
                                 
                                 Text(option.2)
                                     .font(.caption)
-                                    .foregroundColor(isSelected ? .white.opacity(0.7) : AppColors.textCharcoal.opacity(0.5))
+                                    .foregroundColor(isSelected ? .white.opacity(0.7) : AppColors.textSecondary)
                                     .multilineTextAlignment(.leading)
                                 
                                 if isSelected {
@@ -93,7 +93,7 @@ struct BudgetView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

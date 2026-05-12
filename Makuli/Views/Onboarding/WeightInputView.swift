@@ -7,7 +7,7 @@ struct WeightInputView: View {
     @State private var selectedWeight: Double = 75.0
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -16,11 +16,11 @@ struct WeightInputView: View {
                 VStack(spacing: 12) {
                     Text("Current weight")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("Weight is used to calculate your calories")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)

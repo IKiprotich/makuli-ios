@@ -19,11 +19,11 @@ struct QuickAccessSection: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Quick Access")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Get things done faster")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()

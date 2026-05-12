@@ -42,7 +42,7 @@ struct MealCardView: View {
             
         }
         .padding(16)
-        .background(AppColors.bgCream)
+        .background(AppColors.background)
         .cornerRadius(12)
     }
 }

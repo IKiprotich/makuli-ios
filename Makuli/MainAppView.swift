@@ -43,10 +43,9 @@ struct MainAppView: View {
     }
 }
 
-// MARK: - Preview
 struct MainAppView_Previews: PreviewProvider {
     static var previews: some View {
         MainAppView()
     }
-} 
+}
 

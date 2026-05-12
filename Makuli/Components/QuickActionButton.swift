@@ -30,14 +30,14 @@ struct QuickActionButton: View {
                 // Title
                 Text(title)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                     .multilineTextAlignment(.center)
             }
             .padding(20)
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(AppColors.bgCream)
+                    .fill(AppColors.card)
                     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
             )
         }

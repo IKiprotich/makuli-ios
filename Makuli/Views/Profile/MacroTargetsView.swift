@@ -22,11 +22,11 @@ struct MacroTargetsView: View {
                     Text("Macro Targets")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Set your macronutrient percentages")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -82,7 +82,7 @@ struct MacroTargetsView: View {
                 .padding(.bottom, 20)
                 .disabled(proteinPercentage + carbsPercentage + fatPercentage != 100)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
@@ -111,7 +111,7 @@ struct MacroCard: View {
             
             Text(title)
                 .font(.caption)
-                .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                .foregroundColor(AppColors.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -134,7 +134,7 @@ struct MacroSlider: View {
             HStack {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 Spacer()
                 Text("\(percentage)%")
                     .font(.headline)

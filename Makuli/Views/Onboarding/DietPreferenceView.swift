@@ -20,7 +20,7 @@ struct DietPreferenceView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             
             VStack(spacing: 30) {
                 // Progress bar
@@ -33,12 +33,12 @@ struct DietPreferenceView: View {
                 VStack(spacing: 12) {
                     Text("Any dietary preferences?")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     
                     Text("Select all that apply (optional)")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)
@@ -72,7 +72,7 @@ struct DietPreferenceView: View {
                                     Text(option.0)
                                         .font(.caption)
                                         .fontWeight(.medium)
-                                        .foregroundColor(isSelected ? .white : AppColors.textCharcoal)
+                                        .foregroundColor(isSelected ? .white : AppColors.text)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(2)
                                 }
@@ -90,7 +90,7 @@ struct DietPreferenceView: View {
                                         .stroke(
                                             isSelected
                                             ? Color.clear
-                                            : AppColors.textCharcoal.opacity(0.1),
+                                            : AppColors.text.opacity(0.1),
                                             lineWidth: 1
                                         )
                                 )

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProgressTrackerSection: View {
     
-    let metrics : [UIProgressMetrics]
+    let metrics : [ProgressMetric]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -18,11 +18,11 @@ struct ProgressTrackerSection: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Progress Tracker")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Track your weekly achievements")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()
@@ -51,10 +51,10 @@ struct ProgressTrackerSection: View {
 
 #Preview {
     ProgressTrackerSection(metrics: [
-        UIProgressMetrics(title: "This Week", value: "12/15", change: "+3", isPositive: true),
-        UIProgressMetrics(title: "Today", value: "3/4", change: "75%", isPositive: true),
-        UIProgressMetrics(title: "Progress", value: "80%", change: "Great!", isPositive: true),
-        UIProgressMetrics(title: "Groceries", value: "15/20", change: "Ready", isPositive: true)
+        ProgressMetric(title: "This Week", value: "12/15", change: "+3", isPositive: true),
+        ProgressMetric(title: "Today", value: "3/4", change: "75%", isPositive: true),
+        ProgressMetric(title: "Progress", value: "80%", change: "Great!", isPositive: true),
+        ProgressMetric(title: "Groceries", value: "15/20", change: "Ready", isPositive: true)
     ])
     .padding()
 }

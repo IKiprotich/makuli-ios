@@ -24,7 +24,7 @@ struct IngredientRowView: View {
                 toggleCompletion()
             } label: {
                 Image(systemName: ingredient.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(ingredient.isCompleted ? AppColors.successGreen : AppColors.textCharcoal.opacity(0.3))
+                    .foregroundColor(ingredient.isCompleted ? AppColors.successGreen : AppColors.text.opacity(0.3))
                     .font(.title3)
             }
             .accessibilityLabel(ingredient.isCompleted ? "mark as incomplete" : "mark as complete")
@@ -32,12 +32,12 @@ struct IngredientRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(ingredient.formattedQuantity)
                     .font(AppFonts.body())
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                     .strikethrough(ingredient.isCompleted)
                 
                 Text(ingredient.name)
                     .font(AppFonts.caption())
-                    .foregroundColor(AppColors.textCharcoal.opacity(0.3))
+                    .foregroundColor(AppColors.text.opacity(0.3))
                     .strikethrough(ingredient.isCompleted)
             }
             

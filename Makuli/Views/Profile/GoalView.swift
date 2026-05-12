@@ -26,11 +26,11 @@ struct GoalView: View {
                     Text("Fitness Goal")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("What's your main goal?")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -45,11 +45,11 @@ struct GoalView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(option.0)
                                             .font(.headline)
-                                            .foregroundColor(selectedGoal == option.0 ? .white : AppColors.textCharcoal)
+                                            .foregroundColor(selectedGoal == option.0 ? .white : AppColors.text)
                                         
                                         Text(option.1)
                                             .font(.caption)
-                                            .foregroundColor(selectedGoal == option.0 ? .white.opacity(0.8) : AppColors.textCharcoal.opacity(0.6))
+                                            .foregroundColor(selectedGoal == option.0 ? .white.opacity(0.8) : AppColors.textSecondary)
                                     }
                                     
                                     Spacer()
@@ -86,7 +86,7 @@ struct GoalView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

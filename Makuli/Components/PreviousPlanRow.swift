@@ -15,7 +15,7 @@ struct PreviousPlanRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(plan.weekTitle)
                     .font(.headline)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Text(plan.planName)
                     .font(.subheadline)

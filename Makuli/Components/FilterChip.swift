@@ -2,8 +2,6 @@
 //  FilterChip.swift
 //  Makuli
 //
-//  Created by Ian   on 30/06/2025.
-//
 
 import SwiftUI
 
@@ -11,31 +9,41 @@ struct FilterChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(isSelected ? .white : Color(.label))
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundColor(isSelected ? .white : AppColors.text)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(isSelected ? AppColors.primaryOrange : Color(.secondarySystemFill))
+                        .fill(isSelected ? AnyShapeStyle(AppColors.primaryOrange) : AnyShapeStyle(AppColors.card))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(isSelected ? Color.clear : AppColors.border, lineWidth: 1)
+                        )
+                )
+                .shadow(
+                    color: isSelected ? AppColors.primaryOrange.opacity(0.25) : Color.clear,
+                    radius: 6, x: 0, y: 3
                 )
         }
+        .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.04 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
         .accessibilityLabel("Filter by \(title)")
-        .accessibilityHint(isSelected ? "Currently selected" : "Tap to filter recipes")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
-// MARK: - Preview
-struct FilterChip_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 16) {
-            FilterChip(title: "All", isSelected: true, action: {})
-            FilterChip(title: "Quick", isSelected: false, action: {})
-        }
-        .padding()
+#Preview {
+    HStack(spacing: 10) {
+        FilterChip(title: "All",     isSelected: true,  action: {})
+        FilterChip(title: "Quick",   isSelected: false, action: {})
+        FilterChip(title: "Healthy", isSelected: false, action: {})
     }
-} 
+    .padding()
+    .background(AppColors.background)
+}

@@ -1,15 +1,14 @@
-//  BuildplateApp.swift
-//  Buildplate
 //
-//  Created by ian on 2025-01-03.
+//  MakuliApp.swift
+//  Makuli
 //
 
 import SwiftUI
 
 @main
-struct BuildplateApp: App {
+struct MakuliApp: App {
     @StateObject private var themeManager = ThemeManager.shared
-    
+
     var body: some Scene {
         WindowGroup {
             MainAppView()

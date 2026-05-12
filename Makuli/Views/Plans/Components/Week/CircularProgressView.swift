@@ -32,7 +32,7 @@ struct CircularProgressView: View {
             Text("\(Int(progress * 100)) %")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundStyle(AppColors.textCharcoal)
+                .foregroundStyle(AppColors.text)
         }
     }
 }

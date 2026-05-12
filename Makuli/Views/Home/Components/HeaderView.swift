@@ -48,11 +48,11 @@ struct HeaderView: View {
             VStack(spacing: 2) {
                 Text("Home")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Text("Your meal planning hub")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                    .foregroundColor(AppColors.textSecondary)
             }
             
             Spacer()
@@ -61,12 +61,12 @@ struct HeaderView: View {
             Button(action: onSettingsTap) {
                 ZStack {
                     Circle()
-                        .fill(AppColors.textCharcoal.opacity(0.1))
+                        .fill(AppColors.text.opacity(0.1))
                         .frame(width: 44, height: 44)
                     
                     Image(systemName: "gearshape")
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                 }
             }
         }

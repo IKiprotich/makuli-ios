@@ -85,14 +85,14 @@ extension RecipeDetailView {
                     .frame(width: 80, height: 80)
                     .background(
                         Circle()
-                            .fill(AppColors.bgCream)
+                            .fill(AppColors.background)
                     )
                 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(recipe.title)
                         .font(AppFonts.title2())
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .fixedSize(horizontal: false, vertical: true)
                     
                     
@@ -117,7 +117,7 @@ extension RecipeDetailView {
             Text(text)
                 .font(AppFonts.caption())
         }
-        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+        .foregroundColor(AppColors.textSecondary)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(
@@ -132,7 +132,7 @@ extension RecipeDetailView {
         VStack(alignment: .leading, spacing: 16) {
             Text("Ingredients")
                 .font(AppFonts.headline())
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .padding(.horizontal)
             
             VStack(spacing: 12) {
@@ -145,7 +145,7 @@ extension RecipeDetailView {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(AppColors.bgCream)
+                    .fill(AppColors.background)
             )
             .padding(.horizontal)
             
@@ -159,7 +159,7 @@ extension RecipeDetailView {
         VStack(alignment: .leading, spacing: 16) {
             Text("Steps")
                 .font(AppFonts.headline())
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
                 .padding(.horizontal)
             
             VStack(spacing: 16) {
@@ -219,27 +219,16 @@ extension RecipeDetailView {
 }
 
 
-#Preview {
-    RecipeDetailView(recipe: Recipe(
-        id: "preview-recipe",
-        title: "Sample Recipe",
-        cookTime: "30 mins",
-        prepTime: 15,
-        servings: 4,
-        calories: 350,
-        imageUrl: nil,
-        ingredients: ["Ingredient 1", "Ingredient 2"],
-        steps: ["Step 1", "Step 2"],
-        substitutions: ["Sub 1", "Sub 2"],
-        tags: ["sample", "preview"],
-        difficulty: "Easy",
-        cuisineType: "Italian",
-        costEstimate: 15.0,
-        createdAt: Date(),
-        updatedAt: Date(),
-        createdBy: nil,
-        isPublic: true,
-        rating: 4.5,
-        ratingCount: 10
-    ))
+#if DEBUG
+#Preview("Salmon") {
+    RecipeDetailView(recipe: Preview.recipe)
 }
+
+#Preview("Tikka Masala") {
+    RecipeDetailView(recipe: Preview.dinnerRecipe)
+}
+
+#Preview("Overnight Oats") {
+    RecipeDetailView(recipe: Preview.breakfastRecipe)
+}
+#endif

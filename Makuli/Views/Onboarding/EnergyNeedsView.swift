@@ -6,7 +6,7 @@ struct EnergyNeedsView: View {
     let totalPages: Int
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
@@ -18,11 +18,11 @@ struct EnergyNeedsView: View {
                         .foregroundColor(AppColors.primaryOrange)
                     Text("Energy needs")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("The next questions will help us calculate your daily energy needs")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)

@@ -72,7 +72,7 @@ struct WeekDetailView: View {
                     Spacer()
                 }
                 .padding(.bottom, 16)
-                .background(AppColors.bgCream.opacity(0.9))
+                .background(AppColors.background.opacity(0.9))
             }
 //            .navigationDestination(for: Recipe.self) { recipe in
 //                RecipeDetailView(recipe: recipe)
@@ -154,7 +154,7 @@ extension WeekDetailView {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                 }
                 .accessibilityLabel("Go back")
                 
@@ -165,7 +165,7 @@ extension WeekDetailView {
                 Text(plan.plan.title + " Plan")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(AppColors.textCharcoal)
+                    .foregroundColor(AppColors.text)
                 
                 Spacer()
                 
@@ -175,7 +175,7 @@ extension WeekDetailView {
                 }) {
                     Image(systemName: "ellipsis")
                         .font(.title2)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                 }
                 .accessibilityLabel("More options")
             }
@@ -201,7 +201,7 @@ extension WeekDetailView {
                     Text("$\(Int((plan.plan.totalCost ?? 0.0) * 0.8).formatted())")
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("/ $\(Int(plan.plan.totalCost ?? 0.0).formatted())")
                         .font(.subheadline)

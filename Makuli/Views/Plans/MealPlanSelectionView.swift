@@ -117,7 +117,7 @@ struct MealPlanSelectionView: View {
                     }) {
                         Image(systemName: "arrow.left")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(AppColors.textCharcoal)
+                            .foregroundColor(AppColors.text)
                     }
                 }
                 
@@ -188,7 +188,7 @@ struct MealPlanSelectionView: View {
         case "Lunch":
             return AppColors.primaryOrange.opacity(0.15)
         default:
-            return AppColors.textCharcoal.opacity(0.1)
+            return AppColors.text.opacity(0.1)
         }
     }
     
@@ -210,7 +210,7 @@ struct MealPlanSelectionView: View {
         case "Lunch":
             return AppColors.primaryOrange
         default:
-            return AppColors.textCharcoal
+            return AppColors.text
         }
     }
     

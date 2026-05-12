@@ -24,7 +24,7 @@ struct CurrentPlanCard: View {
                     Text(plan.title)
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("\(plan.completedMealsCount)/\(plan.totalMealsCount)")
                         .font(.subheadline)

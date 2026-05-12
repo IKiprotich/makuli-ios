@@ -29,11 +29,11 @@ struct ProfileDietPreferenceView: View {
                     Text("Diet Preference")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Choose your dietary preference")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -47,7 +47,7 @@ struct ProfileDietPreferenceView: View {
                                 HStack {
                                     Text(option)
                                         .font(.headline)
-                                        .foregroundColor(selectedPreference == option ? .white : AppColors.textCharcoal)
+                                        .foregroundColor(selectedPreference == option ? .white : AppColors.text)
                                     
                                     Spacer()
                                     
@@ -83,7 +83,7 @@ struct ProfileDietPreferenceView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

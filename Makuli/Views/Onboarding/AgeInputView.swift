@@ -17,7 +17,7 @@ struct AgeInputView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             
             VStack(spacing: 30) {
                 
@@ -32,11 +32,11 @@ struct AgeInputView: View {
                 VStack(spacing: 12) {
                     Text("Age")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     Text("Age is used to calculate your calories")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.65))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)

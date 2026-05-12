@@ -24,7 +24,7 @@ struct GoalSelectionView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 // progress indicator
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
@@ -35,12 +35,12 @@ struct GoalSelectionView: View {
                 VStack(spacing: 20) {
                     Text("What's your main goal?")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     
                     Text("Choose your primary health objective")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 
@@ -72,7 +72,7 @@ struct GoalSelectionView: View {
                                             .foregroundColor(
                                                 selectedGoal == option.0
                                                     ? .white
-                                                : AppColors.textCharcoal
+                                                : AppColors.text
                                             )
                                         
                                         Text(option.1)
@@ -80,7 +80,7 @@ struct GoalSelectionView: View {
                                             .foregroundColor(
                                                 selectedGoal == option.0
                                                     ? .white.opacity(0.8)
-                                                : AppColors.textCharcoal.opacity(0.6)
+                                                : AppColors.textSecondary
                                             )
                                     }
                                     

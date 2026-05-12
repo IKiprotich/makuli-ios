@@ -47,7 +47,7 @@ struct GroceryItemRowView: View {
             VStack(alignment: .leading) {
                 Text(item.name)
                     .font(.system(size:16, weight: .medium))
-                    .foregroundColor(isChecked ? AppColors.successGreen : AppColors.textCharcoal)
+                    .foregroundColor(isChecked ? AppColors.successGreen : AppColors.text)
                     .strikethrough(isChecked)
                 
                 Text(item.formattedQuantity)

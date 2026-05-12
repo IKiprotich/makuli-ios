@@ -16,7 +16,7 @@ struct GenderSelectionView: View {
     
     var body: some View {
         ZStack {
-            AppColors.bgCream
+            AppColors.background
             VStack(spacing: 30) {
                 // progress indicator
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
@@ -29,12 +29,12 @@ struct GenderSelectionView: View {
                 VStack(spacing: 20) {
                     Text("What's your gender?")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                         .multilineTextAlignment(.center)
                     
                     Text("This helps us provide better nutritional recommendations")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
@@ -51,7 +51,7 @@ struct GenderSelectionView: View {
                                     .foregroundColor(
                                         onboardingData.gender == option
                                             ? .white
-                                        : AppColors.textCharcoal
+                                        : AppColors.text
                                     )
                                 
                                 Spacer()
@@ -88,7 +88,7 @@ struct GenderSelectionView: View {
                 Button(action: {
                     if !onboardingData.gender.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            currentPage = 3
+                            currentPage += 1
                         }
                     }
                 }) {

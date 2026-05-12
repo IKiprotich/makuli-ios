@@ -145,7 +145,7 @@ extension TemplateSelectionView {
                     }
                     .font(.subheadline)
                     .fontWeight(selectedCategory == nil ? .semibold : .medium)
-                    .foregroundColor(selectedCategory == nil ? .white : AppColors.textCharcoal)
+                    .foregroundColor(selectedCategory == nil ? .white : AppColors.text)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(selectedCategory == nil ? AppColors.primaryOrange : Color(.systemGray6))
@@ -168,7 +168,7 @@ extension TemplateSelectionView {
                             }
                             .font(.subheadline)
                             .fontWeight(selectedCategory == category ? .semibold : .medium)
-                            .foregroundColor(selectedCategory == category ? .white : AppColors.textCharcoal)
+                            .foregroundColor(selectedCategory == category ? .white : AppColors.text)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(selectedCategory == category ? AppColors.primaryOrange : Color(.systemGray6))

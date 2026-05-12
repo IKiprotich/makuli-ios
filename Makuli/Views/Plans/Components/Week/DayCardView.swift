@@ -51,7 +51,7 @@ extension DayCardView {
             Text(dayPlan.dayName)
                 .font(.headline)
                 .fontWeight(.bold)
-                .foregroundColor(AppColors.textCharcoal)
+                .foregroundColor(AppColors.text)
             
             Spacer()
             

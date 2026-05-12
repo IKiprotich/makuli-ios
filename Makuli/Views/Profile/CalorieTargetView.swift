@@ -18,11 +18,11 @@ struct CalorieTargetView: View {
                     Text("Calorie Target")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(AppColors.textCharcoal)
+                        .foregroundColor(AppColors.text)
                     
                     Text("Set your daily calorie goal")
                         .font(.body)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -34,7 +34,7 @@ struct CalorieTargetView: View {
                     
                     Text("calories per day")
                         .font(.headline)
-                        .foregroundColor(AppColors.textCharcoal.opacity(0.7))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
                 // Slider
@@ -42,11 +42,11 @@ struct CalorieTargetView: View {
                     HStack {
                         Text("1200")
                             .font(.caption)
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                            .foregroundColor(AppColors.textSecondary)
                         Spacer()
                         Text("3500")
                             .font(.caption)
-                            .foregroundColor(AppColors.textCharcoal.opacity(0.6))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                     
                     Slider(value: Binding(
@@ -73,7 +73,7 @@ struct CalorieTargetView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
-            .background(AppColors.bgCream)
+            .background(AppColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
