@@ -71,7 +71,7 @@ Makuli/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-username/makuli.git
+git clone https://github.com/IKiprotich/makuli.git
 cd makuli
 
 # 2. Set up the database
