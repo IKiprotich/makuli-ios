@@ -1,3 +1,10 @@
+//
+//  GoalView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct GoalView: View {
@@ -21,7 +28,6 @@ struct GoalView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Fitness Goal")
                         .font(.largeTitle)
@@ -34,7 +40,6 @@ struct GoalView: View {
                 }
                 .padding(.top, 20)
                 
-                // Goal options
                 ScrollView {
                     VStack(spacing: 15) {
                         ForEach(goalOptions, id: \.0) { option in
@@ -72,7 +77,6 @@ struct GoalView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedGoal)
                     dismiss()

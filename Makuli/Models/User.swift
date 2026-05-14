@@ -2,13 +2,11 @@
 //  User.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
 
 import Foundation
 
-/// Represents the authenticated user's profile and preferences in-memory.
-/// Loaded from the `profiles` table after sign-in and updated on onboarding completion.
 struct User: Identifiable, Codable {
     let id: String
     let email: String
@@ -33,7 +31,6 @@ struct User: Identifiable, Codable {
     let createdAt: Date
     let updatedAt: Date
 
-    // Maps Swift property names to Supabase column names.
     enum CodingKeys: String, CodingKey {
         case id
         case email
@@ -83,7 +80,6 @@ struct User: Identifiable, Codable {
         dislikedIngredients = try container.decode([String].self, forKey: .dislikedIngredients)
         hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -133,7 +129,6 @@ struct User: Identifiable, Codable {
     var budget: String { budgetRange }
     var isOnboardingCompleted: Bool { hasCompletedOnboarding }
 
-    // Placeholders — replace with real subscription data when billing is implemented.
     var isPremium: Bool { false }
     var subscriptionRenewalDate: String? { nil }
 
@@ -155,9 +150,7 @@ struct User: Identifiable, Codable {
         }
     }
     
-    /// Estimated daily calorie needs using Mifflin-St Jeor equation + activity multiplier.
     var estimatedDailyCalories: Int {
-        // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor Equation
         let bmr: Double
         if gender.lowercased() == "male" {
             bmr = (10 * weight) + (6.25 * height) - (5 * Double(age)) + 5
@@ -165,7 +158,6 @@ struct User: Identifiable, Codable {
             bmr = (10 * weight) + (6.25 * height) - (5 * Double(age)) - 161
         }
         
-        // Apply activity level multiplier
         let activityMultiplier: Double
         switch activityLevel.lowercased() {
         case "sedentary":

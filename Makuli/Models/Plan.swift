@@ -4,92 +4,45 @@
 //
 //  Created by Ian on 2025-01-13.
 //
-//  Production-ready models for meal plans stored in Supabase database.
-//
-//  This file contains the core data models for meal planning functionality in the
-//  Makuli app. It includes the Plan struct for representing user meal plans and
-//  the PlanRecipe struct for individual meals within those plans.
-//
-//  Key Features:
-//  - Custom Codable implementation for Supabase timestamp handling
-//  - Support for different plan generation methods (template, AI, manual)
-//  - Integration with user profiles and recipe database
-//  - Progress tracking and completion status
-//  - Week-based planning with start/end dates
-//
 
 import Foundation
 
 // MARK: - Core Plan Models
 
-/// Represents a meal plan stored in the Supabase 'plans' table.
-/// 
-/// A Plan represents a user's meal plan for a specific time period (typically
-/// a week). It contains metadata about the plan, including creation method,
-/// completion status, and cost estimates. Individual meals within the plan
-/// are stored separately in the 'plan_recipes' table and linked via plan_id.
-/// 
-/// The model includes custom decoding logic to handle Supabase's ISO8601
-/// timestamp format and optional fields that may be null in the database.
-/// 
-/// Example usage:
-/// ```swift
-/// let plan = Plan(
-///     id: "uuid",
-///     userId: "user-uuid",
-///     title: "Healthy Week Plan",
-///     weekStart: Date(),
-///     weekEnd: Calendar.current.date(byAdding: .day, value: 6, to: Date())!,
-///     generationMethod: "template"
-/// )
-/// ```
+
 struct Plan: Codable, Identifiable {
     // MARK: - Core Properties
     
-    /// Unique identifier for the plan (UUID from Supabase)
     let id: String
     
-    /// ID of the user who owns this plan
     let userId: String
     
-    /// Human-readable title for the plan
     let title: String
     
-    /// Start date of the plan period (typically Monday)
     let weekStart: Date
     
-    /// End date of the plan period (typically Sunday)
     let weekEnd: Date
     
-    /// Estimated total cost for all meals in the plan
     let totalCost: Double?
     
-    /// Whether the plan has been completed
     let isCompleted: Bool
     
-    /// When the plan was created
     let createdAt: Date
     
-    /// When the plan was last updated
     let updatedAt: Date
     
     // MARK: - Plan Metadata
     
-    /// ID of the template used to create this plan (if applicable)
     let templateId: String?
     
-    /// Method used to generate the plan: "template", "ai", or "manual"
     let generationMethod: String
     
-    /// Whether the user has marked this plan as a favorite
     let isFavorite: Bool
     
-    /// Percentage of meals completed (0.0 to 100.0)
     let completionPercentage: Double
     
     // MARK: - Coding Keys
     
-    /// Maps Swift property names to Supabase column names
     enum CodingKeys: String, CodingKey {
         case id
         case userId = "user_id"
@@ -108,25 +61,6 @@ struct Plan: Codable, Identifiable {
     
     // MARK: - Initializers
     
-    /// Creates a new Plan instance with all required and optional properties.
-    /// 
-    /// This initializer is used for creating Plan objects programmatically,
-    /// such as when generating plans from templates or AI.
-    /// 
-    /// - Parameters:
-    ///   - id: Unique identifier (usually UUID string)
-    ///   - userId: ID of the user who owns this plan
-    ///   - title: Human-readable plan title
-    ///   - weekStart: Start date of the plan period
-    ///   - weekEnd: End date of the plan period
-    ///   - totalCost: Estimated total cost (optional)
-    ///   - isCompleted: Whether plan is completed
-    ///   - createdAt: Creation timestamp
-    ///   - updatedAt: Last update timestamp
-    ///   - templateId: ID of template used (optional)
-    ///   - generationMethod: How plan was created
-    ///   - isFavorite: Whether user favorited this plan
-    ///   - completionPercentage: Percentage of meals completed
     init(
         id: String,
         userId: String,
@@ -159,16 +93,9 @@ struct Plan: Codable, Identifiable {
     
     // MARK: - Custom Decoding
     
-    /// Custom decoder that handles Supabase's specific data format.
-    /// 
-    /// This decoder is necessary because Supabase returns timestamps as
-    /// ISO8601 strings rather than Date objects. The decoder includes
-    /// fallback logic to handle various timestamp formats and ensure
-    /// the app doesn't crash on malformed data.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode simple fields that don't require special handling
         id = try container.decode(String.self, forKey: .id)
         userId = try container.decode(String.self, forKey: .userId)
         title = try container.decode(String.self, forKey: .title)
@@ -179,7 +106,6 @@ struct Plan: Codable, Identifiable {
         isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
         completionPercentage = try container.decode(Double.self, forKey: .completionPercentage)
         
-        // Custom decoding for timestamps (Supabase returns ISO8601 strings)
         do {
             weekStart = try container.decode(Date.self, forKey: .weekStart)
         } catch {
@@ -235,96 +161,56 @@ struct Plan: Codable, Identifiable {
     
     // MARK: - Computed Properties
     
-    /// Total number of meals in the plan (placeholder - would be calculated from plan_recipes)
     var totalMealsCount: Int {
-        // This would typically be calculated from the plan_recipes table
-        // For now, return a placeholder value
-        return 21 // 3 meals per day for 7 days
+        return 21
     }
     
-    /// Number of completed meals in the plan (placeholder - would be calculated from plan_recipes)
     var completedMealsCount: Int {
-        // This would typically be calculated from the plan_recipes table
-        // For now, calculate based on completion percentage
         return Int(completionPercentage / 100.0 * Double(totalMealsCount))
     }
     
-    /// Progress as a percentage (0.0 to 1.0)
     var progress: Double {
         return completionPercentage / 100.0
     }
 }
 
-/// Represents an individual meal within a plan, stored in the Supabase 'plan_recipes' table.
-/// 
-/// A PlanRecipe links a specific recipe to a plan for a particular day and meal type.
-/// It can either reference an existing recipe from the 'recipes' table or contain
-/// custom meal data (for meals created without a specific recipe).
-/// 
-/// The model supports both recipe-based meals (with recipe_id) and custom meals
-/// (with custom_meal_name, custom_ingredients, etc.) for maximum flexibility.
-/// 
-/// Example usage:
-/// ```swift
-/// let planRecipe = PlanRecipe(
-///     id: "uuid",
-///     planId: "plan-uuid",
-///     recipeId: "recipe-uuid",
-///     dayOfWeek: 0, // Monday
-///     mealType: "breakfast",
-///     day: "Monday"
-/// )
-/// ```
 struct PlanRecipe: Codable, Identifiable {
     // MARK: - Core Properties
     
-    /// Unique identifier for this plan recipe (UUID from Supabase)
     let id: String
     
-    /// ID of the plan this meal belongs to
     let planId: String
     
-    /// ID of the recipe this meal is based on (optional for custom meals)
     let recipeId: String?
     
-    /// Day of the week (0=Sunday, 1=Monday, ..., 6=Saturday)
     let dayOfWeek: Int
     
-    /// Type of meal: "breakfast", "lunch", "dinner", or "snack"
     let mealType: String
     
-    /// Position/order of this meal within the day
     let position: Int
     
-    /// Human-readable day name (e.g., "Monday", "Tuesday")
     let day: String
     
-    /// Whether this meal has been completed
     let isCompleted: Bool
     
-    /// When this meal was completed (if applicable)
     let completedAt: Date?
     
     // MARK: - Custom Meal Data
     
-    /// Custom meal name (used when recipe_id is nil)
     let customMealName: String?
     
-    /// Custom ingredients list (used when recipe_id is nil)
     let customIngredients: [String]?
     
-    /// Custom cooking instructions (used when recipe_id is nil)
     let customInstructions: [String]?
     
-    /// Custom cooking time in minutes (used when recipe_id is nil)
     let customCookTime: Int?
     
-    /// Additional notes for this meal
     let notes: String?
-    
+
+    let imageUrl: String?
+
     // MARK: - Coding Keys
-    
-    /// Maps Swift property names to Supabase column names
+
     enum CodingKeys: String, CodingKey {
         case id
         case planId = "plan_id"
@@ -340,21 +226,72 @@ struct PlanRecipe: Codable, Identifiable {
         case customInstructions = "custom_instructions"
         case customCookTime = "custom_cook_time"
         case notes
+        case imageUrl = "custom_image_url"
+    }
+
+    // MARK: - Memberwise Init (used by mock data and manual construction)
+
+    init(
+        id: String,
+        planId: String,
+        recipeId: String? = nil,
+        dayOfWeek: Int,
+        mealType: String,
+        position: Int = 0,
+        day: String = "",
+        isCompleted: Bool = false,
+        completedAt: Date? = nil,
+        customMealName: String? = nil,
+        customIngredients: [String]? = nil,
+        customInstructions: [String]? = nil,
+        customCookTime: Int? = nil,
+        notes: String? = nil,
+        imageUrl: String? = nil
+    ) {
+        self.id                 = id
+        self.planId             = planId
+        self.recipeId           = recipeId
+        self.dayOfWeek          = dayOfWeek
+        self.mealType           = mealType
+        self.position           = position
+        self.day                = day
+        self.isCompleted        = isCompleted
+        self.completedAt        = completedAt
+        self.customMealName     = customMealName
+        self.customIngredients  = customIngredients
+        self.customInstructions = customInstructions
+        self.customCookTime     = customCookTime
+        self.notes              = notes
+        self.imageUrl           = imageUrl
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id                 = try c.decode(String.self,    forKey: .id)
+        planId             = try c.decode(String.self,    forKey: .planId)
+        recipeId           = try c.decodeIfPresent(String.self,  forKey: .recipeId)
+        dayOfWeek          = try c.decode(Int.self,       forKey: .dayOfWeek)
+        mealType           = try c.decode(String.self,    forKey: .mealType)
+        position           = (try? c.decode(Int.self,     forKey: .position)) ?? 0
+        day                = (try? c.decode(String.self,  forKey: .day)) ?? ""
+        isCompleted        = (try? c.decode(Bool.self,    forKey: .isCompleted)) ?? false
+        completedAt        = try c.decodeIfPresent(Date.self,    forKey: .completedAt)
+        customMealName     = try c.decodeIfPresent(String.self,  forKey: .customMealName)
+        customIngredients  = try c.decodeIfPresent([String].self, forKey: .customIngredients)
+        customInstructions = try c.decodeIfPresent([String].self, forKey: .customInstructions)
+        customCookTime     = try c.decodeIfPresent(Int.self,     forKey: .customCookTime)
+        notes              = try c.decodeIfPresent(String.self,  forKey: .notes)
+        imageUrl           = try c.decodeIfPresent(String.self,  forKey: .imageUrl)
     }
 }
 
 // MARK: - Request Models
 
-/// Request model for creating a new plan in the database.
-/// 
-/// This struct is used when creating new plans via the API or when
-/// generating plans from templates or AI. It includes all the fields
-/// needed to create a plan, with proper coding keys for Supabase mapping.
 struct CreatePlanRequest: Codable {
     let userId: String
     let title: String
-    let weekStart: String // ISO8601 date string
-    let weekEnd: String // ISO8601 date string
+    let weekStart: String
+    let weekEnd: String
     let totalCost: Double?
     let templateId: String?
     let generationMethod: String
@@ -370,10 +307,6 @@ struct CreatePlanRequest: Codable {
     }
 }
 
-/// Request model for creating a new plan recipe in the database.
-/// 
-/// This struct is used when adding meals to plans, either by linking
-/// existing recipes or creating custom meals.
 struct CreatePlanRecipeRequest: Codable {
     let planId: String
     let recipeId: String?
@@ -404,32 +337,24 @@ struct CreatePlanRecipeRequest: Codable {
 
 // MARK: - Helper Models
 
-/// Represents a plan with its associated recipes/meals.
-/// 
-/// This is a convenience model used in ViewModels to combine a Plan
-/// with its PlanRecipe objects for easier UI rendering and data management.
 struct PlanWithRecipes: Identifiable {
     let id: String
     let plan: Plan
     let recipes: [PlanRecipe]
     
-    /// Whether this plan covers the current week
     var isCurrentWeek: Bool {
         let now = Date()
         return plan.weekStart <= now && plan.weekEnd >= now
     }
     
-    /// Number of meals in this plan
     var mealCount: Int {
         return recipes.count
     }
     
-    /// Number of completed meals
     var completedMealCount: Int {
         return recipes.filter { $0.isCompleted }.count
     }
     
-    /// Completion percentage (0.0 to 100.0)
     var completionPercentage: Double {
         guard mealCount > 0 else { return 0.0 }
         return Double(completedMealCount) / Double(mealCount) * 100.0
@@ -439,14 +364,12 @@ struct PlanWithRecipes: Identifiable {
 // MARK: - Extensions
 
 extension Plan {
-    /// Returns a formatted date range string for display.
     var dateRangeDisplay: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return "\(formatter.string(from: weekStart)) - \(formatter.string(from: weekEnd))"
     }
     
-    /// Returns the generation method as a human-readable string.
     var generationMethodDisplay: String {
         switch generationMethod.lowercased() {
         case "template": return "Template"
@@ -457,7 +380,6 @@ extension Plan {
         }
     }
     
-    /// Returns the total cost as a formatted string.
     var totalCostDisplay: String {
         guard let cost = totalCost else { return "N/A" }
         return String(format: "$%.2f", cost)
@@ -465,23 +387,19 @@ extension Plan {
 }
 
 extension PlanRecipe {
-    /// Returns the meal type as a human-readable string.
     var mealTypeDisplay: String {
         return mealType.capitalized
     }
     
-    /// Returns the day of week as a human-readable string.
     var dayOfWeekDisplay: String {
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         return days[dayOfWeek]
     }
     
-    /// Returns the meal name (either custom name or recipe title).
     var mealName: String {
         return customMealName ?? "Meal"
     }
     
-    /// Returns the cooking time (either custom time or recipe time).
     var cookingTime: Int? {
         return customCookTime
     }
@@ -492,37 +410,27 @@ typealias WeekPlan = PlanWithRecipes
 
 // MARK: - WeekPlan Extensions for UI Compatibility
 extension PlanWithRecipes {
-    /// Title for week carousel display
     var weekTitle: String {
         return plan.title
     }
     
-    /// Formatted total cost for display
     var formattedTotalCost: String {
         return "$\(String(format: "%.0f", plan.totalCost ?? 0.0))"
     }
     
 
     
-    /// Legacy property for UI compatibility
     var planName: String {
         return plan.title
     }
     
-    /// Week number for display
     var weekNumber: String {
         let calendar = Calendar.current
         let weekOfYear = calendar.component(.weekOfYear, from: plan.weekStart)
         return "Week \(weekOfYear)"
     }
     
-    /// Mock data for previews and testing
-//    static var mockData: [PlanWithRecipes] {
-//        return [Plan.mockWeeklyPlan()]
-//    }
 }
 
 // MARK: - Mock Data (Removed for Supabase integration)
-// extension Plan { static func mockWeeklyPlan() -> PlanWithRecipes { ... } }
 
-// Deprecated: Use Supabase fetching instead 

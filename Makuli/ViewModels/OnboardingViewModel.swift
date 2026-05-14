@@ -15,7 +15,6 @@ class OnboardingViewModel: ObservableObject {
     @Published var currentStep = 0
     @Published var validationErrors: [String: String] = [:]
 
-    // Form data (used by the multi-step form flow)
     @Published var name = ""
     @Published var age = ""
     @Published var selectedGender = ""
@@ -90,15 +89,15 @@ class OnboardingViewModel: ObservableObject {
 
     var isCurrentStepValid: Bool {
         switch currentStep {
-        case 0: // Personal info
+        case 0:
             return isPersonalInfoValid
-        case 1: // Dietary preferences
+        case 1:
             return isDietaryPreferencesValid
-        case 2: // Goals and experience
+        case 2:
             return isGoalsAndExperienceValid
-        case 3: // Budget and household
+        case 3:
             return isBudgetAndHouseholdValid
-        case 4: // Review
+        case 4:
             return true
         default:
             return false
@@ -262,8 +261,6 @@ class OnboardingViewModel: ObservableObject {
     
     // MARK: - Completion
 
-    /// Completes onboarding using data collected from the onboarding screens.
-    /// This is the primary path called from PlanSummaryView.
     func completeOnboarding(authViewModel: AuthViewModel, onboardingData: OnboardingData) async {
         guard !isCompleting else { return }
         guard authViewModel.user != nil else {
@@ -322,7 +319,6 @@ class OnboardingViewModel: ObservableObject {
 
     // MARK: - Value Mapping
 
-    // Maps onboarding screen values to their database-constraint equivalents.
 
     private func mapGenderToDBValue(_ gender: String) -> String {
         switch gender {
@@ -334,7 +330,6 @@ class OnboardingViewModel: ObservableObject {
         }
     }
 
-    // Takes an array because DietPreferenceView allows multi-select; first DB-supported value wins.
     private func mapDietToDBValue(_ preferences: [String]) -> String {
         for pref in preferences {
             switch pref {
@@ -370,7 +365,6 @@ class OnboardingViewModel: ObservableObject {
         }
     }
 
-    // Legacy helpers used by the multi-step form (not called from onboarding screens).
     private func extractBudgetCategory(from fullBudget: String) -> String {
         if fullBudget.contains("Budget-friendly") { return "low" }
         if fullBudget.contains("Moderate") { return "medium" }

@@ -1,3 +1,10 @@
+//
+//  CalorieTargetView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct CalorieTargetView: View {
@@ -13,7 +20,6 @@ struct CalorieTargetView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Calorie Target")
                         .font(.largeTitle)
@@ -26,7 +32,6 @@ struct CalorieTargetView: View {
                 }
                 .padding(.top, 20)
                 
-                // Calorie display
                 VStack(spacing: 8) {
                     Text("\(calorieTarget)")
                         .font(.system(size: 48, weight: .bold))
@@ -37,7 +42,6 @@ struct CalorieTargetView: View {
                         .foregroundColor(AppColors.textSecondary)
                 }
                 
-                // Slider
                 VStack(spacing: 16) {
                     HStack {
                         Text("1200")
@@ -59,7 +63,6 @@ struct CalorieTargetView: View {
                 
                 Spacer()
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(calorieTarget)
                     dismiss()

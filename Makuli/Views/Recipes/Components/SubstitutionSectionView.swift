@@ -2,7 +2,7 @@
 //  SubstitutionSectionView.swift
 //  Makuli
 //
-//  Created by Ian   on 22/06/2025.
+//  Created by Ian on 2025-06-22.
 //
 
 import SwiftUI
@@ -72,5 +72,4 @@ struct SubstitutionSectionView: View {
 }
 
 #Preview {
-    //SubstitutionSectionView()
 }

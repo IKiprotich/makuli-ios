@@ -23,7 +23,6 @@ class ThemeManager: ObservableObject {
     @Published var colorScheme: ColorScheme {
         didSet {
             UserDefaults.standard.set(colorScheme == .dark, forKey: "isDarkMode")
-            // Only update isDarkMode if it's different to avoid infinite loop
             if isDarkMode != (colorScheme == .dark) {
                 isDarkMode = colorScheme == .dark
             }
@@ -31,7 +30,6 @@ class ThemeManager: ObservableObject {
     }
     
     private init() {
-        // Load saved preference or default to dark mode
         let savedDarkMode = UserDefaults.standard.object(forKey: "isDarkMode") as? Bool ?? true
         self.isDarkMode = savedDarkMode
         self.colorScheme = savedDarkMode ? .dark : .light

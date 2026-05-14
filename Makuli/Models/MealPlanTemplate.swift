@@ -4,152 +4,92 @@
 //
 //  Created by Ian on 2025-01-08.
 //
-//  Models for meal plan templates stored in Supabase database.
 //
 
 import Foundation
 
-/**
- * MealPlanTemplate Model
- * 
- * Represents a template for generating meal plans with predefined preferences and settings.
- * This model allows users to create reusable templates that can be used to generate
- * consistent meal plans with specific dietary, budget, and preference constraints.
- * 
- * Key Features:
- * - Predefined meal planning preferences
- * - Dietary restrictions and preferences
- * - Budget and cost constraints
- * - Meal variety and rotation settings
- * - Template categorization and organization
- * 
- * Database Relationships:
- * - Belongs to a User (via user_id)
- * - Can be used to generate multiple Plans
- * - Contains predefined preferences and settings
- */
+
 struct MealPlanTemplate: Identifiable, Codable {
-    /// Unique identifier for the meal plan template
     let id: String
     
-    /// Reference to the user who owns this template
     let userId: String
     
-    /// Name of the template
     let name: String
     
-    /// Description of the template
     let description: String?
     
-    /// Category of the template (e.g., "Weight Loss", "Muscle Gain", "Maintenance")
     let category: String
     
-    /// Whether this template is the user's default template
     let isDefault: Bool
     
-    /// Whether this template is public and can be shared
     let isPublic: Bool
     
-    /// Template icon or emoji
     let icon: String?
     
-    /// Template color theme
     let colorTheme: String?
     
-    /// Number of days the template covers
     let durationDays: Int
     
-    /// Number of meals per day
     let mealsPerDay: Int
     
-    /// Whether to include snacks
     let includeSnacks: Bool
     
-    /// Target daily calorie intake
     let targetCalories: Int?
     
-    /// Target protein intake in grams
     let targetProtein: Double?
     
-    /// Target carbohydrate intake in grams
     let targetCarbohydrates: Double?
     
-    /// Target fat intake in grams
     let targetFat: Double?
     
-    /// Dietary restrictions for this template
     let dietaryRestrictions: [String]
     
-    /// Allergies and intolerances
     let allergies: [String]
     
-    /// Preferred cuisine types
     let preferredCuisines: [String]
     
-    /// Disliked ingredients
     let dislikedIngredients: [String]
     
-    /// Favorite ingredients
     let favoriteIngredients: [String]
     
-    /// Budget range for this template (Low, Medium, High)
     let budgetRange: String
     
-    /// Maximum cost per meal
     let maxCostPerMeal: Double?
     
-    /// Weekly budget limit
     let weeklyBudget: Double?
     
-    /// Cooking skill level required (Beginner, Intermediate, Advanced)
     let cookingSkillLevel: String
     
-    /// Maximum preparation time per meal in minutes
     let maxPrepTime: Int?
     
-    /// Maximum cooking time per meal in minutes
     let maxCookTime: Int?
     
-    /// Whether to include meal prep instructions
     let includeMealPrep: Bool
     
-    /// Whether to include shopping lists
     let includeShoppingList: Bool
     
-    /// Whether to include nutritional information
     let includeNutritionInfo: Bool
     
-    /// Whether to rotate meals to avoid repetition
     let rotateMeals: Bool
     
-    /// Number of different recipes to include per week
     let recipeVariety: Int?
     
-    /// Whether to include leftovers in planning
     let includeLeftovers: Bool
     
-    /// Preferred meal complexity (Easy, Medium, Hard)
     let preferredComplexity: String
     
-    /// Special instructions or notes for this template
     let specialInstructions: String?
     
-    /// Tags for organizing templates
     let tags: [String]
     
-    /// Usage count - how many times this template has been used
     let usageCount: Int
     
-    /// Rating of the template (1-5 stars)
     let rating: Double?
     
-    /// Number of ratings received
     let ratingCount: Int
     
-    /// Timestamp when the template was created
     let createdAt: Date
     
-    /// Timestamp when the template was last updated
     let updatedAt: Date
     
     // MARK: - Coding Keys
@@ -243,7 +183,6 @@ struct MealPlanTemplate: Identifiable, Codable {
         rating = try container.decodeIfPresent(Double.self, forKey: .rating)
         ratingCount = try container.decode(Int.self, forKey: .ratingCount)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -261,53 +200,7 @@ struct MealPlanTemplate: Identifiable, Codable {
     }
     
     // MARK: - Convenience Initializer
-    
-    /**
-     * Creates a new MealPlanTemplate instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - userId: Reference to the user
-     *   - name: Template name
-     *   - description: Optional description
-     *   - category: Template category
-     *   - isDefault: Whether this is the default template
-     *   - isPublic: Whether template is public
-     *   - icon: Optional icon
-     *   - colorTheme: Optional color theme
-     *   - durationDays: Number of days covered
-     *   - mealsPerDay: Meals per day
-     *   - includeSnacks: Whether to include snacks
-     *   - targetCalories: Target daily calories
-     *   - targetProtein: Target protein in grams
-     *   - targetCarbohydrates: Target carbs in grams
-     *   - targetFat: Target fat in grams
-     *   - dietaryRestrictions: Array of dietary restrictions
-     *   - allergies: Array of allergies
-     *   - preferredCuisines: Array of preferred cuisines
-     *   - dislikedIngredients: Array of disliked ingredients
-     *   - favoriteIngredients: Array of favorite ingredients
-     *   - budgetRange: Budget range
-     *   - maxCostPerMeal: Maximum cost per meal
-     *   - weeklyBudget: Weekly budget limit
-     *   - cookingSkillLevel: Required cooking skill level
-     *   - maxPrepTime: Maximum prep time in minutes
-     *   - maxCookTime: Maximum cook time in minutes
-     *   - includeMealPrep: Whether to include meal prep
-     *   - includeShoppingList: Whether to include shopping list
-     *   - includeNutritionInfo: Whether to include nutrition info
-     *   - rotateMeals: Whether to rotate meals
-     *   - recipeVariety: Number of different recipes per week
-     *   - includeLeftovers: Whether to include leftovers
-     *   - preferredComplexity: Preferred meal complexity
-     *   - specialInstructions: Optional special instructions
-     *   - tags: Array of tags
-     *   - usageCount: Number of times used
-     *   - rating: Average rating
-     *   - ratingCount: Number of ratings
-     *   - createdAt: Creation timestamp
-     *   - updatedAt: Last update timestamp
-     */
+
     init(id: String, userId: String, name: String, description: String?, category: String, isDefault: Bool, isPublic: Bool, icon: String?, colorTheme: String?, durationDays: Int, mealsPerDay: Int, includeSnacks: Bool, targetCalories: Int?, targetProtein: Double?, targetCarbohydrates: Double?, targetFat: Double?, dietaryRestrictions: [String], allergies: [String], preferredCuisines: [String], dislikedIngredients: [String], favoriteIngredients: [String], budgetRange: String, maxCostPerMeal: Double?, weeklyBudget: Double?, cookingSkillLevel: String, maxPrepTime: Int?, maxCookTime: Int?, includeMealPrep: Bool, includeShoppingList: Bool, includeNutritionInfo: Bool, rotateMeals: Bool, recipeVariety: Int?, includeLeftovers: Bool, preferredComplexity: String, specialInstructions: String?, tags: [String], usageCount: Int, rating: Double?, ratingCount: Int, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.userId = userId
@@ -353,22 +246,12 @@ struct MealPlanTemplate: Identifiable, Codable {
     }
     
     // MARK: - Computed Properties
-    
-    /**
-     * Total number of meals in the template
-     * 
-     * - Returns: Total meals (including snacks if enabled)
-     */
+   
     var totalMeals: Int {
         let baseMeals = durationDays * mealsPerDay
         return includeSnacks ? baseMeals + durationDays : baseMeals
     }
     
-    /**
-     * Formatted duration string
-     * 
-     * - Returns: Duration formatted as "X days" or "X weeks"
-     */
     var formattedDuration: String {
         if durationDays == 7 {
             return "1 week"
@@ -380,56 +263,27 @@ struct MealPlanTemplate: Identifiable, Codable {
         }
     }
     
-    /**
-     * Display description
-     * 
-     * - Returns: Description if available, otherwise default text
-     */
+    
     var displayDescription: String {
         return description ?? "A meal plan template for \(category.lowercased())"
     }
-    
-    /**
-     * Whether template has any dietary restrictions
-     * 
-     * - Returns: True if template has dietary restrictions
-     */
+
     var hasDietaryRestrictions: Bool {
         return !dietaryRestrictions.isEmpty
     }
-    
-    /**
-     * Whether template has any allergies
-     * 
-     * - Returns: True if template has allergies
-     */
+
     var hasAllergies: Bool {
         return !allergies.isEmpty
     }
-    
-    /**
-     * Whether template has budget constraints
-     * 
-     * - Returns: True if template has budget limits
-     */
+
     var hasBudgetConstraints: Bool {
         return maxCostPerMeal != nil || weeklyBudget != nil
     }
-    
-    /**
-     * Whether template has time constraints
-     * 
-     * - Returns: True if template has time limits
-     */
+
     var hasTimeConstraints: Bool {
         return maxPrepTime != nil || maxCookTime != nil
     }
-    
-    /**
-     * Formatted rating string
-     * 
-     * - Returns: Rating formatted as "X.X stars" or "No ratings"
-     */
+
     var formattedRating: String {
         guard let rating = rating, ratingCount > 0 else {
             return "No ratings"
@@ -437,11 +291,7 @@ struct MealPlanTemplate: Identifiable, Codable {
         return String(format: "%.1f stars", rating)
     }
     
-    /**
-     * Category color for UI display
-     * 
-     * - Returns: Color name based on category
-     */
+
     var categoryColor: String {
         switch category.lowercased() {
         case "weight loss":
@@ -463,11 +313,7 @@ struct MealPlanTemplate: Identifiable, Codable {
         }
     }
     
-    /**
-     * Budget range color for UI display
-     * 
-     * - Returns: Color name based on budget range
-     */
+
     var budgetColor: String {
         switch budgetRange.lowercased() {
         case "low":
@@ -480,12 +326,7 @@ struct MealPlanTemplate: Identifiable, Codable {
             return "TextCharcoal"
         }
     }
-    
-    /**
-     * Complexity color for UI display
-     * 
-     * - Returns: Color name based on complexity
-     */
+
     var complexityColor: String {
         switch preferredComplexity.lowercased() {
         case "easy":
@@ -498,83 +339,37 @@ struct MealPlanTemplate: Identifiable, Codable {
             return "TextCharcoal"
         }
     }
-    
-    /**
-     * Whether template is suitable for beginners
-     * 
-     * - Returns: True if cooking skill level is beginner
-     */
+
     var isBeginnerFriendly: Bool {
         return cookingSkillLevel.lowercased() == "beginner"
     }
-    
-    /**
-     * Whether template is suitable for advanced cooks
-     * 
-     * - Returns: True if cooking skill level is advanced
-     */
+
     var isAdvancedLevel: Bool {
         return cookingSkillLevel.lowercased() == "advanced"
     }
     
     // MARK: - Helper Methods
     
-    /**
-     * Checks if template has a specific dietary restriction
-     * 
-     * - Parameter restriction: The dietary restriction to check
-     * - Returns: True if template has this restriction
-     */
     func hasDietaryRestriction(_ restriction: String) -> Bool {
         return dietaryRestrictions.contains { $0.lowercased() == restriction.lowercased() }
     }
     
-    /**
-     * Checks if template has a specific allergy
-     * 
-     * - Parameter allergy: The allergy to check
-     * - Returns: True if template has this allergy
-     */
     func hasAllergy(_ allergy: String) -> Bool {
         return allergies.contains { $0.lowercased() == allergy.lowercased() }
     }
-    
-    /**
-     * Checks if template prefers a specific cuisine
-     * 
-     * - Parameter cuisine: The cuisine to check
-     * - Returns: True if template prefers this cuisine
-     */
+
     func prefersCuisine(_ cuisine: String) -> Bool {
         return preferredCuisines.contains { $0.lowercased() == cuisine.lowercased() }
     }
     
-    /**
-     * Checks if template dislikes a specific ingredient
-     * 
-     * - Parameter ingredient: The ingredient to check
-     * - Returns: True if template dislikes this ingredient
-     */
     func dislikesIngredient(_ ingredient: String) -> Bool {
         return dislikedIngredients.contains { $0.lowercased() == ingredient.lowercased() }
     }
-    
-    /**
-     * Checks if template likes a specific ingredient
-     * 
-     * - Parameter ingredient: The ingredient to check
-     * - Returns: True if template likes this ingredient
-     */
+
     func likesIngredient(_ ingredient: String) -> Bool {
         return favoriteIngredients.contains { $0.lowercased() == ingredient.lowercased() }
     }
-    
-    /**
-     * Creates a copy of this template with updated usage count
-     * 
-     * - Parameter newUsageCount: New usage count
-     * - Returns: New MealPlanTemplate instance with updated usage count
-     */
+
     func withUsageCount(_ newUsageCount: Int) -> MealPlanTemplate {
         return MealPlanTemplate(
             id: id,
@@ -620,15 +415,7 @@ struct MealPlanTemplate: Identifiable, Codable {
             updatedAt: Date()
         )
     }
-    
-    /**
-     * Creates a copy of this template with updated rating
-     * 
-     * - Parameters:
-     *   - newRating: New average rating
-     *   - newRatingCount: New rating count
-     * - Returns: New MealPlanTemplate instance with updated rating
-     */
+
     func withRating(_ newRating: Double?, ratingCount newRatingCount: Int) -> MealPlanTemplate {
         return MealPlanTemplate(
             id: id,
@@ -679,9 +466,7 @@ struct MealPlanTemplate: Identifiable, Codable {
 // MARK: - MealPlanTemplate Extensions
 
 extension MealPlanTemplate {
-    /**
-     * Standard template categories
-     */
+   
     static let standardCategories = [
         "Weight Loss",
         "Muscle Gain",
@@ -702,28 +487,14 @@ extension MealPlanTemplate {
         "Other"
     ]
     
-    /**
-     * Standard budget ranges
-     */
     static let budgetRanges = ["Low", "Medium", "High"]
     
-    /**
-     * Standard cooking skill levels
-     */
+
     static let cookingSkillLevels = ["Beginner", "Intermediate", "Advanced"]
     
-    /**
-     * Standard meal complexities
-     */
     static let mealComplexities = ["Easy", "Medium", "Hard"]
     
-    /**
-     * Standard duration options in days
-     */
     static let durationOptions = [7, 14, 21, 28, 30]
     
-    /**
-     * Standard meals per day options
-     */
     static let mealsPerDayOptions = [3, 4, 5, 6]
 } 

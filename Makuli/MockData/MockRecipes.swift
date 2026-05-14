@@ -2,8 +2,7 @@
 //  MockRecipes.swift
 //  Makuli
 //
-//  Static recipe fixtures for SwiftUI previews and development.
-//  Not included in release builds.
+//  Created by Ian on 2025-06-13.
 //
 
 #if DEBUG
@@ -1220,7 +1219,6 @@ enum MockRecipes {
 
     static let all: [Recipe] = breakfasts + lunches + dinners + snacks
 
-    /// A curated short-list for compact UI previews (one from each category)
     static let featured: [Recipe] = [
         avocadoToast, quinoaBowl, grilledSalmon, hummusPlatter
     ]

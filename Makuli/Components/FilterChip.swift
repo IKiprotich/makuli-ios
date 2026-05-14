@@ -2,6 +2,8 @@
 //  FilterChip.swift
 //  Makuli
 //
+//  Created by Ian on 2025-06-13.
+//
 
 import SwiftUI
 

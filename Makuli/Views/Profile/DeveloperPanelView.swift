@@ -2,9 +2,7 @@
 //  DeveloperPanelView.swift
 //  Makuli
 //
-//  Created by AI Assistant on 2025-01-13.
-//
-//  Developer panel for database seeding and admin functions.
+//  Created by Ian on 2025-01-13.
 //
 
 import SwiftUI
@@ -285,7 +283,7 @@ extension DeveloperPanelView {
     }
     
     private func getExpectedTemplateCount() -> Int {
-        return 14 // Based on the number of templates in createSampleTemplates()
+        return 14
     }
 }
 

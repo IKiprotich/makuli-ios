@@ -16,24 +16,19 @@ class ProductionSeeder {
     
     // MARK: - Main Seeding Functions
     
-    /// Seeds the production database with all templates and recipes
     static func seedProductionDatabase() async throws {
         ProductionLogger.logInfo("Starting production database seeding", context: "ProductionSeeder")
         
         do {
-            // 1. Clear existing template data if needed
             if Configuration.isProduction {
                 ProductionLogger.logInfo("Clearing existing templates in production")
                 try await clearExistingTemplates()
             }
             
-            // 2. Seed all recipes
             try await seedAllRecipes()
             
-            // 3. Seed meal plan templates
             try await seedAllMealPlanTemplates()
             
-            // 4. Verify seeded data
             try await verifySeededData()
             
             ProductionLogger.logInfo("Production database seeding completed successfully", context: "ProductionSeeder")
@@ -44,17 +39,263 @@ class ProductionSeeder {
         }
     }
     
-    /// Quick seed for development and testing
     static func quickSeed() async throws {
         try await seedProductionDatabase()
     }
-    
+
+    static func seedSamplePlansForCurrentUser() async throws {
+        ProductionLogger.logInfo("Seeding sample plans for current user", context: "ProductionSeeder")
+
+        let session = try await supabase.auth.session
+        let userId = session.user.id.uuidString
+
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let weekday = cal.component(.weekday, from: today)
+        let daysToMonday = (weekday == 2) ? 0 : ((9 - weekday) % 7)
+        let thisMonday = cal.date(byAdding: .day, value: -((weekday == 1 ? 6 : weekday - 2)), to: today)!
+        let lastMonday = cal.date(byAdding: .day, value: -7, to: thisMonday)!
+
+        let currentPlanMeals: [(Int, String, String, Int?, Bool)] = [
+            (1, "breakfast", "Avocado Toast with Poached Eggs",   10, true),
+            (1, "lunch",     "Roasted Vegetable Quinoa Bowl",      30, true),
+            (1, "dinner",    "Mediterranean Herb-Crusted Salmon",  20, true),
+            (2, "breakfast", "Spinach & Feta Omelette",             8, true),
+            (2, "lunch",     "Classic Caesar Salad",               10, true),
+            (2, "dinner",    "Wild Mushroom Risotto",              35, true),
+            (3, "breakfast", "Greek Yogurt Parfait with Granola",   0, false),
+            (3, "lunch",     "Tuna Niçoise Salad",                 15, false),
+            (3, "dinner",    "Chicken Tikka Masala",               40, false),
+            (4, "breakfast", "Overnight Oats with Chia & Berries",  0, false),
+            (4, "lunch",     "Spiced Red Lentil Soup",             35, false),
+            (4, "dinner",    "Classic Spaghetti Bolognese",        60, false),
+            (5, "breakfast", "Banana Protein Pancakes",            15, false),
+            (5, "lunch",     "Turkey & Avocado Club Wrap",          5, false),
+            (5, "dinner",    "Herb Butter Roast Chicken",          90, false),
+            (6, "breakfast", "Shakshuka with Feta",                25, false),
+            (6, "lunch",     "Korean Bibimbap Bowl",               30, false),
+            (6, "dinner",    "Korean Beef Bulgogi",                15, false),
+            (0, "breakfast", "Acai Power Bowl",                     0, false),
+            (0, "lunch",     "Fresh Vietnamese Spring Rolls",      15, false),
+            (0, "dinner",    "Thai Green Curry with Tofu",         25, false),
+        ]
+
+        let lastWeekMeals: [(Int, String, String, Int?, Bool)] = [
+            (1, "breakfast", "Overnight Oats with Chia & Berries",  0, true),
+            (1, "lunch",     "Thai Peanut Noodles",                 15, true),
+            (1, "dinner",    "Korean Beef Bulgogi",                 15, true),
+            (2, "breakfast", "Greek Yogurt Parfait with Granola",    0, true),
+            (2, "lunch",     "Korean Bibimbap Bowl",                30, true),
+            (2, "dinner",    "Classic Pad Thai with Prawns",        20, true),
+            (3, "breakfast", "Banana Protein Pancakes",             15, true),
+            (3, "lunch",     "Fresh Vietnamese Spring Rolls",       15, true),
+            (3, "dinner",    "Thai Green Curry with Tofu",          25, true),
+            (4, "breakfast", "Spinach & Feta Omelette",              8, true),
+            (4, "lunch",     "Thai Peanut Noodles",                 15, true),
+            (4, "dinner",    "Chicken Tikka Masala",                40, true),
+            (5, "breakfast", "Overnight Oats with Chia & Berries",   0, true),
+            (5, "lunch",     "Korean Bibimbap Bowl",                30, true),
+            (5, "dinner",    "Korean Beef Bulgogi",                 15, true),
+            (6, "breakfast", "Avocado Toast with Poached Eggs",     10, true),
+            (6, "lunch",     "Fresh Vietnamese Spring Rolls",       15, true),
+            (6, "dinner",    "Classic Pad Thai with Prawns",        20, true),
+            (0, "breakfast", "Shakshuka with Feta",                 25, true),
+            (0, "lunch",     "Thai Peanut Noodles",                 15, true),
+            (0, "dinner",    "Thai Green Curry with Tofu",          25, true),
+        ]
+
+        let kenyaWeekMeals: [(Int, String, String, Int?, Bool)] = [
+            (1, "breakfast", "Mandazi with Kenyan Chai",                   20, true),
+            (1, "lunch",     "Githeri (Maize & Bean Stew)",                 90, true),
+            (1, "dinner",    "Nyama Choma (Kenyan Grilled Goat)",           60, true),
+            (2, "breakfast", "Uji wa Wimbi (Finger Millet Porridge)",       15, true),
+            (2, "lunch",     "Mukimo with Sukuma Wiki",                     30, true),
+            (2, "dinner",    "Mchuzi wa Kuku (Kenyan Chicken Stew)",        50, true),
+            (3, "breakfast", "Scrambled Eggs with Sukuma Wiki",             10, true),
+            (3, "lunch",     "Kenyan Chapati with Maharagwe ya Nazi",       50, true),
+            (3, "dinner",    "Kenyan Pilau",                                50, true),
+            (4, "breakfast", "Mandazi with Kenyan Chai",                   20, false),
+            (4, "lunch",     "Viazi Karai (Potato Fritters)",               25, false),
+            (4, "dinner",    "Samaki wa Nazi (Coastal Fish in Coconut)",    30, false),
+            (5, "breakfast", "Githeri Breakfast Bowl",                     20, false),
+            (5, "lunch",     "Mukimo with Sukuma Wiki",                     30, false),
+            (5, "dinner",    "Ugali na Mchuzi wa Kuku",                    50, false),
+            (6, "breakfast", "Vitumbua (Coconut Rice Pancakes)",           20, false),
+            (6, "lunch",     "Kenyan Pilau",                               50, false),
+            (6, "dinner",    "Nyama Choma (Kenyan Grilled Goat)",          60, false),
+            (0, "breakfast", "Mandazi with Kenyan Chai",                   20, false),
+            (0, "lunch",     "Githeri (Maize & Bean Stew)",                90, false),
+            (0, "dinner",    "Maharagwe ya Nazi (Coconut Kidney Beans)",   60, false),
+        ]
+
+        let twoWeeksAgo = cal.date(byAdding: .day, value: -7, to: lastMonday)!
+
+        let plans: [(title: String, weekStart: Date, weekEnd: Date, meals: [(Int, String, String, Int?, Bool)], completionPct: Double)] = [
+            ("Mediterranean Week",  thisMonday,   cal.date(byAdding: .day, value: 6, to: thisMonday)!,   currentPlanMeals, 28.6),
+            ("Asian Fusion Week",   lastMonday,   cal.date(byAdding: .day, value: 6, to: lastMonday)!,   lastWeekMeals,   100.0),
+            ("Kenyan Cuisine Week", twoWeeksAgo,  cal.date(byAdding: .day, value: 6, to: twoWeeksAgo)!,  kenyaWeekMeals,  100.0),
+        ]
+
+        let isoFormatter = ISO8601DateFormatter()
+
+        for planData in plans {
+            struct PlanInsert: Encodable {
+                let user_id: String
+                let title: String
+                let week_start: String
+                let week_end: String
+                let is_completed: Bool
+                let completion_percentage: Double
+                let generation_method: String
+                let is_favorite: Bool
+            }
+
+            let planInsert = PlanInsert(
+                user_id: userId,
+                title: planData.title,
+                week_start: isoFormatter.string(from: planData.weekStart),
+                week_end: isoFormatter.string(from: planData.weekEnd),
+                is_completed: planData.completionPct >= 100,
+                completion_percentage: planData.completionPct,
+                generation_method: "template",
+                is_favorite: planData.completionPct >= 100
+            )
+
+            let planResponse = try await supabase
+                .from("plans")
+                .insert(planInsert)
+                .select("id")
+                .single()
+                .execute()
+
+            guard let planId = try? JSONDecoder()
+                .decode([String: String].self, from: planResponse.data)["id"] else {
+                ProductionLogger.logInfo("Could not extract plan ID, skipping meals for \(planData.title)")
+                continue
+            }
+
+            let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+            for (position, meal) in planData.meals.enumerated() {
+                let (dayOfWeek, mealType, mealName, cookTime, isCompleted) = meal
+
+                struct PlanRecipeInsert: Encodable {
+                    let plan_id: String
+                    let day_of_week: Int
+                    let meal_type: String
+                    let position: Int
+                    let day: String
+                    let is_completed: Bool
+                    let custom_meal_name: String
+                    let custom_cook_time: Int?
+                    let custom_image_url: String?
+                }
+
+                let recipeInsert = PlanRecipeInsert(
+                    plan_id: planId,
+                    day_of_week: dayOfWeek,
+                    meal_type: mealType,
+                    position: position,
+                    day: days[dayOfWeek],
+                    is_completed: isCompleted,
+                    custom_meal_name: mealName,
+                    custom_cook_time: cookTime,
+                    custom_image_url: mealImageURL(for: mealName)
+                )
+
+                try await supabase
+                    .from("plan_recipes")
+                    .insert(recipeInsert)
+                    .execute()
+            }
+
+            ProductionLogger.logInfo("Seeded plan '\(planData.title)' with \(planData.meals.count) meals")
+        }
+
+        ProductionLogger.logInfo("Sample plans seeded successfully for user \(userId)")
+    }
+
+    // MARK: - Meal Image Lookup
+
+    static func mealImageURL(for name: String) -> String? {
+        let n = name.lowercased()
+        if n.contains("nyama choma")        { return "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("pilau")              { return "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("ugali")              { return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("githeri")            { return "https://images.unsplash.com/photo-1574926054530-4bcf145fe25e?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("mukimo")             { return "https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("mandazi")            { return "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("maharagwe")          { return "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("chapati")            { return "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("mchuzi wa kuku")     { return "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("mchuzi")             { return "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("viazi karai")        { return "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("samaki wa nazi")     { return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("samaki")             { return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("vitumbua")           { return "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("uji")                { return "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("matoke")             { return "https://images.unsplash.com/photo-1571748982800-fa51082c2224?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("sukuma wiki")        { return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("kenyan chai")        { return "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("avocado toast")      { return "https://images.unsplash.com/photo-1541519227354-08fa5d50c820?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("shakshuka")          { return "https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("greek yogurt parfait") || n.contains("yogurt parfait") { return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("banana protein pancake") || (n.contains("pancake") && n.contains("protein")) { return "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("overnight oats")     { return "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("spinach") && n.contains("omelette") { return "https://images.unsplash.com/photo-1612240498936-65f5101365d2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("scrambled eggs")     { return "https://images.unsplash.com/photo-1612240498936-65f5101365d2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("acai")               { return "https://images.unsplash.com/photo-1590301157284-f0c7a08e0bef?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("pancake")            { return "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("porridge") || n.contains("oats") { return "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("omelette") || n.contains("frittata") { return "https://images.unsplash.com/photo-1612240498936-65f5101365d2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("caesar salad")       { return "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("quinoa bowl") || n.contains("roasted vegetable") { return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("niçoise") || n.contains("nicoise") { return "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("bibimbap")           { return "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("spring rolls")       { return "https://images.unsplash.com/photo-1562802378-063ec186a863?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("peanut noodle")      { return "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("lentil soup")        { return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("soup")               { return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("turkey") && n.contains("wrap") { return "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("shawarma")           { return "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("taco")               { return "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("wrap")               { return "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("jollof")             { return "https://images.unsplash.com/photo-1536304993881-ff86d57456de?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("biryani")            { return "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("fried rice")         { return "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("risotto")            { return "https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("rice")               { return "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("spaghetti bolognese") || n.contains("bolognese") { return "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("pad thai")           { return "https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("pasta")              { return "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("tikka masala")       { return "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("thai green curry") || (n.contains("green curry")) { return "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("curry")              { return "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("stew")               { return "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("salmon")             { return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("bulgogi")            { return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("roast chicken") || n.contains("herb butter") { return "https://images.unsplash.com/photo-1598866594230-a7c12756260f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("chicken")            { return "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("kofta")              { return "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("grilled")            { return "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("fish") || n.contains("seafood") { return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("enchilada")          { return "https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("mushroom")           { return "https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("aubergine") || n.contains("eggplant") { return "https://images.unsplash.com/photo-1481304453051-c5f7a1a6c0b0?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("hummus")             { return "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("bean") || n.contains("lentil") { return "https://images.unsplash.com/photo-1574926054530-4bcf145fe25e?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("vegetable") || n.contains("veggie") { return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("breakfast")          { return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("salad")              { return "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=800&q=80" }
+        if n.contains("bowl")               { return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80" }
+        return nil
+    }
+
     // MARK: - Recipe Seeding
     
     private static func seedAllRecipes() async throws {
         ProductionLogger.logInfo("Seeding recipes database", context: "ProductionSeeder")
         
-        // Get current authenticated user's ID for RLS compliance
         let session = try await supabase.auth.session
         let currentUserId = session.user.id.uuidString
         
@@ -62,7 +303,6 @@ class ProductionSeeder {
         
         for recipe in recipeData {
             do {
-                // Convert to CreateRecipeRequest for proper Encodable compliance
                 let createRequest = CreateRecipeRequest(
                     title: recipe["title"] as? String ?? "",
                     cookTime: recipe["cook_time"] as? String,
@@ -78,7 +318,6 @@ class ProductionSeeder {
                     cuisineType: recipe["cuisine_type"] as? String,
                     costEstimate: recipe["cost_estimate"] as? Double,
                     isPublic: recipe["is_public"] as? Bool ?? true,
-                    createdBy: currentUserId
                 )
                 
                 try await supabase
@@ -90,7 +329,6 @@ class ProductionSeeder {
                 
             } catch {
                 ProductionLogger.logError(error, context: "Seeding recipe: \(recipe["title"] ?? "Unknown")")
-                // Continue with other recipes even if one fails
             }
         }
         
@@ -102,7 +340,6 @@ class ProductionSeeder {
     private static func seedAllMealPlanTemplates() async throws {
         ProductionLogger.logInfo("Seeding meal plan templates", context: "ProductionSeeder")
         
-        // Get current authenticated user's ID for RLS compliance
         let session = try await supabase.auth.session
         let currentUserId = session.user.id.uuidString
         
@@ -110,7 +347,6 @@ class ProductionSeeder {
         
         for template in templates {
             do {
-                // Insert template
                 let createTemplateRequest = CreateMealPlanTemplateRequest(
                     name: template.name,
                     description: template.description,
@@ -121,12 +357,10 @@ class ProductionSeeder {
                     estimatedCostMax: template.estimatedCostMax,
                     imageUrl: nil,
                     tags: template.tags,
-                    isActive: true,
                     icon: template.icon,
                     colorScheme: nil,
                     targetCaloriesPerDay: nil,
                     macros: nil,
-                    createdBy: currentUserId
                 )
                 
                 let templateData = try await supabase
@@ -140,7 +374,6 @@ class ProductionSeeder {
                     throw ProductionSeederError.templateCreationFailed(template.name)
                 }
                 
-                // Insert template meals
                 let meals = getTemplateMeals(for: template)
                 for meal in meals {
                     let createMealRequest = CreateTemplateMealRequest(
@@ -182,7 +415,6 @@ class ProductionSeeder {
     private static func verifySeededData() async throws {
         ProductionLogger.logInfo("Verifying seeded data", context: "ProductionSeeder")
         
-        // Verify templates
         let templatesResponse = try await supabase
             .from("meal_plan_templates")
             .select("id, name")
@@ -191,7 +423,6 @@ class ProductionSeeder {
         let templateCount = try extractCount(from: templatesResponse)
         ProductionLogger.logInfo("Verified \(templateCount) templates in database")
         
-        // Verify template meals
         let mealsResponse = try await supabase
             .from("template_meals")
             .select("id")
@@ -200,7 +431,6 @@ class ProductionSeeder {
         let mealCount = try extractCount(from: mealsResponse)
         ProductionLogger.logInfo("Verified \(mealCount) template meals in database")
         
-        // Verify recipes
         let recipesResponse = try await supabase
             .from("recipes")
             .select("id")
@@ -209,7 +439,7 @@ class ProductionSeeder {
         let recipeCount = try extractCount(from: recipesResponse)
         ProductionLogger.logInfo("Verified \(recipeCount) recipes in database")
         
-        if templateCount < 10 || mealCount < 200 || recipeCount < 50 {
+        if templateCount < 5 || mealCount < 50 || recipeCount < 20 {
             throw ProductionSeederError.verificationFailed("Insufficient data seeded")
         }
         
@@ -219,18 +449,16 @@ class ProductionSeeder {
     // MARK: - Cleanup Functions
     
     private static func clearExistingTemplates() async throws {
-        // Delete template meals first (due to foreign key constraints)
         try await supabase
             .from("template_meals")
             .delete()
-            .neq("template_id", value: "00000000-0000-0000-0000-000000000000") // Delete all
+            .neq("template_id", value: "00000000-0000-0000-0000-000000000000")
             .execute()
         
-        // Delete templates
         try await supabase
             .from("meal_plan_templates")
             .delete()
-            .neq("id", value: "00000000-0000-0000-0000-000000000000") // Delete all
+            .neq("id", value: "00000000-0000-0000-0000-000000000000")
             .execute()
         
         ProductionLogger.logInfo("Cleared existing templates from database")
@@ -239,12 +467,10 @@ class ProductionSeeder {
     // MARK: - Helper Functions
     
     private static func extractId(from response: Any) -> String? {
-        // Extract ID from Supabase response
         if let data = response as? [String: Any],
            let id = data["id"] as? String {
             return id
         }
-        // Try alternative response format
         if let dataArray = response as? [[String: Any]],
            let firstItem = dataArray.first,
            let id = firstItem["id"] as? String {
@@ -254,7 +480,6 @@ class ProductionSeeder {
     }
     
     private static func extractCount(from response: Any) -> Int {
-        // Extract count from Supabase response
         if let dataArray = response as? [[String: Any]] {
             return dataArray.count
         }
@@ -404,7 +629,17 @@ class ProductionSeeder {
                 estimatedCostMax: 140.0,
                 icon: "🌍",
                 tags: ["international", "diverse", "gourmet"]
-            )
+            ),
+            ProductionTemplate(
+                name: "Kenyan Cuisine Week",
+                description: "Authentic Kenyan and East African flavours — nyama choma, pilau, githeri and more",
+                category: "kenyan",
+                difficulty: "beginner",
+                estimatedCostMin: 40.0,
+                estimatedCostMax: 65.0,
+                icon: "🇰🇪",
+                tags: ["kenyan", "east-african", "traditional", "authentic"]
+            ),
         ]
     }
     
@@ -413,7 +648,6 @@ class ProductionSeeder {
         var meals: [[String: Any]] = []
         var position = 0
 
-        // Named meals per template category (7 breakfasts, 7 lunches, 7 dinners)
         let mealNames = templateMealNames(for: template.category)
 
         for (dayIndex, day) in days.enumerated() {
@@ -489,7 +723,6 @@ class ProductionSeeder {
         let dinners: [TemplateMeal]
     }
 
-    // swiftlint:disable function_body_length
     private static func templateMealNames(for category: String) -> TemplateWeekMeals {
         switch category {
         case "mediterranean":
@@ -585,8 +818,38 @@ class ProductionSeeder {
                 ]
             )
 
+        case "kenyan":
+            return TemplateWeekMeals(
+                breakfasts: [
+                    TemplateMeal(name: "Mandazi with Kenyan Chai", cookTime: 20, prepTime: 15, calories: 340, cost: 2.5, ingredients: ["2 cups plain flour", "1 tbsp sugar", "1 tsp baking powder", "½ tsp ground cardamom", "½ cup coconut milk", "1 egg", "Oil for frying", "Kenyan black tea", "Whole milk", "Cardamom pods", "Fresh ginger"], steps: ["Mix flour, sugar, baking powder and cardamom", "Add coconut milk and egg, knead 5 minutes", "Cut into triangles and deep-fry until golden", "Brew strong tea with cardamom and ginger", "Serve mandazi hot with spiced chai"]),
+                    TemplateMeal(name: "Scrambled Eggs with Sukuma Wiki", cookTime: 10, prepTime: 5, calories: 290, cost: 2.0, ingredients: ["3 eggs", "1 bunch collard greens", "1 tomato diced", "1 onion diced", "1 tbsp oil", "Salt and pepper"], steps: ["Finely shred collard greens", "Sauté onion and tomato", "Add greens and wilt", "Scramble eggs alongside", "Serve together"]),
+                    TemplateMeal(name: "Uji wa Wimbi (Millet Porridge)", cookTime: 15, prepTime: 5, calories: 310, cost: 1.5, ingredients: ["1 cup finger millet flour", "4 cups water", "2 tbsp sugar", "Pinch of salt", "Milk to serve"], steps: ["Mix millet flour with cold water", "Bring remaining water to boil", "Whisk in flour paste gradually", "Cook stirring constantly 10 minutes", "Sweeten and serve with milk"]),
+                    TemplateMeal(name: "Vitumbua (Coconut Rice Pancakes)", cookTime: 20, prepTime: 10, calories: 320, cost: 2.8, ingredients: ["1 cup rice flour", "1 cup coconut milk", "2 tbsp sugar", "½ tsp yeast", "Pinch of cardamom"], steps: ["Mix rice flour with coconut milk and sugar", "Add yeast, rest 30 minutes", "Cook in a special vitumbua pan or takoyaki pan", "Each should have a domed shape", "Serve hot with chai"]),
+                    TemplateMeal(name: "Kenyan French Toast (Mkate wa Kukaanga)", cookTime: 10, prepTime: 5, calories: 360, cost: 2.2, ingredients: ["4 slices white bread", "2 eggs", "¼ cup milk", "1 tsp vanilla", "1 tbsp sugar", "½ tsp cinnamon", "Butter for frying"], steps: ["Whisk eggs, milk, vanilla and sugar", "Dip bread slices in egg mixture", "Fry in butter until golden both sides", "Dust with cinnamon and sugar", "Serve with fresh mango"]),
+                    TemplateMeal(name: "Maharagwe ya Nazi with Chapati", cookTime: 40, prepTime: 10, calories: 450, cost: 3.0, ingredients: ["1 cup red kidney beans soaked overnight", "400ml coconut milk", "1 onion diced", "2 tomatoes", "1 tsp turmeric", "1 tsp cumin", "Salt"], steps: ["Cook beans until tender", "Sauté onion and tomatoes with spices", "Add beans and coconut milk", "Simmer 20 minutes", "Serve with warm chapati"]),
+                    TemplateMeal(name: "Githeri Breakfast Bowl", cookTime: 20, prepTime: 5, calories: 380, cost: 1.8, ingredients: ["1 cup cooked githeri (maize and beans)", "1 tomato diced", "1 onion diced", "1 tsp oil", "Salt and pepper", "Fresh coriander"], steps: ["Heat oil in a pan", "Fry onion until golden", "Add tomatoes and cook down", "Stir in githeri", "Season and garnish with coriander"]),
+                ],
+                lunches: [
+                    TemplateMeal(name: "Githeri (Maize & Bean Stew)", cookTime: 60, prepTime: 10, calories: 380, cost: 2.5, ingredients: ["2 cups dried maize", "1 cup dried kidney beans", "1 large onion", "3 tomatoes", "2 tbsp oil", "1 tsp curry powder", "Salt and pepper", "Fresh coriander"], steps: ["Soak maize and beans overnight", "Boil together until tender (1 hour)", "Fry onion, add tomatoes and curry powder", "Add boiled maize and beans, stir well", "Simmer 15 minutes, garnish with coriander"]),
+                    TemplateMeal(name: "Mukimo with Sukuma Wiki", cookTime: 30, prepTime: 15, calories: 410, cost: 2.8, ingredients: ["4 large potatoes peeled and cubed", "1 cup green peas", "1 cup sweetcorn kernels", "1 bunch collard greens shredded", "1 onion diced", "2 tbsp butter", "Salt to taste"], steps: ["Boil potatoes until tender", "Add peas and corn, boil together", "Separately wilt collard greens with onion", "Mash everything together with butter", "Season and serve as a thick green mash"]),
+                    TemplateMeal(name: "Viazi Karai (Spiced Potato Fritters)", cookTime: 25, prepTime: 10, calories: 350, cost: 2.0, ingredients: ["4 medium potatoes boiled", "½ cup plain flour", "1 tsp cumin", "1 tsp coriander", "½ tsp turmeric", "½ tsp chilli powder", "Salt", "Oil for frying", "Tamarind chutney to serve"], steps: ["Slice boiled potatoes", "Mix flour with spices and enough water for thick batter", "Dip potato slices in batter", "Deep-fry until golden", "Serve with tamarind chutney"]),
+                    TemplateMeal(name: "Kenyan Pilau Rice", cookTime: 45, prepTime: 15, calories: 480, cost: 5.5, ingredients: ["2 cups basmati rice", "300g beef cubed", "2 onions sliced", "4 garlic cloves", "1 tsp cumin", "4 cardamom pods", "2 cinnamon sticks", "6 cloves", "1 tsp black pepper", "3 cups beef stock"], steps: ["Brown beef with spices", "Caramelise onions deeply", "Add garlic and all spices", "Add rice and stock", "Cook covered on low heat 20 minutes", "Rest 10 minutes before serving"]),
+                    TemplateMeal(name: "Wali wa Nazi (Coconut Rice)", cookTime: 25, prepTime: 5, calories: 420, cost: 3.5, ingredients: ["2 cups basmati rice", "400ml coconut milk", "200ml water", "1 tsp salt", "1 tsp sugar", "Fresh coriander"], steps: ["Rinse rice until water runs clear", "Combine coconut milk and water, bring to boil", "Add rice, salt and sugar", "Cook covered on low heat 18 minutes", "Fluff with fork and garnish with coriander"]),
+                    TemplateMeal(name: "Mchuzi wa Samaki (Fish Curry)", cookTime: 25, prepTime: 10, calories: 360, cost: 6.5, ingredients: ["4 tilapia fillets", "400ml coconut milk", "2 tomatoes diced", "1 onion diced", "3 garlic cloves", "1 tsp turmeric", "1 tsp curry powder", "Fresh coriander and lime"], steps: ["Fry onion and garlic until golden", "Add tomatoes and spices, cook 5 minutes", "Pour in coconut milk, bring to simmer", "Add fish, cook 10 minutes", "Finish with coriander and lime"]),
+                    TemplateMeal(name: "Kenyan Beef Samosa", cookTime: 30, prepTime: 20, calories: 320, cost: 4.0, ingredients: ["250g beef mince", "1 onion diced", "2 green chillies", "Fresh coriander", "½ tsp cumin", "½ tsp garam masala", "Samosa pastry sheets", "Oil for frying"], steps: ["Brown beef with onion and spices", "Cool filling completely", "Fold pastry into triangles with filling", "Seal edges with water", "Deep-fry until golden brown"]),
+                ],
+                dinners: [
+                    TemplateMeal(name: "Nyama Choma (Kenyan Grilled Goat)", cookTime: 60, prepTime: 20, calories: 580, cost: 12.0, ingredients: ["1kg goat or beef on the bone", "2 tsp rock salt", "1 tsp black pepper", "1 tbsp oil", "Kachumbari (tomato-onion salad)", "Ugali to serve"], steps: ["Rub meat generously with salt and pepper", "Grill over hot charcoal or high-heat grill", "Turn every 10 minutes, grill 50–60 minutes total", "Meat should be slightly charred outside", "Serve with kachumbari and ugali"]),
+                    TemplateMeal(name: "Ugali na Mchuzi wa Kuku", cookTime: 50, prepTime: 15, calories: 540, cost: 7.5, ingredients: ["1 whole chicken jointed", "2 cups maize meal (posho)", "4 cups water", "2 onions diced", "3 tomatoes", "2 garlic cloves", "1 tsp turmeric", "Salt to taste"], steps: ["Brown chicken pieces in oil", "Add onion, garlic and tomatoes", "Add turmeric and salt, pour in water", "Simmer 30 minutes", "Meanwhile make ugali: bring water to boil, add maize meal gradually, stir until stiff", "Serve stew with ugali"]),
+                    TemplateMeal(name: "Samaki wa Nazi (Coastal Fish in Coconut)", cookTime: 30, prepTime: 15, calories: 420, cost: 9.0, ingredients: ["4 whole tilapia or snapper", "400ml coconut milk", "4 garlic cloves", "1 tbsp ginger", "2 tomatoes", "1 tsp turmeric", "1 tsp cumin", "Fresh coriander", "Lime wedges"], steps: ["Score fish and season with salt and turmeric", "Fry fish briefly to seal", "Blend garlic, ginger, tomatoes into a paste", "Cook paste in oil 5 minutes", "Add coconut milk and bring to simmer", "Add fish, cook 15 minutes, finish with coriander"]),
+                    TemplateMeal(name: "Kenyan Beef Stew with Ugali", cookTime: 60, prepTime: 15, calories: 520, cost: 9.0, ingredients: ["700g beef cubed", "3 tomatoes diced", "2 onions diced", "3 garlic cloves", "1 tsp curry powder", "1 tsp turmeric", "2 potatoes cubed", "Salt and pepper", "Maize meal for ugali"], steps: ["Brown beef in batches", "Fry onion, garlic and spices", "Add tomatoes and cook until thick", "Add beef and cover with water", "Add potatoes, simmer 40 minutes", "Serve with hand-shaped ugali"]),
+                    TemplateMeal(name: "Maharagwe ya Nazi (Coconut Kidney Beans)", cookTime: 50, prepTime: 10, calories: 440, cost: 4.5, ingredients: ["2 cups kidney beans soaked", "400ml coconut milk", "2 tomatoes diced", "1 onion diced", "3 garlic cloves", "1 tsp cumin", "1 tsp turmeric", "1 green chilli", "Salt", "Wali wa Nazi to serve"], steps: ["Boil beans until tender", "Fry onion, garlic and chilli", "Add tomatoes and spices, cook 5 minutes", "Add beans and coconut milk", "Simmer 20 minutes until thick and creamy", "Serve over coconut rice"]),
+                    TemplateMeal(name: "Kenyan Chapati na Kachumbari", cookTime: 30, prepTime: 20, calories: 490, cost: 3.5, ingredients: ["3 cups plain flour", "1 cup warm water", "1 tsp salt", "Oil for layers", "3 tomatoes diced", "1 red onion diced", "Juice of 1 lemon", "Fresh coriander", "1 green chilli"], steps: ["Mix flour and salt, add water gradually, knead 10 minutes", "Divide into balls, rest 15 minutes", "Roll flat, brush with oil, roll up into a coil, flatten again", "Cook in a dry pan until golden with charred spots both sides", "Make kachumbari: mix tomatoes, onion, coriander and lemon"]),
+                    TemplateMeal(name: "Matoke (Stewed Green Bananas)", cookTime: 45, prepTime: 15, calories: 380, cost: 4.0, ingredients: ["6 green bananas peeled", "300g beef or goat cubed", "2 tomatoes", "1 onion", "2 garlic cloves", "1 tsp curry powder", "Salt", "Banana leaves or foil to wrap"], steps: ["Brown meat with onion and garlic", "Add tomatoes and curry powder", "Add green bananas", "Wrap in banana leaves or foil", "Steam or braise 35–40 minutes until bananas are tender", "Serve as a complete one-pot dish"]),
+                ]
+            )
+
         default:
-            // Generic fallback for any category not explicitly handled
             return TemplateWeekMeals(
                 breakfasts: (1...7).map { i in
                     TemplateMeal(name: "Overnight Oats Day \(i)", cookTime: 0, prepTime: 5, calories: 350, cost: 3.0, ingredients: ["rolled oats", "milk", "berries", "honey"], steps: ["Mix oats with milk", "Refrigerate overnight", "Top with berries"])
@@ -600,7 +863,6 @@ class ProductionSeeder {
             )
         }
     }
-    // swiftlint:enable function_body_length
     
     private static func getAllProductionRecipes() -> [[String: Any]] {
         return [
@@ -877,6 +1139,209 @@ class ProductionSeeder {
                 "substitutions": ["Use frozen mango instead of acai", "Add spirulina for extra nutrients"],
                 "difficulty": "easy", "cuisine_type": "brazilian", "cost_estimate": 6.00, "is_public": true,
                 "tags": ["snack", "vegan", "no-cook", "healthy"]
+            ],
+            // MARK: Kenyan & East African
+            [
+                "title": "Nyama Choma (Kenyan Grilled Goat)",
+                "cook_time": "60 min", "prep_time": 20, "servings": 4, "calories": 580,
+                "image_url": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["1kg bone-in goat or beef ribs", "2 tsp coarse rock salt", "1 tsp coarsely ground black pepper", "1 tbsp vegetable oil", "3 tomatoes finely diced (kachumbari)", "1 red onion finely diced", "Juice of 1 lemon", "1 green chilli minced", "Fresh coriander"],
+                "steps": ["Rub meat generously with salt, pepper and oil.", "Place over hot charcoal grill or high heat BBQ.", "Grill turning every 10 minutes for 50–60 minutes until charred outside and cooked through.", "Make kachumbari: combine tomatoes, onion, chilli, lemon juice and coriander.", "Serve meat sliced with kachumbari and ugali."],
+                "substitutions": ["Use lamb chops or beef ribs", "Marinate overnight for deeper flavour"],
+                "difficulty": "medium", "cuisine_type": "kenyan", "cost_estimate": 12.0, "is_public": true,
+                "tags": ["dinner", "kenyan", "grilled", "gluten-free", "high-protein"]
+            ],
+            [
+                "title": "Kenyan Pilau",
+                "cook_time": "50 min", "prep_time": 15, "servings": 6, "calories": 520,
+                "image_url": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 cups basmati rice rinsed", "500g beef or chicken cubed", "2 large onions thinly sliced", "5 garlic cloves minced", "1 tsp grated ginger", "4 cardamom pods", "2 cinnamon sticks", "6 whole cloves", "1 tsp cumin seeds", "1 tsp black peppercorns", "1 tsp turmeric", "3 cups beef stock", "3 tbsp oil"],
+                "steps": ["Toast cardamom, cinnamon, cloves, cumin and peppercorns in oil until fragrant.", "Add onion, cook on medium heat until deeply caramelised (20 minutes).", "Add garlic, ginger, turmeric and meat, brown well.", "Add rice, stir to coat in spices.", "Pour in stock, bring to boil then reduce heat.", "Cover and cook 20 minutes. Rest 10 minutes before serving."],
+                "substitutions": ["Use goat instead of beef for more authentic flavour", "Add fried potato cubes on top"],
+                "difficulty": "medium", "cuisine_type": "kenyan", "cost_estimate": 8.50, "is_public": true,
+                "tags": ["dinner", "kenyan", "east-african", "rice", "spiced"]
+            ],
+            [
+                "title": "Ugali na Sukuma Wiki",
+                "cook_time": "30 min", "prep_time": 10, "servings": 4, "calories": 390,
+                "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 cups maize meal (posho flour)", "4 cups water", "1 tsp salt", "1 large bunch collard greens finely shredded", "1 large onion diced", "3 tomatoes diced", "2 tbsp vegetable oil", "2 garlic cloves minced", "Salt and pepper to taste"],
+                "steps": ["For ugali: bring salted water to boil, reduce heat, pour in maize meal in a steady stream while stirring.", "Stir continuously 10–15 minutes until very thick and pulls away from sides.", "Mould into a round dome to serve.", "For sukuma wiki: heat oil, fry onion and garlic until golden.", "Add tomatoes and cook until saucy.", "Add shredded greens, toss and cook 5 minutes until just tender."],
+                "substitutions": ["Use kale or cavolo nero instead of collard greens", "Add fried egg on top for protein"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 3.50, "is_public": true,
+                "tags": ["dinner", "kenyan", "vegan", "staple", "budget"]
+            ],
+            [
+                "title": "Githeri (Maize & Bean Stew)",
+                "cook_time": "90 min", "prep_time": 10, "servings": 6, "calories": 380,
+                "image_url": "https://images.unsplash.com/photo-1574926054530-4bcf145fe25e?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 cups dried maize kernels soaked overnight", "1 cup dried kidney beans soaked overnight", "1 large onion diced", "3 large tomatoes diced", "2 tbsp oil", "3 garlic cloves minced", "1 tsp curry powder", "Salt and pepper", "Fresh coriander", "2 medium potatoes cubed (optional)"],
+                "steps": ["Boil soaked maize and beans together in fresh water until tender (60–75 minutes).", "Heat oil in a separate pan, fry onion until golden.", "Add garlic, curry powder and tomatoes, cook into a thick sauce.", "Add potatoes if using and cook 15 minutes.", "Add boiled maize and beans to the sauce, mix well.", "Simmer 10 minutes, garnish with coriander."],
+                "substitutions": ["Use canned beans and sweetcorn to save time", "Add spinach or sukuma wiki at the end"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 2.50, "is_public": true,
+                "tags": ["lunch", "kenyan", "vegan", "budget", "meal-prep", "high-protein"]
+            ],
+            [
+                "title": "Mukimo (Kenyan Green Potato Mash)",
+                "cook_time": "30 min", "prep_time": 15, "servings": 4, "calories": 360,
+                "image_url": "https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["6 large potatoes peeled and cubed", "1 cup fresh or frozen green peas", "1 cup sweetcorn kernels", "1 cup pumpkin leaves or spinach shredded", "1 onion diced", "2 tbsp butter", "Salt to taste", "Milk to loosen (optional)"],
+                "steps": ["Boil potatoes until tender, add peas and corn to pot for last 5 minutes.", "In a separate pan, sauté onion in butter until soft.", "Add shredded greens to onion, cook 3 minutes until wilted.", "Drain potatoes, peas and corn.", "Mash everything together including greens.", "Season with salt, add milk if too thick."],
+                "substitutions": ["Use sweet potato for a different flavour", "Add roasted groundnuts for crunch"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 3.00, "is_public": true,
+                "tags": ["lunch", "kenyan", "vegetarian", "budget", "comfort", "gluten-free"]
+            ],
+            [
+                "title": "Mandazi (East African Doughnuts)",
+                "cook_time": "20 min", "prep_time": 20, "servings": 16, "calories": 180,
+                "image_url": "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["3 cups plain flour", "½ cup sugar", "2 tsp baking powder", "1 tsp ground cardamom", "½ tsp cinnamon", "¾ cup coconut milk", "1 egg beaten", "1 tsp vanilla extract", "Oil for deep-frying", "Icing sugar to dust"],
+                "steps": ["Mix flour, sugar, baking powder, cardamom and cinnamon.", "Whisk egg, coconut milk and vanilla together.", "Combine wet and dry ingredients into a soft dough, do not over-knead.", "Roll out to 1cm thick, cut into triangles.", "Heat oil to 180°C, fry in batches 3–4 minutes until golden.", "Drain on paper, dust with icing sugar."],
+                "substitutions": ["Use regular milk instead of coconut milk", "Add grated coconut to the dough"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 2.00, "is_public": true,
+                "tags": ["breakfast", "snack", "kenyan", "east-african", "fried", "sweet"]
+            ],
+            [
+                "title": "Maharagwe ya Nazi (Coconut Kidney Beans)",
+                "cook_time": "60 min", "prep_time": 10, "servings": 4, "calories": 420,
+                "image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 cups dried red kidney beans soaked overnight", "400ml coconut milk", "2 large tomatoes diced", "1 onion diced", "3 garlic cloves minced", "1 tsp turmeric", "1 tsp cumin", "1 green chilli", "Salt to taste", "Fresh coriander"],
+                "steps": ["Boil kidney beans in fresh water until tender (45–60 minutes).", "Fry onion and garlic until golden.", "Add tomatoes, turmeric, cumin and chilli, cook into a sauce.", "Add cooked beans with some cooking liquid.", "Pour in coconut milk, simmer 20 minutes uncovered.", "Beans should be in a thick, creamy coconut sauce."],
+                "substitutions": ["Use canned kidney beans to save time", "Add spinach for extra nutrients"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 4.00, "is_public": true,
+                "tags": ["dinner", "kenyan", "coastal", "vegan", "gluten-free", "budget"]
+            ],
+            [
+                "title": "Kenyan Chapati",
+                "cook_time": "30 min", "prep_time": 20, "servings": 8, "calories": 240,
+                "image_url": "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["3 cups plain flour", "1 cup warm water", "1 tsp salt", "2 tbsp vegetable oil", "Extra oil for cooking layers"],
+                "steps": ["Combine flour and salt, add oil and water gradually.", "Knead 10 minutes until smooth and elastic.", "Divide into 8 balls, cover and rest 20 minutes.", "Roll each ball flat, brush with oil.", "Roll into a log then coil like a snail, flatten again.", "Cook in a dry pan on medium heat 2–3 minutes per side until golden with charred spots."],
+                "substitutions": ["Add a little milk for softer chapati", "Whole wheat flour for a healthier version"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 1.50, "is_public": true,
+                "tags": ["bread", "kenyan", "vegan", "staple", "side"]
+            ],
+            [
+                "title": "Mchuzi wa Kuku (Kenyan Chicken Stew)",
+                "cook_time": "50 min", "prep_time": 15, "servings": 4, "calories": 460,
+                "image_url": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["1 whole chicken jointed into pieces", "3 large tomatoes diced", "2 large onions diced", "4 garlic cloves minced", "1 tsp turmeric", "1 tsp curry powder", "1 tsp coriander powder", "2 tbsp oil", "400ml water or chicken stock", "Salt and pepper", "Fresh coriander"],
+                "steps": ["Brown chicken pieces in hot oil on all sides.", "Remove chicken, fry onion and garlic until golden.", "Add tomatoes, turmeric, curry powder and coriander, cook 8 minutes.", "Return chicken to pan, add stock.", "Simmer covered 35–40 minutes until chicken is tender.", "Sauce should be thick and coating. Serve with ugali or rice."],
+                "substitutions": ["Use goat for nyama ya mbuzi stew", "Add potatoes to make it more filling"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 8.50, "is_public": true,
+                "tags": ["dinner", "kenyan", "gluten-free", "family", "comfort"]
+            ],
+            [
+                "title": "Viazi Karai (Kenyan Street Potato Fritters)",
+                "cook_time": "20 min", "prep_time": 15, "servings": 4, "calories": 320,
+                "image_url": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["500g medium potatoes", "1 cup chickpea flour (besan)", "1 tsp cumin", "1 tsp coriander", "½ tsp turmeric", "½ tsp chilli powder", "Water to make batter", "Oil for deep-frying", "Tamarind chutney to serve", "Sliced onion and coriander to garnish"],
+                "steps": ["Boil potatoes until just cooked, cool and peel.", "Slice into thick rounds.", "Mix chickpea flour with spices and enough water to make a thick batter.", "Season batter with salt.", "Heat oil to 175°C.", "Dip potato slices in batter, fry 3–4 minutes until golden and crispy.", "Serve with tamarind chutney and garnish."],
+                "substitutions": ["Use cassava or sweet potato", "Add grated ginger to batter for extra warmth"],
+                "difficulty": "easy", "cuisine_type": "kenyan", "cost_estimate": 2.80, "is_public": true,
+                "tags": ["snack", "kenyan", "street-food", "vegan", "Mombasa"]
+            ],
+            [
+                "title": "Samaki wa Nazi (Coastal Fish in Coconut)",
+                "cook_time": "30 min", "prep_time": 15, "servings": 4, "calories": 400,
+                "image_url": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["4 whole tilapia or red snapper fillets", "400ml coconut milk", "3 large tomatoes diced", "1 onion diced", "4 garlic cloves minced", "1 tbsp fresh ginger grated", "1 tsp turmeric", "1 tsp cumin", "1 green chilli", "Juice of 1 lime", "Fresh coriander", "Salt"],
+                "steps": ["Score fish and season with salt and turmeric.", "Fry fish 2 minutes per side in hot oil, set aside.", "In same pan, fry onion, garlic and ginger until golden.", "Add tomatoes, cumin and chilli, cook 8 minutes until saucy.", "Pour in coconut milk, bring to gentle simmer.", "Add fish, cook 12–15 minutes. Finish with lime juice and coriander."],
+                "substitutions": ["Use king prawns instead of fish", "Add okra for a thicker sauce"],
+                "difficulty": "medium", "cuisine_type": "kenyan", "cost_estimate": 9.50, "is_public": true,
+                "tags": ["dinner", "kenyan", "coastal", "seafood", "gluten-free"]
+            ],
+            // MARK: West African
+            [
+                "title": "Jollof Rice with Fried Plantain",
+                "cook_time": "50 min", "prep_time": 15, "servings": 6, "calories": 510,
+                "image_url": "https://images.unsplash.com/photo-1536304993881-ff86d57456de?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["3 cups long-grain parboiled rice", "400g can crushed tomatoes", "2 red bell peppers blended", "1 scotch bonnet pepper", "1 large onion blended", "3 tbsp tomato purée", "4 cups chicken stock", "1 tsp curry powder", "1 tsp thyme", "Salt and seasoning", "3 ripe plantains", "Oil"],
+                "steps": ["Blend tomatoes, peppers and onion into a sauce.", "Fry blended sauce in oil 20 minutes until reduced and deep red.", "Add tomato purée, curry powder, thyme and stock.", "Rinse rice, add to sauce, stir well.", "Cook covered on medium-low for 25 minutes, check and stir halfway.", "Slice plantains, fry in oil until golden. Serve alongside."],
+                "substitutions": ["Use jasmine rice for a different texture", "Add chicken pieces to cook in the rice"],
+                "difficulty": "medium", "cuisine_type": "west-african", "cost_estimate": 7.00, "is_public": true,
+                "tags": ["dinner", "west-african", "rice", "comfort", "vegan"]
+            ],
+            // MARK: More Global Variety
+            [
+                "title": "Chicken Shawarma Platter",
+                "cook_time": "25 min", "prep_time": 20, "servings": 4, "calories": 510,
+                "image_url": "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["700g chicken thighs boneless", "3 tbsp yogurt", "2 tsp cumin", "2 tsp coriander", "1 tsp turmeric", "1 tsp smoked paprika", "½ tsp cinnamon", "4 garlic cloves", "Juice of 1 lemon", "Pitta bread", "Garlic sauce", "Pickled turnips", "Parsley"],
+                "steps": ["Mix yogurt, spices, garlic and lemon, marinate chicken 2 hours or overnight.", "Cook chicken on a hot grill or oven at 220°C for 20–25 minutes.", "Rest and slice thinly.", "Serve in warm pitta with garlic sauce, pickled turnips and parsley."],
+                "substitutions": ["Use lamb for a more traditional version", "Serve as a wrap for street-food style"],
+                "difficulty": "easy", "cuisine_type": "middle-eastern", "cost_estimate": 11.00, "is_public": true,
+                "tags": ["dinner", "middle-eastern", "high-protein", "gluten-free-option"]
+            ],
+            [
+                "title": "Teriyaki Salmon Bowl",
+                "cook_time": "15 min", "prep_time": 10, "servings": 2, "calories": 520,
+                "image_url": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 salmon fillets", "3 tbsp soy sauce", "2 tbsp mirin", "1 tbsp sake", "1 tbsp brown sugar", "2 cups cooked Japanese rice", "1 avocado sliced", "100g edamame", "1 cucumber sliced", "Sesame seeds", "Spring onions", "Pickled ginger"],
+                "steps": ["Mix soy sauce, mirin, sake and sugar into teriyaki sauce.", "Marinate salmon 15 minutes.", "Grill or pan-fry salmon 3–4 minutes per side, glazing with extra sauce.", "Assemble bowls with rice, avocado, edamame and cucumber.", "Place salmon on top, drizzle remaining sauce.", "Garnish with sesame seeds, spring onions and pickled ginger."],
+                "substitutions": ["Use tofu for vegetarian version", "Replace rice with cauliflower rice (low-carb)"],
+                "difficulty": "easy", "cuisine_type": "japanese", "cost_estimate": 14.50, "is_public": true,
+                "tags": ["dinner", "japanese", "healthy", "high-protein", "gluten-free"]
+            ],
+            [
+                "title": "Beef Tacos with Pico de Gallo",
+                "cook_time": "20 min", "prep_time": 15, "servings": 4, "calories": 490,
+                "image_url": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["500g beef mince", "1 tsp cumin", "1 tsp chilli powder", "½ tsp smoked paprika", "½ tsp garlic powder", "8 corn tortillas", "3 tomatoes finely diced", "1 red onion finely diced", "1 jalapeño minced", "Fresh coriander", "Juice of 2 limes", "Soured cream and guacamole"],
+                "steps": ["Brown beef, drain fat, add all spices and a splash of water.", "Cook 5 minutes until sauce coats the meat.", "For pico: combine tomatoes, red onion, jalapeño, coriander and lime.", "Warm tortillas in a dry pan.", "Fill with beef, top with pico, soured cream and guacamole."],
+                "substitutions": ["Use chicken or pork", "Double the jalapeño for extra heat"],
+                "difficulty": "easy", "cuisine_type": "mexican", "cost_estimate": 10.50, "is_public": true,
+                "tags": ["dinner", "mexican", "family", "quick", "gluten-free"]
+            ],
+            [
+                "title": "Miso-Glazed Aubergine",
+                "cook_time": "25 min", "prep_time": 10, "servings": 4, "calories": 280,
+                "image_url": "https://images.unsplash.com/photo-1481304453051-c5f7a1a6c0b0?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2 large aubergines halved", "3 tbsp white miso paste", "2 tbsp mirin", "1 tbsp sake", "1 tbsp sesame oil", "1 tsp sugar", "Sesame seeds", "Spring onions", "Steamed rice to serve"],
+                "steps": ["Score aubergine flesh in a cross-hatch pattern.", "Brush with sesame oil and grill flesh-side down 5 minutes.", "Mix miso, mirin, sake and sugar into a glaze.", "Spread glaze over scored flesh.", "Grill under high heat 8–10 minutes until caramelised.", "Scatter sesame seeds and spring onions."],
+                "substitutions": ["Use red miso for stronger flavour", "Add a drizzle of chilli oil"],
+                "difficulty": "easy", "cuisine_type": "japanese", "cost_estimate": 6.50, "is_public": true,
+                "tags": ["dinner", "japanese", "vegan", "healthy", "umami"]
+            ],
+            [
+                "title": "Creamy Tuscan Garlic Chicken",
+                "cook_time": "30 min", "prep_time": 10, "servings": 4, "calories": 530,
+                "image_url": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["4 chicken breasts", "6 garlic cloves minced", "1 cup sun-dried tomatoes", "2 cups baby spinach", "1 cup double cream", "½ cup chicken stock", "50g parmesan grated", "1 tsp Italian seasoning", "2 tbsp olive oil", "Salt and pepper"],
+                "steps": ["Season chicken, sear in hot oil 5 minutes per side until golden, set aside.", "In same pan, fry garlic 1 minute.", "Add sun-dried tomatoes, cook 2 minutes.", "Pour in stock and cream, bring to simmer.", "Add parmesan and Italian seasoning, stir.", "Return chicken to pan, add spinach, cook 5–7 minutes until sauce thickens."],
+                "substitutions": ["Use half-fat cream for lighter version", "Add mushrooms for extra depth"],
+                "difficulty": "easy", "cuisine_type": "italian", "cost_estimate": 14.00, "is_public": true,
+                "tags": ["dinner", "italian", "creamy", "high-protein", "gluten-free"]
+            ],
+            [
+                "title": "Pho Bo (Vietnamese Beef Noodle Soup)",
+                "cook_time": "180 min", "prep_time": 20, "servings": 6, "calories": 420,
+                "image_url": "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["2kg beef bones", "500g beef brisket", "1 large onion charred", "5cm ginger charred", "3 star anise", "3 cloves", "1 cinnamon stick", "1 tbsp fish sauce", "400g rice noodles", "200g ribeye thinly sliced raw", "Bean sprouts", "Thai basil", "Lime wedges", "Sliced chillies"],
+                "steps": ["Blanch bones, rinse well.", "Char onion and ginger directly on flame.", "Simmer bones and brisket with charred veg and spices 3 hours.", "Strain broth, season with fish sauce and salt.", "Cook rice noodles separately, drain.", "Divide noodles into bowls, top with broth, brisket slices and raw beef.", "Serve immediately with bean sprouts, basil, lime and chilli."],
+                "substitutions": ["Use chicken for pho ga", "Shortcut: use good-quality beef stock with spices"],
+                "difficulty": "hard", "cuisine_type": "vietnamese", "cost_estimate": 18.00, "is_public": true,
+                "tags": ["dinner", "vietnamese", "soup", "gluten-free", "weekend"]
+            ],
+            [
+                "title": "Shakshuka Verde",
+                "cook_time": "20 min", "prep_time": 10, "servings": 4, "calories": 260,
+                "image_url": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["6 large eggs", "400g tomatillos", "2 jalapeños", "1 green pepper", "1 onion diced", "3 garlic cloves", "100g baby spinach", "50g feta", "1 tsp cumin", "Fresh coriander", "Sourdough to serve"],
+                "steps": ["Blend tomatillos, jalapeños and green pepper.", "Sauté onion and garlic.", "Add blended sauce and cumin, simmer 8 minutes.", "Add spinach and stir in.", "Make 6 wells, crack in eggs.", "Cover and cook 6–8 minutes. Top with feta and coriander."],
+                "substitutions": ["Use canned green salsa instead of tomatillos", "Add avocado slices on top"],
+                "difficulty": "easy", "cuisine_type": "mexican", "cost_estimate": 7.50, "is_public": true,
+                "tags": ["breakfast", "mexican", "vegetarian", "one-pan"]
+            ],
+            [
+                "title": "Lamb Biryani",
+                "cook_time": "90 min", "prep_time": 30, "servings": 6, "calories": 620,
+                "image_url": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+                "ingredients": ["700g lamb shoulder cubed", "3 cups basmati rice", "2 cups yogurt", "2 large onions sliced", "4 garlic cloves", "1 tbsp ginger", "1 tsp saffron soaked in warm milk", "2 tsp biryani spice", "4 cardamom pods", "Fried onion (birista)", "Fresh mint and coriander"],
+                "steps": ["Marinate lamb in yogurt and spices 2 hours.", "Fry onion until crispy golden (birista).", "Cook marinated lamb 30 minutes.", "Parboil rice until 70% cooked, drain.", "Layer rice over lamb, drizzle saffron milk.", "Top with birista, mint and coriander.", "Cook covered on very low heat 30 minutes (dum cooking)."],
+                "substitutions": ["Use chicken for quicker cooking", "Add boiled eggs for extra protein"],
+                "difficulty": "hard", "cuisine_type": "indian", "cost_estimate": 18.00, "is_public": true,
+                "tags": ["dinner", "indian", "rice", "weekend", "celebration"]
             ],
         ]
     }

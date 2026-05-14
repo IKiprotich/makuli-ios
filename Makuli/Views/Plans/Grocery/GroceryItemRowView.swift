@@ -2,7 +2,7 @@
 //  GroceryItemRowView.swift
 //  Makuli
 //
-//  Created by Ian   on 24/06/2025.
+//  Created by Ian on 2025-06-24.
 //
 
 import SwiftUI
@@ -15,7 +15,6 @@ struct GroceryItemRowView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            //checkbox
             Button(action: onToggle) {
                 ZStack {
                     
@@ -38,12 +37,10 @@ struct GroceryItemRowView: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            //emoji
             Text("🛒")
             .font(.title2)
             .frame(width: 32)
             
-            //item details
             VStack(alignment: .leading) {
                 Text(item.name)
                     .font(.system(size:16, weight: .medium))
@@ -71,8 +68,5 @@ struct GroceryItemRowView: View {
     }
 }
 
-
-
 #Preview {
-  //  GroceryItemRowView()
 }

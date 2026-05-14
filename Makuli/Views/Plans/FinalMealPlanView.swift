@@ -21,11 +21,9 @@ struct FinalMealPlanView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
                 AppColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 24) {
-                    // Header
                     VStack(spacing: 8) {
                         Text("Meal Plan")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -37,9 +35,7 @@ struct FinalMealPlanView: View {
                     }
                     .padding(.top, 20)
                     
-                    // Enhance My Plan button
                     Button(action: {
-                        // Handle enhance plan action
                     }) {
                         HStack(spacing: 8) {
                             Text("Enhance My Plan")
@@ -65,7 +61,6 @@ struct FinalMealPlanView: View {
                     }
                     .padding(.horizontal, 20)
                     
-                    // Meal plan content
                     ScrollView {
                         VStack(spacing: 24) {
                             ForEach(Array(weekDays.enumerated()), id: \.offset) { index, date in
@@ -82,7 +77,6 @@ struct FinalMealPlanView: View {
             }
             .navigationBarHidden(true)
             .task {
-                // Save the meal plan to database
                 await saveMealPlan()
             }
         }
@@ -100,13 +94,11 @@ struct FinalMealPlanView: View {
     
     private func dayMealSection(for date: Date) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Day header
             Text(formatDayHeader(date))
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(AppColors.text)
                 .padding(.horizontal, 20)
             
-            // Meals for this day
             VStack(spacing: 12) {
                 ForEach(Array(selectedMealsForDay(date).enumerated()), id: \.offset) { index, mealType in
                     if isMealSelected(for: date, mealType: mealType) {
@@ -122,7 +114,6 @@ struct FinalMealPlanView: View {
         let mealImage = getMealImage(for: mealType)
         
         return HStack(spacing: 16) {
-            // Meal image
             AsyncImage(url: URL(string: mealImage)) { image in
                 image
                     .resizable()
@@ -140,9 +131,7 @@ struct FinalMealPlanView: View {
             .clipped()
             .cornerRadius(8)
             
-            // Meal details
             VStack(alignment: .leading, spacing: 4) {
-                // Meal type tag
                 Text(mealType)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .padding(.horizontal, 8)
@@ -151,7 +140,6 @@ struct FinalMealPlanView: View {
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 
-                // Meal name
                 Text(mealName)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(AppColors.text)
@@ -160,10 +148,8 @@ struct FinalMealPlanView: View {
             
             Spacer()
             
-            // Options button (only show for today)
             if Calendar.current.isDateInToday(date) {
                 Button(action: {
-                    // Handle meal options
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
@@ -217,7 +203,6 @@ struct FinalMealPlanView: View {
     }
     
     private func getMealImage(for mealType: String) -> String {
-        // In real app, this would be actual image URLs
         return ""
     }
     
@@ -260,7 +245,6 @@ struct FinalMealPlanView: View {
             return
         }
         
-        // Create a user profile for the plan creation
         let userProfile = UserProfile(
             id: user.id,
             userId: user.id,
@@ -310,13 +294,11 @@ struct FinalMealPlanView: View {
         
         if success {
             Logger.info("Successfully saved meal plan")
-            // Dismiss the view after a short delay to show success
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 dismiss()
             }
         } else {
             Logger.error("Failed to save meal plan: \(planViewModel.errorMessage ?? "Unknown error")")
-            // You could show an error alert here
         }
     }
 }

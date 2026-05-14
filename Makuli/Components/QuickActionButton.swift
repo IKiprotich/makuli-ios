@@ -2,7 +2,7 @@
 //  QuickActionButton.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import SwiftUI
@@ -16,7 +16,6 @@ struct QuickActionButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 12) {
-                // Icon container
                 ZStack {
                     Circle()
                         .fill(AppColors.primaryOrange.opacity(0.1))
@@ -27,7 +26,6 @@ struct QuickActionButton: View {
                         .foregroundColor(AppColors.primaryOrange)
                 }
                 
-                // Title
                 Text(title)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(AppColors.text)

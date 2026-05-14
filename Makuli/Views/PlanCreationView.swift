@@ -4,425 +4,326 @@
 //
 //  Created by Ian on 2025-01-13.
 //
-//  Production-ready plan creation view with templates and AI generation.
-//
 
 import SwiftUI
 
 struct PlanCreationView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authViewModel: AuthViewModel
     @StateObject private var planViewModel = PlanViewModel()
     @StateObject private var profileViewModel = ProfileViewModel()
-    @EnvironmentObject var authViewModel: AuthViewModel
-    
-    @State private var selectedCreationMethod: CreationMethod = .template
+
     @State private var selectedTemplate: MealPlanTemplate?
     @State private var weekStartDate = Date()
-    @State private var showingAIGeneration = false
     @State private var isCreating = false
-    
-    enum CreationMethod: String, CaseIterable {
-        case template = "Template"
-        case ai = "AI Generate"
-        
-        var icon: String {
-            switch self {
-            case .template:
-                return "doc.text.fill"
-            case .ai:
-                return "wand.and.stars"
-            }
-        }
-        
-        var description: String {
-            switch self {
-            case .template:
-                return "Choose from our curated meal plan templates"
-            case .ai:
-                return "Let AI create a personalized meal plan for you"
-            }
-        }
-    }
-    
+
+    var onPlanCreated: (() -> Void)?
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    headerSection
-                    
-                    creationMethodSelector
-                    
-                    if selectedCreationMethod == .template {
-                        templateSelection
-                    } else {
-                        spoonacularGenerationSection
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 28) {
+                        templateSection
+                        weekPickerSection
+                        Spacer(minLength: 20)
                     }
-                    
-                    weekSelectionSection
-                    
-                    createPlanButton
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 120)
                 }
-                .padding()
+
+                VStack {
+                    Spacer()
+                    createButton
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
+                }
             }
-            .navigationTitle("Create Meal Plan")
+            .navigationTitle("New Plan")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
+                        .foregroundColor(AppColors.primaryOrange)
                 }
             }
             .task {
                 if let user = authViewModel.user {
-                    await profileViewModel.fetchProfile(for: user.id)
-                    await planViewModel.fetchTemplates()
+                    async let _ = profileViewModel.fetchProfile(for: user.id)
+                    async let _ = planViewModel.fetchTemplates()
                 }
             }
-            .alert("Error", isPresented: .constant(planViewModel.errorMessage != nil)) {
-                Button("OK") {
-                    planViewModel.clearError()
-                }
+            .alert("Error", isPresented: Binding(
+                get: { planViewModel.errorMessage != nil },
+                set: { if !$0 { planViewModel.clearError() } }
+            )) {
+                Button("OK") { planViewModel.clearError() }
             } message: {
-                if let errorMessage = planViewModel.errorMessage {
-                    Text(errorMessage)
-                }
-            }
-            .alert("Success", isPresented: .constant(planViewModel.selectedPlan != nil && !isCreating)) {
-                Button("View Plan") {
-                    dismiss()
-                }
-                Button("Create Another") {
-                    planViewModel.selectedPlan = nil
-                    selectedTemplate = nil
-                }
-            } message: {
-                Text("Your meal plan has been created successfully!")
+                Text(planViewModel.errorMessage ?? "")
             }
         }
     }
-}
 
-extension PlanCreationView {
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "calendar.badge.plus")
-                .font(.system(size: 50))
-                .foregroundColor(AppColors.primaryOrange)
-            
-            Text("Create Your Meal Plan")
-                .font(.title2)
-                .fontWeight(.semibold)
-            
-            Text("Choose how you'd like to create your weekly meal plan")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-    }
-    
-    private var creationMethodSelector: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Creation Method")
-                .font(.headline)
-            
-            HStack(spacing: 12) {
-                ForEach(CreationMethod.allCases, id: \.self) { method in
-                    Button(action: {
-                        selectedCreationMethod = method
-                        selectedTemplate = nil
-                    }) {
-                        VStack(spacing: 8) {
-                            Image(systemName: method.icon)
-                                .font(.title2)
-                                .foregroundColor(selectedCreationMethod == method ? .white : AppColors.primaryOrange)
-                            
-                            Text(method.rawValue)
-                                .font(.headline)
-                                .foregroundColor(selectedCreationMethod == method ? .white : .primary)
-                            
-                            Text(method.description)
-                                .font(.caption)
-                                .foregroundColor(selectedCreationMethod == method ? .white.opacity(0.8) : .secondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            selectedCreationMethod == method ?
-                            AppColors.primaryOrange :
-                            AppColors.primaryOrange.opacity(0.1)
-                        )
-                        .cornerRadius(12)
-                    }
-                }
-            }
-        }
-    }
-    
-    private var templateSelection: some View {
+    // MARK: - Template Section
+
+    private var templateSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Choose a Template")
-                .font(.headline)
-            
+            sectionHeader(
+                icon: "doc.text.fill",
+                title: "Choose a Template",
+                subtitle: "Pick a curated weekly plan to get started"
+            )
+
             if planViewModel.isLoadingTemplates {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("Loading templates...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
+                loadingTemplatesView
             } else if planViewModel.templates.isEmpty {
-                VStack(spacing: 8) {
-                                            Image(systemName: "doc.text")
-                        .font(.system(size: 30))
-                        .foregroundColor(.gray)
-                    
-                    Text("No templates available")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
-                    Text("Please check your connection and try again")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(AppColors.background)
-                .cornerRadius(12)
+                emptyTemplatesView
             } else {
-                LazyVGrid(columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ], spacing: 12) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(planViewModel.templates, id: \.id) { template in
-                        SelectableTemplateCard(
+                        TemplateCard(
                             template: template,
-                            isSelected: selectedTemplate?.id == template.id,
-                            onSelect: {
+                            isSelected: selectedTemplate?.id == template.id
+                        ) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                 selectedTemplate = template
                             }
-                        )
+                        }
                     }
                 }
             }
         }
     }
-    
-    private var spoonacularGenerationSection: some View {
+
+    private var loadingTemplatesView: some View {
+        HStack(spacing: 10) {
+            ProgressView().scaleEffect(0.85)
+            Text("Loading templates…")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(AppColors.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+    }
+
+    private var emptyTemplatesView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "doc.badge.plus")
+                .font(.system(size: 40, weight: .light))
+                .foregroundColor(AppColors.textSecondary)
+            Text("No templates yet")
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(AppColors.text)
+            Text("Use the Developer Panel to seed templates")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(AppColors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(AppColors.card)
+                .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+        )
+    }
+
+    // MARK: - Week Picker Section
+
+    private var weekPickerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Spoonacular Generation")
-                .font(.headline)
-            
-            VStack(spacing: 12) {
-                HStack {
-                    Image(systemName: "fork.knife")
-                        .foregroundColor(AppColors.primaryOrange)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Personalized Meal Plan")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        
-                        Text("Spoonacular will create a custom plan based on your profile")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                }
-                .padding()
-                .background(AppColors.primaryOrange.opacity(0.1))
-                .cornerRadius(12)
-                
-                // Show usage limits if applicable
-                if let profile = profileViewModel.profile, !profile.hasPremiumAccess {
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.blue)
-                        
-                        Text("You have \(profile.spoonacularGenerationsRemainingThisMonth) Spoonacular generations remaining this month")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                }
-            }
-        }
-    }
-    
-    private var weekSelectionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Week Starting")
-                .font(.headline)
-            
-            DatePicker(
-                "Week Start Date",
-                selection: $weekStartDate,
-                in: Date()...,
-                displayedComponents: .date
+            sectionHeader(
+                icon: "calendar",
+                title: "Week Starting",
+                subtitle: "Plans run Monday to Sunday"
             )
-            .datePickerStyle(.compact)
-            .padding()
-            .background(AppColors.background)
-            .cornerRadius(12)
+
+            HStack {
+                DatePicker(
+                    "",
+                    selection: $weekStartDate,
+                    in: mondayOfCurrentWeek...,
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.compact)
+                .labelsHidden()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(AppColors.card)
+                    .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+            )
         }
     }
-    
-    private var createPlanButton: some View {
+
+    // MARK: - Create Button
+
+    private var createButton: some View {
         Button(action: createPlan) {
-            HStack {
+            HStack(spacing: 10) {
                 if isCreating {
                     ProgressView()
-                        .scaleEffect(0.8)
+                        .scaleEffect(0.85)
                         .tint(.white)
                 } else {
-                    Image(systemName: selectedCreationMethod == .template ? "doc.badge.plus" : "wand.and.stars")
+                    Image(systemName: "calendar.badge.plus")
+                        .font(.system(size: 16, weight: .semibold))
                 }
-                
-                Text(isCreating ? "Creating Plan..." : "Create Plan")
-                    .fontWeight(.semibold)
+                Text(isCreating ? "Creating…" : "Create Plan")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(canCreatePlan ? AppColors.primaryOrange : Color.gray)
-            .cornerRadius(12)
+            .frame(height: 54)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(canCreate ? AppColors.primaryOrange : Color.gray.opacity(0.4))
+            )
+            .shadow(color: canCreate ? AppColors.primaryOrange.opacity(0.35) : .clear,
+                    radius: 10, x: 0, y: 5)
         }
-        .disabled(!canCreatePlan || isCreating)
+        .disabled(!canCreate || isCreating)
+        .animation(.easeInOut(duration: 0.2), value: canCreate)
     }
-    
-    private var canCreatePlan: Bool {
-        guard let user = authViewModel.user,
-              let profile = profileViewModel.profile else { return false }
-        
-        switch selectedCreationMethod {
-        case .template:
-            return selectedTemplate != nil && profile.canCreateMorePlans
-        case .ai:
-            return profile.canUseSpoonacularGeneration && profile.canCreateMorePlans
+
+    // MARK: - Helpers
+
+    private func sectionHeader(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(AppColors.primaryOrange)
+                .frame(width: 32, height: 32)
+                .background(AppColors.primaryOrange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(AppColors.text)
+                Text(subtitle)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+            }
         }
     }
-    
+
+    private var canCreate: Bool {
+        selectedTemplate != nil && authViewModel.user != nil
+    }
+
+    private var mondayOfCurrentWeek: Date {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let weekday = cal.component(.weekday, from: today)
+        let daysToMonday = (weekday == 1) ? 0 : (2 - weekday + 7) % 7
+        return cal.date(byAdding: .day, value: -daysToMonday, to: today) ?? today
+    }
+
     private func createPlan() {
         guard let user = authViewModel.user,
-              let profile = profileViewModel.profile else { return }
-        
+              let template = selectedTemplate else { return }
+
         isCreating = true
-        
         Task {
-            var success = false
-            
-            switch selectedCreationMethod {
-            case .template:
-                if let template = selectedTemplate {
-                    success = await planViewModel.createPlanFromTemplate(
-                        templateId: template.id,
-                        for: user.id,
-                        weekStart: weekStartDate,
-                        userProfile: profile
-                    )
-                    
-                    if success {
-                        await profileViewModel.incrementPlanCreationCount()
-                    }
-                }
-                
-            case .ai:
-                let preferences = MealPlanPreferences(
-                    weekStartDate: weekStartDate,
-                    budget: profile.budget ?? "Medium ($60-100)",
-                    dietaryRestrictions: [profile.diet ?? "No restrictions"],
-                    goals: [profile.goal ?? "General Health"],
-                    excludedIngredients: []
+            let profile = profileViewModel.profile
+            let success: Bool
+            if let profile {
+                success = await planViewModel.createPlanFromTemplate(
+                    templateId: template.id,
+                    for: user.id,
+                    weekStart: weekStartDate,
+                    userProfile: profile
                 )
-                
-                success = await planViewModel.generateSpoonacularMealPlanWithPreferences(
-                    for: profile,
-                    preferences: preferences
+            } else {
+                success = await planViewModel.createPlanDirectly(
+                    templateId: template.id,
+                    for: user.id,
+                    weekStart: weekStartDate,
+                    title: template.name
                 )
-                
-                if success {
-                    await profileViewModel.incrementPlanCreationCount()
-                    await profileViewModel.incrementSpoonacularGenerationCount()
-                }
             }
-            
             isCreating = false
-            
             if success {
-                // Success will be handled by the alert
+                if profile != nil {
+                    await profileViewModel.incrementPlanCreationCount()
+                }
+                onPlanCreated?()
+                dismiss()
             }
         }
     }
 }
 
-// Removed duplicate TemplateCard declaration - using SelectableTemplateCard instead
-struct SelectableTemplateCard: View {
+// MARK: - Template Card
+
+struct TemplateCard: View {
     let template: MealPlanTemplate
     let isSelected: Bool
     let onSelect: () -> Void
-    
-    var body: some View { 
+
+    var body: some View {
         Button(action: onSelect) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text(template.icon ?? "🍽️")
-                        .font(.title2)
-                    
+                        .font(.system(size: 28))
                     Spacer()
-                    
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .font(.system(size: 18))
+                            .foregroundColor(AppColors.primaryOrange)
                     }
                 }
-                
+
                 Text(template.name)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                
-                Text(template.description ?? "")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(AppColors.text)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
-                
-                HStack {
-                    Text("$\(Int(template.maxCostPerMeal ?? 0)) per meal")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                    
-                    Spacer()
-                    
-                    Text(template.cookingSkillLevel.capitalized)
-                        .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(AppColors.primaryOrange.opacity(0.2))
-                        .cornerRadius(4)
+
+                if let desc = template.description {
+                    Text(desc)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
                 }
+
+                Spacer(minLength: 0)
+
+                Text(template.cookingSkillLevel.capitalized)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(AppColors.primaryOrange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(AppColors.primaryOrange.opacity(0.12), in: Capsule())
             }
-            .padding()
+            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? AppColors.primaryOrange.opacity(0.1) : AppColors.background)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? AppColors.primaryOrange : Color.clear, lineWidth: 2)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(AppColors.card)
+                    .shadow(color: .black.opacity(isSelected ? 0.08 : 0.04), radius: 8, x: 0, y: 4)
             )
-            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(
+                        isSelected ? AppColors.primaryOrange : Color.clear,
+                        lineWidth: 2
+                    )
+            )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }
 
 #Preview {
     PlanCreationView()
         .environmentObject(AuthViewModel())
-} 
+}

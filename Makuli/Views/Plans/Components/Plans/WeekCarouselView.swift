@@ -2,7 +2,7 @@
 //  WeekCarouselView.swift
 //  Makuli
 //
-//  Created by Ian   on 20/06/2025.
+//  Created by Ian on 2025-06-20.
 //
 
 import SwiftUI
@@ -38,7 +38,7 @@ struct WeekCarouselCard: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            let validImageURL: URL? = nil // No real image URL for now
+            let validImageURL: URL? = nil
             if let url = validImageURL {
                 AsyncImage(url: url) { image in
                     image
@@ -78,5 +78,4 @@ struct WeekCarouselCard: View {
     }
 }
 #Preview {
-   // WeekCarouselView()
 }

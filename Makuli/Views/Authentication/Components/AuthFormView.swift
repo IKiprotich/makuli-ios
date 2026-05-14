@@ -2,7 +2,7 @@
 //  AuthFormView.swift
 //  Makuli
 //
-//  Created by Ian   on 27/06/2025.
+//  Created by Ian on 2025-06-27.
 //
 
 import SwiftUI
@@ -15,7 +15,6 @@ struct AuthFormView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Email Field
             AuthTextField(
                 text: $email,
                 placeholder: "Email",
@@ -23,14 +22,12 @@ struct AuthFormView: View {
                 textContentType: .emailAddress
             )
             
-            // Password Field
             AuthSecureField(
                 text: $password,
                 placeholder: "Password",
                 textContentType: isSignUp ? .newPassword : .password
             )
             
-            // Submit Button
             AuthSubmitButton(
                 isSignUp: isSignUp,
                 isLoading: authViewModel.isLoading,

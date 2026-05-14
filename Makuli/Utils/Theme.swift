@@ -2,23 +2,22 @@
 //  Theme.swift
 //  Makuli
 //
+//  Created by Ian on 2025-01-13.
+//
 
 import SwiftUI
 
 // MARK: - Colours
 
 enum AppColors {
-    // Brand
     static let primaryOrange = Color("PrimaryOrange")
     static let successGreen  = Color("SuccessGreen")
     static let warnRed       = Color("WarnRed")
 
-    // Static (light-mode only — use sparingly)
     static let bgCream      = Color("BackgroundCream")
     static let textCharcoal = Color("TextCharcoal")
     static let warmsand     = Color("WarmSand")
 
-    // Adaptive — prefer these throughout the app
     static var background: Color {
         Color(UIColor { tc in
             tc.userInterfaceStyle == .dark ? .systemBackground : UIColor(bgCream)
@@ -71,7 +70,6 @@ enum AppFonts {
 // MARK: - Reusable Modifiers
 
 extension View {
-    /// Full-width orange primary button style.
     func primaryButtonStyle() -> some View {
         self
             .font(AppFonts.headline())
@@ -82,7 +80,6 @@ extension View {
             .cornerRadius(12)
     }
 
-    /// Outlined secondary button style.
     func secondaryButtonStyle() -> some View {
         self
             .font(AppFonts.headline())

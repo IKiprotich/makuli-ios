@@ -1,3 +1,10 @@
+//
+//  FavoriteCuisinesView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct FavoriteCuisinesView: View {
@@ -17,7 +24,6 @@ struct FavoriteCuisinesView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Favorite Cuisines")
                         .font(.largeTitle)
@@ -30,7 +36,6 @@ struct FavoriteCuisinesView: View {
                 }
                 .padding(.top, 20)
                 
-                // Cuisines grid
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(cuisineOptions, id: \.self) { cuisine in
@@ -59,7 +64,6 @@ struct FavoriteCuisinesView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedCuisines)
                     dismiss()

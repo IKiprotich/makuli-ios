@@ -1,3 +1,10 @@
+//
+//  MealsPerDayView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct MealsPerDayView: View {
@@ -15,7 +22,6 @@ struct MealsPerDayView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Meals Per Day")
                         .font(.largeTitle)
@@ -28,7 +34,6 @@ struct MealsPerDayView: View {
                 }
                 .padding(.top, 20)
                 
-                // Meals display
                 VStack(spacing: 8) {
                     Text("\(selectedMeals)")
                         .font(.system(size: 48, weight: .bold))
@@ -39,7 +44,6 @@ struct MealsPerDayView: View {
                         .foregroundColor(AppColors.textSecondary)
                 }
                 
-                // Meal options
                 VStack(spacing: 12) {
                     ForEach(mealOptions, id: \.self) { meals in
                         let isSelected = selectedMeals == meals
@@ -72,7 +76,6 @@ struct MealsPerDayView: View {
                 
                 Spacer()
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedMeals)
                     dismiss()

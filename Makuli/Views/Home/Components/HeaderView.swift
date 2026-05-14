@@ -2,7 +2,7 @@
 //  HeaderView.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import SwiftUI
@@ -14,7 +14,6 @@ struct HeaderView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Enhanced profile image with actual profile picture
             Button(action: onProfileTap) {
                 ZStack {
                     Circle()
@@ -44,7 +43,6 @@ struct HeaderView: View {
             
             Spacer()
             
-            // Enhanced home title
             VStack(spacing: 2) {
                 Text("Home")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -57,7 +55,6 @@ struct HeaderView: View {
             
             Spacer()
             
-            // Enhanced settings button
             Button(action: onSettingsTap) {
                 ZStack {
                     Circle()

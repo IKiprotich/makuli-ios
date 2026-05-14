@@ -2,7 +2,7 @@
 //  GenderSelectionView.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
 
 import SwiftUI
@@ -18,7 +18,6 @@ struct GenderSelectionView: View {
         ZStack {
             AppColors.background
             VStack(spacing: 30) {
-                // progress indicator
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
@@ -39,7 +38,6 @@ struct GenderSelectionView: View {
                         .padding(.horizontal)
                 }
                 
-                // gender selection
                 VStack(spacing: 15) {
                     ForEach(genderOptions, id: \.self) { option in
                         Button(action: {
@@ -84,7 +82,6 @@ struct GenderSelectionView: View {
                 
                 Spacer()
                 
-                // continue button
                 Button(action: {
                     if !onboardingData.gender.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {

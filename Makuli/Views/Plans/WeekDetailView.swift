@@ -2,7 +2,7 @@
 //  WeekDetailView.swift
 //  Makuli
 //
-//  Created by Ian   on 21/06/2025.
+//  Created by Ian on 2025-06-21.
 //
 
 import SwiftUI
@@ -19,14 +19,11 @@ struct WeekDetailView: View {
             GeometryReader { geometry in
                 ZStack(alignment: .bottom) {
                     
-                    //main content
                     ScrollView {
                         VStack (spacing: 0) {
                             
-                            //header section
                             headerSection
                             
-                            //daycards
                             LazyVStack(spacing: 16){
                                 ForEach(dayPlans) { dayPlan in
                                     DayCardView(dayPlan: dayPlan)
@@ -34,14 +31,10 @@ struct WeekDetailView: View {
                                 }
                             }
                             .padding(.top, 24)
-                            .padding(.bottom, 100) //the space for the sticky button
+                            .padding(.bottom, 100)
                         }
                     }
                     
-                    //sticky bottom button
-                    // groceryListButton
-                    //     .padding(.horizontal, 20)
-                    //     .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
                 }
             }
             .navigationBarHidden(true)
@@ -51,7 +44,6 @@ struct WeekDetailView: View {
             .onAppear {
                 dayPlans = generateDayPlans(from: plan)
             }
-            // Add the floating action button as a safe area inset
             .safeAreaInset(edge: .bottom) {
                 HStack {
                     Spacer()
@@ -74,22 +66,18 @@ struct WeekDetailView: View {
                 .padding(.bottom, 16)
                 .background(AppColors.background.opacity(0.9))
             }
-//            .navigationDestination(for: Recipe.self) { recipe in
-//                RecipeDetailView(recipe: recipe)
-//            }
         }
     }
     
     func generateGroceryList() -> [GroceryItem] {
         var ingredientMap: [String: GroceryItem] = [:]
         for planRecipe in plan.recipes {
-            // Note: This would need to be updated when we have actual Recipe objects linked to PlanRecipe
             if let ingredients = planRecipe.customIngredients {
                 for ingredient in ingredients {
                     let key = ingredient.lowercased()
                     if ingredientMap[key] == nil {
                         ingredientMap[key] = GroceryItem(
-                            userId: "current-user", // This should be replaced with actual user ID
+                            userId: "current-user",
                             name: ingredient,
                             quantity: 1.0,
                             unit: "pieces",
@@ -112,26 +100,23 @@ struct WeekDetailView: View {
         let calendar = Calendar.current
         var dayPlans: [DayPlan] = []
         
-        // Create day plans for each day of the week
         for dayOffset in 0..<7 {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: plan.plan.weekStart) else { continue }
             
             let dayName = date.dayOfWeek
             let dayNumber = "\(calendar.component(.day, from: date))"
             
-            // Get meals for this specific day based on day of week
             let mealsForDay = plan.recipes.filter { planRecipe in
-                return planRecipe.dayOfWeek == calendar.component(.weekday, from: date) - 1 // Sunday = 0
+                return planRecipe.dayOfWeek == calendar.component(.weekday, from: date) - 1
             }
             
-            // If no meals scheduled for this day, create empty day
             let dayMeals = mealsForDay.isEmpty ? [] : mealsForDay
             let isCompleted = !dayMeals.isEmpty && dayMeals.allSatisfy { $0.isCompleted }
             
             let dayPlan = DayPlan(
                 dayName: dayName,
                 dayNumber: dayNumber,
-                meals: [], // For now, empty meals array since DayPlan expects different meal structure
+                meals: [],
                 isCompleted: isCompleted,
                 date: date
             )
@@ -143,13 +128,10 @@ struct WeekDetailView: View {
     }
 }
 
-
 extension WeekDetailView {
     
-    //header section
     private var headerSection: some View {
         VStack(spacing: 16) {
-            // Navigation and title
             HStack {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
@@ -171,7 +153,6 @@ extension WeekDetailView {
                 
                 
                 Button (action:{
-                    // implement more options
                 }) {
                     Image(systemName: "ellipsis")
                         .font(.title2)
@@ -182,13 +163,11 @@ extension WeekDetailView {
             .padding(.horizontal, 20)
             .padding(.top, 8)
             
-            // Budget and progress card
             budgetProgressCard
                 .padding(.horizontal, 20)
         }
     }
     
-    //budget progress card
     private var budgetProgressCard: some View {
         HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 8) {
@@ -215,12 +194,10 @@ extension WeekDetailView {
             
             Spacer()
             
-            // circular progress indicator
             CircularProgressView(progress: plan.plan.progress)
                 .frame(width: 60, height: 60)
             
             Button("Add to Grocery List") {
-                // implement the add to grocery list action
             }
             .font(.caption)
             .foregroundColor(AppColors.primaryOrange)
@@ -240,10 +217,8 @@ extension WeekDetailView {
     }
     
     
-    //grocery list button
     private var groceryListButton: some View {
         Button(action: {
-            //implement the generate grocery list function
         }){
             HStack {
                 Image(systemName: "cart.fill")
@@ -264,6 +239,3 @@ extension WeekDetailView {
     
 }
 
-//#Preview {
-//    WeekDetailView(plan: Plan.mockWeeklyPlan())
-//}

@@ -2,7 +2,7 @@
 //  AuthViewModel.swift
 //  Makuli
 //
-//  Created by Ian   on 30/06/2025.
+//  Created by Ian on 2025-06-30.
 //
 
 import Foundation
@@ -18,7 +18,6 @@ class AuthViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        // Bind AuthManager's published properties to this ViewModel
         authManager.$user.assign(to: &$user)
         authManager.$isLoading.assign(to: &$isLoading)
         authManager.$errorMessage.assign(to: &$errorMessage)

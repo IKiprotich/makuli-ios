@@ -26,37 +26,30 @@ class ProfileViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     
-    /// Whether user has premium access
     var hasPremiumAccess: Bool {
         return profile?.hasPremiumAccess ?? false
     }
     
-    /// User's subscription display name
     var subscriptionDisplayName: String {
         return profile?.subscriptionDisplayName ?? "Free Plan"
     }
     
-    /// Days until subscription renewal
     var daysUntilRenewal: Int? {
         return profile?.daysUntilRenewal
     }
     
-    /// Plans remaining this month
     var plansRemainingThisMonth: Int {
         return profile?.plansRemainingThisMonth ?? 0
     }
     
-    /// Spoonacular generations remaining this month
     var spoonacularGenerationsRemainingThisMonth: Int {
         return profile?.spoonacularGenerationsRemainingThisMonth ?? 0
     }
     
-    /// Whether profile is complete
     var isProfileComplete: Bool {
         return profile?.isProfileComplete ?? false
     }
     
-    /// Profile completion percentage
     var profileCompletionPercentage: Double {
         guard let profile = profile else { return 0.0 }
         
@@ -75,15 +68,12 @@ class ProfileViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Fetches user profile from database
     func fetchProfile(for userId: String) async {
-        // Don't fetch if we already have a profile and no error
         if profile != nil && errorMessage == nil {
             Logger.debug("Profile already loaded, skipping fetch")
             return
         }
         
-        // Cancel any existing fetch task to prevent duplicate requests
         fetchTask?.cancel()
         
         fetchTask = Task {
@@ -93,14 +83,12 @@ class ProfileViewModel: ObservableObject {
         await fetchTask?.value
     }
     
-    /// Forces a refresh of the profile
     func forceRefreshProfile(for userId: String) async {
         profile = nil
         errorMessage = nil
         await performFetch(for: userId)
     }
     
-    /// Updates user profile information
     func updateProfile(
         userId: String,
         name: String? = nil,
@@ -119,7 +107,6 @@ class ProfileViewModel: ObservableObject {
             errorMessage = nil
             successMessage = nil
             
-            // Create updated profile with default preferences
             let defaultNotificationPreferences = NotificationPreferences(
                 mealReminders: true,
                 groceryReminders: true,
@@ -227,7 +214,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(updatedProfile)
             
-            // Update local state
             self.profile = updatedProfile
             self.successMessage = "Profile updated successfully"
             
@@ -243,7 +229,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Completes onboarding process
     func completeOnboarding(
         userId: String,
         name: String,
@@ -260,7 +245,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Create updated profile for onboarding completion with default preferences
             let onboardingNotificationPreferences = NotificationPreferences(
                 mealReminders: true,
                 groceryReminders: true,
@@ -368,7 +352,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(updatedProfile)
             
-            // Update local state
             self.profile = updatedProfile
             self.successMessage = "Welcome to Makuli! Your profile is now complete."
             
@@ -384,7 +367,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates subscription status (premium upgrade/downgrade)
     func updateSubscription(
         userId: String,
         subscriptionType: String,
@@ -397,7 +379,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update subscription in profile
             guard var currentProfile = profile else { 
                 throw ProfileError.profileNotLoaded 
             }
@@ -408,7 +389,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Refresh profile to get updated subscription data
             await forceRefreshProfile(for: userId)
             
             self.successMessage = "Subscription updated successfully"
@@ -425,24 +405,12 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Increments plan creation count
     func incrementPlanCreationCount() async {
         guard var currentProfile = profile else { return }
-        
-        do {
-            currentProfile.incrementPlanCreationCount()
-            
-            try await supabaseManager.updateUserProfile(currentProfile)
-            
-            // Update local state
-            self.profile = currentProfile
-            
-        } catch {
-            Logger.error("Failed to increment plan creation count: \(error)")
-        }
+        currentProfile.incrementPlanCreationCount()
+        self.profile = currentProfile
     }
     
-    /// Increments Spoonacular generation count
     func incrementSpoonacularGenerationCount() async {
         guard var currentProfile = profile else { return }
         
@@ -451,7 +419,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             
         } catch {
@@ -459,34 +426,25 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Checks if user can perform a specific action
     func canPerformAction(_ action: UserAction) -> Bool {
         return profile?.canPerformAction(action) ?? false
     }
     
-    /// Gets usage stats for the current month
-    func getUsageStats() -> (plans: Int, maxPlans: Int, spoonacularGenerations: Int, maxSpoonacularGenerations: Int) {
+    func getUsageStats() -> (plans: Int, maxPlans: Int) {
         guard let profile = profile else {
-            return (0, 0, 0, 0)
+            return (0, 0)
         }
-        
-        let maxPlans = profile.hasPremiumAccess ? 
-            Configuration.maxPlansPerUser : 
+
+        let maxPlans = profile.hasPremiumAccess ?
+            Configuration.maxPlansPerUser :
             Configuration.freePlanLimits.maxPlansPerMonth
-        
-        let maxSpoonacularGenerations = profile.hasPremiumAccess ? 
-            Int.max : 
-            Configuration.freePlanLimits.maxSpoonacularGenerationsPerMonth
-        
+
         return (
             plans: profile.plansCreatedThisMonth,
-            maxPlans: maxPlans,
-            spoonacularGenerations: profile.spoonacularGenerationsThisMonth,
-            maxSpoonacularGenerations: maxSpoonacularGenerations
+            maxPlans: maxPlans
         )
     }
     
-    /// Uploads profile image
     func uploadProfileImage(_ imageData: Data, userId: String) async -> Bool {
         do {
             Logger.info("Uploading profile image for user: \(userId)")
@@ -494,10 +452,8 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // TODO: Implement profile image upload
             let imageUrl = "https://placeholder.com/profile-\(userId).jpg"
             
-            // Update profile with new image URL
             let success = await updateProfile(
                 userId: userId,
                 profileImageUrl: imageUrl
@@ -518,7 +474,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Deletes user account
     func deleteAccount(userId: String) async -> Bool {
         do {
             Logger.info("Deleting account for user: \(userId)")
@@ -528,7 +483,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.deleteUserAccount(userId: userId)
             
-            // Clear local state
             self.profile = nil
             
             isUpdating = false
@@ -544,7 +498,6 @@ class ProfileViewModel: ObservableObject {
     
     // MARK: - Preference Update Methods
     
-    /// Updates user's fitness goal
     func updateGoal(_ newGoal: String) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -559,7 +512,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Goal updated successfully"
             
@@ -574,7 +526,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's budget preference
     func updateBudget(_ newBudget: String) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -589,7 +540,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Budget updated successfully"
             
@@ -604,7 +554,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's diet preference
     func updateDietPreference(_ newDiet: String) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -619,7 +568,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Diet preference updated successfully"
             
@@ -634,7 +582,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's cooking skill level
     func updateCookingSkill(_ newSkill: String) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -644,7 +591,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update cooking preferences
             let updatedCookingPreferences = CookingPreferences(
                 skillLevel: newSkill,
                 preferredCookingTime: currentProfile.cookingPreferences?.preferredCookingTime ?? 30,
@@ -659,7 +605,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Cooking skill updated successfully"
             
@@ -674,7 +619,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's preferred cuisines
     func updatePreferredCuisines(_ newCuisines: [String]) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -684,7 +628,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update meal planning preferences
             let updatedMealPlanningPreferences = MealPlanningPreferences(
                 mealsPerDay: currentProfile.mealPlanningPreferences?.mealsPerDay ?? 3,
                 preferredPrepTime: currentProfile.mealPlanningPreferences?.preferredPrepTime ?? 30,
@@ -700,7 +643,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Preferred cuisines updated successfully"
             
@@ -715,7 +657,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's disliked ingredients
     func updateDislikedIngredients(_ newDislikes: [String]) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -725,7 +666,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update dietary preferences
             let updatedDietaryPreferences = DietaryPreferences(
                 restrictions: currentProfile.dietaryPreferences?.restrictions ?? [],
                 allergies: currentProfile.dietaryPreferences?.allergies ?? [],
@@ -740,7 +680,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Disliked ingredients updated successfully"
             
@@ -755,7 +694,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's meals per day preference
     func updateMealsPerDay(_ newMeals: Int) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -765,7 +703,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update meal planning preferences
             let updatedMealPlanningPreferences = MealPlanningPreferences(
                 mealsPerDay: newMeals,
                 preferredPrepTime: currentProfile.mealPlanningPreferences?.preferredPrepTime ?? 30,
@@ -781,7 +718,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Meals per day updated successfully"
             
@@ -796,7 +732,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's calorie target
     func updateCalorieTarget(_ newCalories: Int) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -806,7 +741,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update fitness goals
             let updatedFitnessGoals = FitnessGoals(
                 targetWeight: currentProfile.fitnessGoals?.targetWeight,
                 targetCalories: newCalories,
@@ -822,7 +756,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Calorie target updated successfully"
             
@@ -837,7 +770,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Updates user's macro targets
     func updateMacroTargets(protein: Int, carbs: Int, fat: Int) async -> Bool {
         guard var currentProfile = profile else { return false }
         
@@ -847,7 +779,6 @@ class ProfileViewModel: ObservableObject {
             isUpdating = true
             errorMessage = nil
             
-            // Update fitness goals with macro percentages
             let updatedFitnessGoals = FitnessGoals(
                 targetWeight: currentProfile.fitnessGoals?.targetWeight,
                 targetCalories: currentProfile.fitnessGoals?.targetCalories,
@@ -863,7 +794,6 @@ class ProfileViewModel: ObservableObject {
             
             try await supabaseManager.updateUserProfile(currentProfile)
             
-            // Update local state
             self.profile = currentProfile
             self.successMessage = "Macro targets updated successfully"
             
@@ -878,7 +808,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Exports user data
     func exportUserData(userId: String) async -> UserDataExport? {
         do {
             Logger.info("Exporting user data for: \(userId)")
@@ -897,23 +826,19 @@ class ProfileViewModel: ObservableObject {
     
     // MARK: - Helper Methods
     
-    /// Clears error message
     func clearError() {
         errorMessage = nil
     }
     
-    /// Clears success message
     func clearSuccess() {
         successMessage = nil
     }
     
-    /// Clears all messages
     func clearMessages() {
         errorMessage = nil
         successMessage = nil
     }
     
-    /// Gets subscription status text
     func getSubscriptionStatusText() -> String {
         guard let profile = profile else { return "Unknown" }
         
@@ -928,29 +853,19 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Gets usage warning message if approaching limits
     func getUsageWarning() -> String? {
         guard let profile = profile, !profile.hasPremiumAccess else { return nil }
-        
+
         let planLimit = Configuration.freePlanLimits.maxPlansPerMonth
-        let spoonacularLimit = Configuration.freePlanLimits.maxSpoonacularGenerationsPerMonth
-        
+
         if profile.plansCreatedThisMonth >= planLimit {
             return "You've reached your monthly plan limit. Upgrade to premium for unlimited plans."
         }
-        
-        if profile.spoonacularGenerationsThisMonth >= spoonacularLimit {
-            return "You've reached your monthly Spoonacular generation limit. Upgrade to premium for unlimited meal plans."
-        }
-        
+
         if profile.plansCreatedThisMonth >= planLimit - 1 {
             return "You have 1 plan remaining this month. Upgrade to premium for unlimited plans."
         }
-        
-        if profile.spoonacularGenerationsThisMonth >= spoonacularLimit - 1 {
-            return "You have 1 Spoonacular generation remaining this month. Upgrade to premium for unlimited access."
-        }
-        
+
         return nil
     }
     

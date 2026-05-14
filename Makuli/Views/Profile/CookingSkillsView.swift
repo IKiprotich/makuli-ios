@@ -1,3 +1,10 @@
+//
+//  CookingSkillsView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-23.
+//
+
 import SwiftUI
 
 struct CookingSkillsView: View {
@@ -20,7 +27,6 @@ struct CookingSkillsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Cooking Skills")
                         .font(.largeTitle)
@@ -33,7 +39,6 @@ struct CookingSkillsView: View {
                 }
                 .padding(.top, 20)
                 
-                // Skill options
                 VStack(spacing: 16) {
                     ForEach(skillOptions, id: \.0) { option in
                         let isSelected = selectedSkill == option.0
@@ -63,7 +68,6 @@ struct CookingSkillsView: View {
                 
                 Spacer()
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedSkill)
                     dismiss()

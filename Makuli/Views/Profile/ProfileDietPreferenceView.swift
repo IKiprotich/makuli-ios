@@ -1,3 +1,10 @@
+//
+//  ProfileDietPreferenceView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct ProfileDietPreferenceView: View {
@@ -24,7 +31,6 @@ struct ProfileDietPreferenceView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Diet Preference")
                         .font(.largeTitle)
@@ -37,7 +43,6 @@ struct ProfileDietPreferenceView: View {
                 }
                 .padding(.top, 20)
                 
-                // Diet options
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(dietOptions, id: \.self) { option in
@@ -69,7 +74,6 @@ struct ProfileDietPreferenceView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedPreference)
                     dismiss()

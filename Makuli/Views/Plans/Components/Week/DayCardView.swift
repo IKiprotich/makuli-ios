@@ -2,7 +2,7 @@
 //  DayCardView.swift
 //  Makuli
 //
-//  Created by Ian   on 21/06/2025.
+//  Created by Ian on 2025-06-21.
 //
 
 import SwiftUI
@@ -14,10 +14,8 @@ struct DayCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            //day header
             dayHeader
             
-            //meals list
             VStack(spacing: 1){
                 ForEach(dayPlan.meals, id: \.id) { meal in
                     MealRowView(
@@ -28,7 +26,7 @@ struct DayCardView: View {
                                 expandedMeal = expandedMeal == meal.id ? nil : meal.id
                             }
                         },
-                        recipe: meal.recipe // pass the recipe to MealRowView
+                        recipe: meal.recipe
                     )
                 }
                 

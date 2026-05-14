@@ -2,13 +2,11 @@
 //  OnboardingData.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
 
 import Foundation
 
-/// Data collected across all onboarding screens. Used to personalize the user's
-/// initial meal plan and to populate their profile in the database.
 final class OnboardingData: Identifiable, Codable, ObservableObject {
     let id: String
     let userId: String
@@ -44,10 +42,8 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     var dislikedCuisines: [String]
     var pantryStatus: String
     var avatarEmoji: String
-    /// Explicit daily calorie override; falls back to `estimatedDailyCalories` when nil.
     var calorieGoal: Int?
 
-    // Maps Swift property names to Supabase column names for decoding/encoding.
     enum CodingKeys: String, CodingKey {
         case id
         case userId = "user_id"
@@ -124,7 +120,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         avatarEmoji = (try? container.decode(String.self, forKey: .avatarEmoji)) ?? ""
         calorieGoal = try? container.decodeIfPresent(Int.self, forKey: .calorieGoal)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -199,9 +194,7 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
         }
     }
     
-    /// Estimated daily calorie needs using Mifflin-St Jeor equation + activity multiplier.
     var estimatedDailyCalories: Int {
-        // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor Equation
         let bmr: Double
         if gender.lowercased() == "male" {
             bmr = (10 * weight) + (6.25 * height) - (5 * Double(age)) + 5
@@ -209,7 +202,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
             bmr = (10 * weight) + (6.25 * height) - (5 * Double(age)) - 161
         }
         
-        // Apply activity level multiplier
         let activityMultiplier: Double
         switch activityLevel.lowercased() {
         case "sedentary":
@@ -243,7 +235,6 @@ final class OnboardingData: Identifiable, Codable, ObservableObject {
     var hasPreferredCuisines: Bool { !preferredCuisines.isEmpty }
 
     var formattedHeight: String {
-        // Convert to feet and inches for display
         let totalInches = height / 2.54
         let feet = Int(totalInches / 12)
         let inches = Int(totalInches.truncatingRemainder(dividingBy: 12))

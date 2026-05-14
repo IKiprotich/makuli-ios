@@ -1,3 +1,10 @@
+//
+//  View+Extensions.swift
+//  Makuli
+//
+//  Created by Ian on 2025-06-27.
+//
+
 import SwiftUI
 
 extension View {

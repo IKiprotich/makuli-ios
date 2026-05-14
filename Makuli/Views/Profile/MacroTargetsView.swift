@@ -1,3 +1,10 @@
+//
+//  MacroTargetsView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct MacroTargetsView: View {
@@ -17,7 +24,6 @@ struct MacroTargetsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Macro Targets")
                         .font(.largeTitle)
@@ -30,7 +36,6 @@ struct MacroTargetsView: View {
                 }
                 .padding(.top, 20)
                 
-                // Macro display
                 VStack(spacing: 16) {
                     HStack(spacing: 20) {
                         MacroCard(title: "Protein", percentage: proteinPercentage, color: AppColors.primaryOrange)
@@ -43,7 +48,6 @@ struct MacroTargetsView: View {
                         .foregroundColor(proteinPercentage + carbsPercentage + fatPercentage == 100 ? AppColors.successGreen : AppColors.warnRed)
                 }
                 
-                // Sliders
                 VStack(spacing: 24) {
                     MacroSlider(
                         title: "Protein",
@@ -67,7 +71,6 @@ struct MacroTargetsView: View {
                 
                 Spacer()
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(proteinPercentage, carbsPercentage, fatPercentage)
                     dismiss()

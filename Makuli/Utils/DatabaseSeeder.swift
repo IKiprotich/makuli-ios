@@ -2,9 +2,7 @@
 //  DatabaseSeeder.swift
 //  Makuli
 //
-//  Created by AI Assistant on 2025-01-13.
-//
-//  Production-ready utility for seeding the Supabase database with meal plan templates.
+//  Created by Ian on 2025-01-13.
 //
 
 import Foundation
@@ -20,7 +18,6 @@ class DatabaseSeeder: ObservableObject {
     
     private init() {}
     
-    /// Seeds the database with all meal plan templates and recipes for production
     func seedDatabase() async -> Bool {
         isSeeding = true
         errorMessage = nil
@@ -30,7 +27,6 @@ class DatabaseSeeder: ObservableObject {
             seedingProgress = "Starting production database seeding..."
             ProductionLogger.logInfo("Starting production database seeding", context: "DatabaseSeeder")
             
-            // Use ProductionSeeder for comprehensive seeding
             try await ProductionSeeder.seedProductionDatabase()
             
             successMessage = "Successfully seeded production database with 14 meal plan templates and 294+ meals!"
@@ -50,7 +46,6 @@ class DatabaseSeeder: ObservableObject {
         }
     }
     
-    /// Clears all existing templates and reseeds (use with caution in production)
     func resetAndSeedDatabase() async -> Bool {
         isSeeding = true
         errorMessage = nil
@@ -61,11 +56,9 @@ class DatabaseSeeder: ObservableObject {
             ProductionLogger.logInfo("Starting database reset and reseed", context: "DatabaseSeeder")
             
             if Configuration.isProduction {
-                // Extra confirmation for production
                 seedingProgress = "⚠️ Resetting production database - this may take a few minutes..."
             }
             
-            // ProductionSeeder handles clearing existing data
             try await ProductionSeeder.seedProductionDatabase()
             
             successMessage = "Database reset and seeded successfully!"
@@ -85,7 +78,6 @@ class DatabaseSeeder: ObservableObject {
         }
     }
     
-    /// Checks current template count in database
     func checkTemplateCount() async -> Int {
         do {
             let templates = try await SupabaseManager.shared.fetchMealPlanTemplates()
@@ -97,13 +89,11 @@ class DatabaseSeeder: ObservableObject {
         }
     }
     
-    /// Verifies database connectivity
     func testDatabaseConnection() async -> Bool {
         await SupabaseManager.shared.checkConnection()
         return SupabaseManager.shared.isConnected
     }
     
-    /// Gets detailed seeding status
     func getSeedingStatus() async -> SeedingStatus {
         let templateCount = await checkTemplateCount()
         let isConnected = await testDatabaseConnection()
@@ -132,7 +122,6 @@ class DatabaseSeeder: ObservableObject {
 // MARK: - Development Helper Functions
 
 extension DatabaseSeeder {
-    /// Quick function to seed database during development
     static func quickSeed() async {
         ProductionLogger.logInfo("🌱 Starting quick database seed...", context: "DatabaseSeeder")
         let seeder = DatabaseSeeder.shared
@@ -148,7 +137,6 @@ extension DatabaseSeeder {
         }
     }
     
-    /// Development function to verify production readiness
     static func verifyProductionReadiness() async -> ProductionReadiness {
         let seeder = DatabaseSeeder.shared
         let status = await seeder.getSeedingStatus()

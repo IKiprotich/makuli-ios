@@ -2,22 +2,12 @@
 //  PreviewContent.swift
 //  Makuli
 //
-//  Convenience shorthands for #Preview blocks and SwiftUI canvas.
-//  Not included in release builds.
+//  Created by Ian on 2025-06-13.
 //
 
 #if DEBUG
 import Foundation
 
-/// Single namespace for all preview data so #Preview blocks stay clean.
-///
-/// Usage:
-/// ```swift
-/// #Preview {
-///     RecipeCardView(recipe: Preview.recipe)
-///         .padding()
-/// }
-/// ```
 enum Preview {
 
     // MARK: - Single-item shorthands
@@ -31,8 +21,8 @@ enum Preview {
     static var plan: Plan               { MockPlans.currentWeekPlan }
     static var completedPlan: Plan      { MockPlans.lastWeekPlan }
 
-    static var planRecipe: PlanRecipe   { MockPlans.currentWeekRecipes[2] } // Monday dinner
-    static var completedMeal: PlanRecipe { MockPlans.currentWeekRecipes[0] } // Monday breakfast (done)
+    static var planRecipe: PlanRecipe   { MockPlans.currentWeekRecipes[2] }
+    static var completedMeal: PlanRecipe { MockPlans.currentWeekRecipes[0] }
 
     // MARK: - List shorthands
 
@@ -57,7 +47,6 @@ enum Preview {
 
     // MARK: - PlanWithRecipes helper
 
-    /// Returns a `PlanWithRecipes`-style tuple for views that need both.
     static var planWithRecipes: (plan: Plan, recipes: [PlanRecipe]) {
         (plan: MockPlans.currentWeekPlan, recipes: MockPlans.currentWeekRecipes)
     }

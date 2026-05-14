@@ -2,122 +2,72 @@
 //  ProgressMetrics.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import Foundation
 
-/**
- * ProgressMetrics Model
- * 
- * Represents user progress and metrics over time for tracking health and fitness goals.
- * This model captures various metrics that help users monitor their progress towards
- * their meal planning and fitness objectives.
- * 
- * Key Features:
- * - Weight tracking and BMI calculations
- * - Calorie intake and macronutrient tracking
- * - Meal plan adherence and completion rates
- * - Exercise and activity tracking
- * - Goal progress and achievement tracking
- * 
- * Database Relationships:
- * - Belongs to a User (via user_id)
- * - Can be linked to specific Plans (via plan_id)
- * - Tracks progress over time with date-based entries
- */
 struct ProgressMetrics: Identifiable, Codable {
-    /// Unique identifier for the progress metrics entry
     let id: String
     
-    /// Reference to the user these metrics belong to
     let userId: String
     
-    /// Reference to the plan these metrics are associated with (optional)
     let planId: String?
     
-    /// Date when these metrics were recorded
     let date: Date
     
-    /// User's weight in kilograms on this date
     let weight: Double?
     
-    /// User's body fat percentage (optional)
     let bodyFatPercentage: Double?
     
-    /// User's muscle mass in kilograms (optional)
     let muscleMass: Double?
     
-    /// Total calories consumed on this date
     let caloriesConsumed: Int?
     
-    /// Target calories for this date
     let targetCalories: Int?
     
-    /// Protein consumed in grams
     let proteinConsumed: Double?
     
-    /// Carbohydrates consumed in grams
     let carbohydratesConsumed: Double?
     
-    /// Fat consumed in grams
     let fatConsumed: Double?
     
-    /// Fiber consumed in grams
     let fiberConsumed: Double?
     
-    /// Sugar consumed in grams
     let sugarConsumed: Double?
     
-    /// Sodium consumed in milligrams
     let sodiumConsumed: Int?
     
-    /// Number of meals completed on this date
     let mealsCompleted: Int
     
-    /// Total number of meals planned for this date
     let mealsPlanned: Int
     
-    /// Whether the user followed their meal plan today
     let followedMealPlan: Bool
     
-    /// Number of glasses of water consumed
     let waterIntake: Int?
     
-    /// Minutes of exercise completed
     let exerciseMinutes: Int?
     
-    /// Type of exercise performed
     let exerciseType: String?
     
-    /// Steps taken on this date
     let stepsTaken: Int?
     
-    /// Target steps for this date
     let targetSteps: Int?
     
-    /// Sleep hours the previous night
     let sleepHours: Double?
     
-    /// Quality of sleep (1-10 scale)
     let sleepQuality: Int?
     
-    /// Stress level (1-10 scale)
     let stressLevel: Int?
     
-    /// Energy level (1-10 scale)
     let energyLevel: Int?
     
-    /// Mood rating (1-10 scale)
     let moodRating: Int?
     
-    /// Notes or comments about this day
     let notes: String?
     
-    /// Timestamp when the metrics were created
     let createdAt: Date
     
-    /// Timestamp when the metrics were last updated
     let updatedAt: Date
     
     // MARK: - Coding Keys
@@ -190,7 +140,6 @@ struct ProgressMetrics: Identifiable, Codable {
         moodRating = try container.decodeIfPresent(Int.self, forKey: .moodRating)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -215,42 +164,6 @@ struct ProgressMetrics: Identifiable, Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new ProgressMetrics instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - userId: Reference to the user
-     *   - planId: Optional reference to the plan
-     *   - date: Date when metrics were recorded
-     *   - weight: User's weight in kilograms
-     *   - bodyFatPercentage: Body fat percentage
-     *   - muscleMass: Muscle mass in kilograms
-     *   - caloriesConsumed: Total calories consumed
-     *   - targetCalories: Target calories for the day
-     *   - proteinConsumed: Protein consumed in grams
-     *   - carbohydratesConsumed: Carbohydrates consumed in grams
-     *   - fatConsumed: Fat consumed in grams
-     *   - fiberConsumed: Fiber consumed in grams
-     *   - sugarConsumed: Sugar consumed in grams
-     *   - sodiumConsumed: Sodium consumed in milligrams
-     *   - mealsCompleted: Number of meals completed
-     *   - mealsPlanned: Number of meals planned
-     *   - followedMealPlan: Whether meal plan was followed
-     *   - waterIntake: Glasses of water consumed
-     *   - exerciseMinutes: Minutes of exercise
-     *   - exerciseType: Type of exercise
-     *   - stepsTaken: Steps taken
-     *   - targetSteps: Target steps for the day
-     *   - sleepHours: Hours of sleep
-     *   - sleepQuality: Sleep quality rating
-     *   - stressLevel: Stress level rating
-     *   - energyLevel: Energy level rating
-     *   - moodRating: Mood rating
-     *   - notes: Optional notes
-     *   - createdAt: Creation timestamp
-     *   - updatedAt: Last update timestamp
-     */
     init(id: String, userId: String, planId: String?, date: Date, weight: Double?, bodyFatPercentage: Double?, muscleMass: Double?, caloriesConsumed: Int?, targetCalories: Int?, proteinConsumed: Double?, carbohydratesConsumed: Double?, fatConsumed: Double?, fiberConsumed: Double?, sugarConsumed: Double?, sodiumConsumed: Int?, mealsCompleted: Int, mealsPlanned: Int, followedMealPlan: Bool, waterIntake: Int?, exerciseMinutes: Int?, exerciseType: String?, stepsTaken: Int?, targetSteps: Int?, sleepHours: Double?, sleepQuality: Int?, stressLevel: Int?, energyLevel: Int?, moodRating: Int?, notes: String?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.userId = userId
@@ -287,71 +200,36 @@ struct ProgressMetrics: Identifiable, Codable {
     
     // MARK: - Computed Properties
     
-    /**
-     * Meal plan adherence percentage
-     * 
-     * - Returns: Percentage of meals completed vs planned
-     */
     var mealPlanAdherence: Double {
         guard mealsPlanned > 0 else { return 0.0 }
         return Double(mealsCompleted) / Double(mealsPlanned) * 100.0
     }
     
-    /**
-     * Calorie deficit or surplus
-     * 
-     * - Returns: Difference between consumed and target calories
-     */
     var calorieDifference: Int? {
         guard let consumed = caloriesConsumed, let target = targetCalories else { return nil }
         return consumed - target
     }
     
-    /**
-     * Whether user is in a calorie deficit
-     * 
-     * - Returns: True if consumed fewer calories than target
-     */
     var isInCalorieDeficit: Bool {
         guard let difference = calorieDifference else { return false }
         return difference < 0
     }
     
-    /**
-     * Whether user is in a calorie surplus
-     * 
-     * - Returns: True if consumed more calories than target
-     */
     var isInCalorieSurplus: Bool {
         guard let difference = calorieDifference else { return false }
         return difference > 0
     }
     
-    /**
-     * Steps goal achievement percentage
-     * 
-     * - Returns: Percentage of steps taken vs target
-     */
     var stepsGoalAchievement: Double? {
         guard let taken = stepsTaken, let target = targetSteps, target > 0 else { return nil }
         return Double(taken) / Double(target) * 100.0
     }
     
-    /**
-     * Whether steps goal was achieved
-     * 
-     * - Returns: True if steps taken >= target steps
-     */
     var stepsGoalAchieved: Bool {
         guard let taken = stepsTaken, let target = targetSteps else { return false }
         return taken >= target
     }
     
-    /**
-     * Total macronutrient calories
-     * 
-     * - Returns: Sum of calories from protein, carbs, and fat
-     */
     var totalMacroCalories: Double {
         let proteinCalories = (proteinConsumed ?? 0) * 4
         let carbCalories = (carbohydratesConsumed ?? 0) * 4
@@ -359,87 +237,56 @@ struct ProgressMetrics: Identifiable, Codable {
         return proteinCalories + carbCalories + fatCalories
     }
     
-    /**
-     * Protein percentage of total calories
-     * 
-     * - Returns: Percentage of calories from protein
-     */
     var proteinPercentage: Double? {
         guard let consumed = caloriesConsumed, consumed > 0 else { return nil }
         let proteinCalories = (proteinConsumed ?? 0) * 4
         return (proteinCalories / Double(consumed)) * 100.0
     }
     
-    /**
-     * Carbohydrate percentage of total calories
-     * 
-     * - Returns: Percentage of calories from carbohydrates
-     */
     var carbohydratePercentage: Double? {
         guard let consumed = caloriesConsumed, consumed > 0 else { return nil }
         let carbCalories = (carbohydratesConsumed ?? 0) * 4
         return (carbCalories / Double(consumed)) * 100.0
     }
     
-    /**
-     * Fat percentage of total calories
-     * 
-     * - Returns: Percentage of calories from fat
-     */
     var fatPercentage: Double? {
         guard let consumed = caloriesConsumed, consumed > 0 else { return nil }
         let fatCalories = (fatConsumed ?? 0) * 9
         return (fatCalories / Double(consumed)) * 100.0
     }
     
-    /**
-     * Whether sleep goal was met (7-9 hours)
-     * 
-     * - Returns: True if sleep hours are within recommended range
-     */
     var sleepGoalMet: Bool {
         guard let hours = sleepHours else { return false }
         return hours >= 7.0 && hours <= 9.0
     }
     
-    /**
-     * Overall wellness score (1-10)
-     * 
-     * - Returns: Calculated wellness score based on various metrics
-     */
     var wellnessScore: Int {
-        var score = 5 // Base score
+        var score = 5
         
-        // Meal plan adherence (0-2 points)
         if mealPlanAdherence >= 80 {
             score += 2
         } else if mealPlanAdherence >= 60 {
             score += 1
         }
         
-        // Exercise (0-2 points)
         if let exercise = exerciseMinutes, exercise >= 30 {
             score += 2
         } else if let exercise = exerciseMinutes, exercise >= 15 {
             score += 1
         }
         
-        // Steps (0-1 point)
         if stepsGoalAchieved {
             score += 1
         }
         
-        // Sleep (0-1 point)
         if sleepGoalMet {
             score += 1
         }
         
-        // Water intake (0-1 point)
         if let water = waterIntake, water >= 8 {
             score += 1
         }
         
-        // Energy and mood (0-2 points)
         if let energy = energyLevel, energy >= 7 {
             score += 1
         }
@@ -450,22 +297,12 @@ struct ProgressMetrics: Identifiable, Codable {
         return min(score, 10)
     }
     
-    /**
-     * Formatted date string
-     * 
-     * - Returns: Date formatted as "MMM dd, yyyy"
-     */
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
     
-    /**
-     * Day of week
-     * 
-     * - Returns: Day of week as string
-     */
     var dayOfWeek: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE"
@@ -474,12 +311,6 @@ struct ProgressMetrics: Identifiable, Codable {
     
     // MARK: - Helper Methods
     
-    /**
-     * Creates a copy of this metrics with updated weight
-     * 
-     * - Parameter newWeight: New weight value
-     * - Returns: New ProgressMetrics instance with updated weight
-     */
     func withWeight(_ newWeight: Double?) -> ProgressMetrics {
         return ProgressMetrics(
             id: id,
@@ -516,12 +347,6 @@ struct ProgressMetrics: Identifiable, Codable {
         )
     }
     
-    /**
-     * Creates a copy of this metrics with updated meal completion
-     * 
-     * - Parameter newMealsCompleted: New number of meals completed
-     * - Returns: New ProgressMetrics instance with updated meal completion
-     */
     func withMealsCompleted(_ newMealsCompleted: Int) -> ProgressMetrics {
         return ProgressMetrics(
             id: id,
@@ -558,12 +383,6 @@ struct ProgressMetrics: Identifiable, Codable {
         )
     }
     
-    /**
-     * Creates a copy of this metrics with updated calories consumed
-     * 
-     * - Parameter newCaloriesConsumed: New calories consumed value
-     * - Returns: New ProgressMetrics instance with updated calories
-     */
     func withCaloriesConsumed(_ newCaloriesConsumed: Int?) -> ProgressMetrics {
         return ProgressMetrics(
             id: id,
@@ -604,9 +423,6 @@ struct ProgressMetrics: Identifiable, Codable {
 // MARK: - ProgressMetrics Extensions
 
 extension ProgressMetrics {
-    /**
-     * Standard exercise types
-     */
     static let exerciseTypes = [
         "Cardio",
         "Strength Training",
@@ -621,14 +437,8 @@ extension ProgressMetrics {
         "Other"
     ]
     
-    /**
-     * Rating scale options
-     */
     static let ratingScale = Array(1...10)
     
-    /**
-     * Sleep quality descriptions
-     */
     static func sleepQualityDescription(for rating: Int) -> String {
         switch rating {
         case 1...3:
@@ -644,9 +454,6 @@ extension ProgressMetrics {
         }
     }
     
-    /**
-     * Stress level descriptions
-     */
     static func stressLevelDescription(for rating: Int) -> String {
         switch rating {
         case 1...3:
@@ -662,9 +469,6 @@ extension ProgressMetrics {
         }
     }
     
-    /**
-     * Energy level descriptions
-     */
     static func energyLevelDescription(for rating: Int) -> String {
         switch rating {
         case 1...3:
@@ -680,9 +484,6 @@ extension ProgressMetrics {
         }
     }
     
-    /**
-     * Mood descriptions
-     */
     static func moodDescription(for rating: Int) -> String {
         switch rating {
         case 1...3:

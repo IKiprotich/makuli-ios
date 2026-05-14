@@ -1,3 +1,10 @@
+//
+//  DietPreferenceView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-06-26.
+//
+
 import SwiftUI
 
 struct DietPreferenceView: View {
@@ -23,13 +30,11 @@ struct DietPreferenceView: View {
             AppColors.background
             
             VStack(spacing: 30) {
-                // Progress bar
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.horizontal)
                 
-                // Title and subtitle
                 VStack(spacing: 12) {
                     Text("Any dietary preferences?")
                         .font(.system(size: 28, weight: .bold))
@@ -43,7 +48,6 @@ struct DietPreferenceView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Diet selection grid
                 ScrollView {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
@@ -53,13 +57,11 @@ struct DietPreferenceView: View {
                             let isSelected = selectedDiets.contains(option.0)
                             
                             Button(action: {
-                                // 1. Update UI state instantly
                                 if isSelected {
                                     selectedDiets.removeAll { $0 == option.0 }
                                 } else {
                                     selectedDiets.append(option.0)
                                 }
-                                // 2. Update shared model in background
                                 DispatchQueue.main.async {
                                     onboardingData.dietaryPreferences = selectedDiets
                                 }
@@ -103,11 +105,8 @@ struct DietPreferenceView: View {
                 
                 Spacer()
                 
-                // Continue button
                 Button(action: {
-                    // 1. Advance page immediately
                     currentPage += 1
-                    // 2. Save to onboardingData in background
                     DispatchQueue.main.async {
                         onboardingData.dietaryPreferences = selectedDiets
                     }

@@ -1,20 +1,17 @@
 //
 //  MealPlanModels.swift
-//  Buildplate
+//  Makuli
 //
-//  Created by ian on 2025-01-03.
+//  Created by Ian on 2025-01-03.
 //
 
 import Foundation
 
 // MARK: - Core Models
-// Plan struct moved to Plan.swift for production Supabase integration
 
 // MARK: - Mock Data
-// Plan mock data moved to Plan.swift for production integration
 
 // MARK: - Helper Extensions
-// Plan extensions moved to Plan.swift for production integration
 
 extension Date {
     var dayOfWeek: String {
@@ -31,7 +28,6 @@ extension Date {
 }
 
 // MARK: - Legacy Type Aliases for UI Compatibility
-// WeekPlan typealias moved to Plan.swift for production integration
 
 // MARK: - Day Plan Model for UI
 struct DayPlan: Identifiable, Codable {
@@ -62,7 +58,6 @@ struct DayPlan: Identifiable, Codable {
             let dayName = date.dayOfWeek
             let dayNumber = "\(calendar.component(.day, from: date))"
             
-            // Create mock meals for this day
             let meals = [
                 Meal(
                     id: UUID(),

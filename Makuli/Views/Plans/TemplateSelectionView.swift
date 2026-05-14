@@ -2,9 +2,7 @@
 //  TemplateSelectionView.swift
 //  Makuli
 //
-//  Created by AI Assistant on 2025-01-08.
-//
-//  View for selecting meal plan templates from Supabase database.
+//  Created by Ian on 2025-01-08.
 //
 
 import SwiftUI
@@ -49,7 +47,6 @@ struct TemplateSelectionView: View {
                 Button("Seed Templates") {
                     Task {
                         seedingTemplates = true
-                        // TODO: Implement seedSampleTemplates method in PlanViewModel
                         Logger.info("Template seeding not yet implemented")
                         seedingTemplates = false
                         await planViewModel.fetchTemplates()
@@ -134,7 +131,6 @@ extension TemplateSelectionView {
     private var categoryFiltersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                // "All" filter
                 Button {
                     selectedCategory = nil
                 } label: {
@@ -152,7 +148,6 @@ extension TemplateSelectionView {
                     .cornerRadius(20)
                 }
                 
-                // Category filters
                 ForEach(planViewModel.templateCategories, id: \.self) { category in
                     let categoryCount = planViewModel.templates(for: category).count
                     
@@ -334,7 +329,6 @@ struct TemplateSelectionCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header with category icon and difficulty
             HStack {
                 Text(categoryIcon)
                     .font(.title2)
@@ -351,7 +345,6 @@ struct TemplateSelectionCard: View {
                     .cornerRadius(6)
             }
             
-            // Template info
             VStack(alignment: .leading, spacing: 8) {
                 Text(template.name)
                     .font(.headline)
@@ -364,7 +357,6 @@ struct TemplateSelectionCard: View {
                     .foregroundColor(.secondary)
                     .lineLimit(3)
                 
-                // Cost and duration
                 HStack {
                     Label {
                         Text("$\(Int(template.maxCostPerMeal ?? 0)) per meal")
@@ -389,7 +381,6 @@ struct TemplateSelectionCard: View {
                 .foregroundColor(.secondary)
             }
             
-            // Action button
             Button {
                 Task {
                     isCreating = true

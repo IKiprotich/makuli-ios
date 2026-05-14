@@ -2,7 +2,7 @@
 //  SocialSignInView.swift
 //  Makuli
 //
-//  Created by Ian   on 27/06/2025.
+//  Created by Ian on 2025-06-27.
 //
 
 import SwiftUI
@@ -13,7 +13,6 @@ struct SocialSignInView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            // Google Sign In Button
             GoogleSignInButton(authViewModel: authViewModel)
         }
         .padding(.horizontal)

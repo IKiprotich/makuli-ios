@@ -23,96 +23,53 @@ import Foundation
 
 // MARK: - Core Recipe Model
 
-/// Represents a complete recipe stored in the Supabase 'recipes' table.
-/// 
-/// This model includes all recipe metadata, ingredients, cooking instructions,
-/// and nutritional information. It's used throughout the app for displaying
-/// recipes, creating meal plans, and generating grocery lists.
-/// 
-/// The model includes custom decoding logic to handle:
-/// - ISO8601 timestamp strings from Supabase (created_at, updated_at)
-/// - JSONB arrays for ingredients, steps, substitutions, and tags
-/// - Optional fields that may be null in the database
-/// 
-/// Example usage:
-/// ```swift
-/// let recipe = Recipe(
-///     id: "uuid",
-///     title: "Spaghetti Carbonara",
-///     ingredients: ["pasta", "eggs", "bacon"],
-///     steps: ["Boil pasta", "Cook bacon", "Mix with eggs"],
-///     tags: ["italian", "quick", "dinner"]
-/// )
-/// ```
 struct Recipe: Identifiable, Codable {
     // MARK: - Core Properties
     
-    /// Unique identifier for the recipe (UUID from Supabase)
     let id: String
     
-    /// Recipe title/name
     let title: String
     
-    /// Cooking time as a formatted string (e.g., "30 mins", "1 hour")
     let cookTime: String?
     
-    /// Preparation time in minutes
     let prepTime: Int?
     
-    /// Number of servings this recipe yields
     let servings: Int?
     
-    /// Estimated calories per serving
     let calories: Int?
     
-    /// URL to the recipe's image (may be nil or invalid)
     let imageUrl: String?
     
-    /// List of ingredients required for the recipe
     let ingredients: [String]
     
-    /// Step-by-step cooking instructions
     let steps: [String]
     
-    /// Optional ingredient substitutions
     let substitutions: [String]?
     
-    /// Recipe tags for categorization and filtering
     let tags: [String]
     
-    /// Difficulty level: "easy", "medium", or "hard"
     let difficulty: String?
     
-    /// Type of cuisine (e.g., "italian", "mexican", "asian")
     let cuisineType: String?
     
-    /// Estimated cost to make the recipe
     let costEstimate: Double?
     
-    /// When the recipe was created in the database
     let createdAt: Date
     
-    /// When the recipe was last updated
     let updatedAt: Date
     
-    /// ID of the user who created this recipe (may be nil for system recipes)
     let createdBy: String?
     
-    /// Spoonacular recipe ID (for external API reference)
     let spoonacularId: String?
     
-    /// Whether this recipe is publicly visible
     let isPublic: Bool
     
-    /// Average rating (0.0 to 5.0)
     let rating: Double
     
-    /// Number of ratings received
     let ratingCount: Int
     
     // MARK: - Coding Keys
     
-    /// Maps Swift property names to Supabase column names
     enum CodingKeys: String, CodingKey {
         case id
         case title
@@ -139,33 +96,6 @@ struct Recipe: Identifiable, Codable {
     
     // MARK: - Initializers
     
-    /// Creates a new Recipe instance with all required and optional properties.
-    /// 
-    /// This initializer is used for creating Recipe objects programmatically,
-    /// such as when generating recipes from AI data or creating test data.
-    /// 
-    /// - Parameters:
-    ///   - id: Unique identifier (usually UUID string)
-    ///   - title: Recipe name
-    ///   - cookTime: Formatted cooking time string
-    ///   - prepTime: Preparation time in minutes
-    ///   - servings: Number of servings
-    ///   - calories: Calories per serving
-    ///   - imageUrl: URL to recipe image
-    ///   - ingredients: Array of ingredient strings
-    ///   - steps: Array of instruction strings
-    ///   - substitutions: Optional ingredient substitutions
-    ///   - tags: Array of recipe tags
-    ///   - difficulty: Difficulty level
-    ///   - cuisineType: Type of cuisine
-    ///   - costEstimate: Estimated cost
-    ///   - createdAt: Creation timestamp
-    ///   - updatedAt: Last update timestamp
-    ///   - createdBy: Creator's user ID
-    ///   - spoonacularId: Spoonacular recipe ID for external API reference
-    ///   - isPublic: Public visibility flag
-    ///   - rating: Average rating
-    ///   - ratingCount: Number of ratings
     init(
         id: String,
         title: String,
@@ -214,19 +144,9 @@ struct Recipe: Identifiable, Codable {
     
     // MARK: - Custom Decoding
     
-    /// Custom decoder that handles Supabase's specific data format.
-    /// 
-    /// This decoder is necessary because:
-    /// 1. Supabase returns timestamps as ISO8601 strings, not Date objects
-    /// 2. JSONB arrays may be returned as strings in some cases
-    /// 3. Some fields may be null or missing
-    /// 
-    /// The decoder includes fallback logic to handle various data formats
-    /// and ensure the app doesn't crash on malformed data.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode simple fields that don't require special handling
         id = try container.decode(String.self, forKey: .id)
         title = try container.decode(String.self, forKey: .title)
         cookTime = try container.decodeIfPresent(String.self, forKey: .cookTime)
@@ -240,10 +160,9 @@ struct Recipe: Identifiable, Codable {
         createdBy = try container.decodeIfPresent(String.self, forKey: .createdBy)
         spoonacularId = try container.decodeIfPresent(String.self, forKey: .spoonacularId)
         isPublic = try container.decode(Bool.self, forKey: .isPublic)
-        rating = try container.decode(Double.self, forKey: .rating)
-        ratingCount = try container.decode(Int.self, forKey: .ratingCount)
+        rating = try container.decodeIfPresent(Double.self, forKey: .rating) ?? 0.0
+        ratingCount = try container.decodeIfPresent(Int.self, forKey: .ratingCount) ?? 0
         
-        // Custom decoding for timestamps (Supabase returns ISO8601 strings)
         do {
             createdAt = try container.decode(Date.self, forKey: .createdAt)
         } catch {
@@ -270,7 +189,6 @@ struct Recipe: Identifiable, Codable {
             }
         }
         
-        // Custom decoding for ingredients array (handles both JSONB arrays and comma-separated strings)
         do {
             ingredients = try container.decode([String].self, forKey: .ingredients)
         } catch {
@@ -285,7 +203,6 @@ struct Recipe: Identifiable, Codable {
             }
         }
         
-        // Custom decoding for steps array (handles both JSONB arrays and comma-separated strings)
         do {
             steps = try container.decode([String].self, forKey: .steps)
         } catch {
@@ -300,7 +217,6 @@ struct Recipe: Identifiable, Codable {
             }
         }
         
-        // Custom decoding for substitutions array (optional, handles both JSONB arrays and comma-separated strings)
         do {
             substitutions = try container.decodeIfPresent([String].self, forKey: .substitutions)
         } catch {
@@ -315,7 +231,6 @@ struct Recipe: Identifiable, Codable {
             }
         }
         
-        // Custom decoding for tags array (handles both JSONB arrays and comma-separated strings)
         do {
             tags = try container.decode([String].self, forKey: .tags)
         } catch {
@@ -333,11 +248,6 @@ struct Recipe: Identifiable, Codable {
     
     // MARK: - Computed Properties
     
-    /// Returns a validated URL for the recipe image, or nil if the URL is invalid.
-    /// 
-    /// This property filters out common invalid URLs like "meal_placeholder" and
-    /// ensures the URL has a valid scheme before returning it. This prevents
-    /// AsyncImage from attempting to load invalid URLs and causing errors.
     var validImageURL: URL? {
         guard let urlString = imageUrl,
               urlString != "meal_placeholder",
@@ -350,33 +260,23 @@ struct Recipe: Identifiable, Codable {
         return url
     }
     
-    /// Converts the cook time string to minutes for calculations.
-    /// 
-    /// Parses strings like "25 mins", "1 hour", "1h 30m" and returns
-    /// the total time in minutes. Returns 30 minutes as default if parsing fails.
     var cookTimeInMinutes: Int {
         guard let cookTime = cookTime else { return 30 }
         
-        // Extract number from strings like "25 mins", "1 hour", etc.
         let components = cookTime.components(separatedBy: .whitespaces)
         if let firstNumber = components.first, let minutes = Int(firstNumber) {
-            // Check if it contains "hour" to convert
             if cookTime.lowercased().contains("hour") {
                 return minutes * 60
             }
             return minutes
         }
-        return 30 // Default fallback
+        return 30
     }
     
-    /// Total time including prep and cook time in minutes.
     var totalTimeInMinutes: Int {
         return (prepTime ?? 0) + cookTimeInMinutes
     }
     
-    /// Formatted time display for UI.
-    /// 
-    /// Returns strings like "30 mins", "1 hour", "1h 30m" based on total time.
     var formattedTime: String {
         if totalTimeInMinutes < 60 {
             return "\(totalTimeInMinutes) mins"
@@ -391,14 +291,10 @@ struct Recipe: Identifiable, Codable {
         }
     }
     
-    /// Whether this recipe is considered "quick" (30 minutes or less).
     var isQuick: Bool {
         return totalTimeInMinutes <= 30
     }
     
-    /// Whether this recipe is considered "healthy".
-    /// 
-    /// A recipe is considered healthy if it has healthy tags or is low in calories.
     var isHealthy: Bool {
         let healthyTags = ["healthy", "low-fat", "high-protein", "vegetarian", "vegan"]
         let hasHealthyTags = tags.contains { tag in
@@ -410,7 +306,6 @@ struct Recipe: Identifiable, Codable {
         return hasHealthyTags || isLowCalorie
     }
     
-    /// Human-readable difficulty level.
     var difficultyDisplay: String {
         switch difficulty?.lowercased() {
         case "easy": return "Easy"
@@ -420,10 +315,6 @@ struct Recipe: Identifiable, Codable {
         }
     }
     
-    /// Rating display with star symbols.
-    /// 
-    /// Returns a string like "★★★★☆ (4)" showing the rating with stars
-    /// and the number of ratings in parentheses.
     var ratingDisplay: String {
         let fullStars = Int(rating)
         let hasHalfStar = rating - Double(fullStars) >= 0.5
@@ -439,11 +330,6 @@ struct Recipe: Identifiable, Codable {
 
 // MARK: - Request Models
 
-/// Request model for creating a new recipe in the database.
-/// 
-/// This struct is used when creating new recipes via the API or when
-/// seeding the database. It includes all the fields needed to create
-/// a recipe, with proper coding keys for Supabase column mapping.
 struct CreateRecipeRequest: Codable {
     let title: String
     let cookTime: String?
@@ -481,24 +367,6 @@ struct CreateRecipeRequest: Codable {
     
     // MARK: - Initializers
     
-    /// Creates a new recipe creation request.
-    /// 
-    /// - Parameters:
-    ///   - title: Recipe name
-    ///   - cookTime: Formatted cooking time
-    ///   - prepTime: Preparation time in minutes
-    ///   - servings: Number of servings
-    ///   - calories: Calories per serving
-    ///   - imageUrl: URL to recipe image
-    ///   - ingredients: Array of ingredient strings
-    ///   - steps: Array of instruction strings
-    ///   - substitutions: Optional ingredient substitutions
-    ///   - tags: Array of recipe tags
-    ///   - difficulty: Difficulty level
-    ///   - cuisineType: Type of cuisine
-    ///   - costEstimate: Estimated cost
-    ///   - isPublic: Whether recipe should be publicly visible
-    ///   - createdBy: ID of the creating user
     init(
         title: String,
         cookTime: String? = nil,
@@ -536,13 +404,11 @@ struct CreateRecipeRequest: Codable {
 
 // MARK: - Enums
 
-/// Represents the difficulty level of a recipe.
 enum RecipeDifficulty: String, CaseIterable {
     case easy = "easy"
     case medium = "medium"
     case hard = "hard"
     
-    /// Human-readable display name.
     var displayName: String {
         switch self {
         case .easy: return "Easy"
@@ -551,7 +417,6 @@ enum RecipeDifficulty: String, CaseIterable {
         }
     }
     
-    /// Icon representation for UI.
     var icon: String {
         switch self {
         case .easy: return "🟢"
@@ -561,7 +426,6 @@ enum RecipeDifficulty: String, CaseIterable {
     }
 }
 
-/// Represents different types of cuisine.
 enum CuisineType: String, CaseIterable {
     case american = "american"
     case italian = "italian"
@@ -576,7 +440,6 @@ enum CuisineType: String, CaseIterable {
     case middle_eastern = "middle_eastern"
     case other = "other"
     
-    /// Human-readable display name.
     var displayName: String {
         switch self {
         case .american: return "American"
@@ -594,7 +457,6 @@ enum CuisineType: String, CaseIterable {
         }
     }
     
-    /// Flag emoji representation.
     var flag: String {
         switch self {
         case .american: return "🇺🇸"
@@ -615,10 +477,6 @@ enum CuisineType: String, CaseIterable {
 
 // MARK: - Recipe Categories
 
-/// Represents different tags that can be applied to recipes.
-/// 
-/// These tags are used for filtering, categorization, and dietary preferences.
-/// Each tag has a display name and color for UI representation.
 enum RecipeTag: String, CaseIterable {
     case healthy = "healthy"
     case quick = "quick"
@@ -637,7 +495,6 @@ enum RecipeTag: String, CaseIterable {
     case budgetFriendly = "budget-friendly"
     case mealPrep = "meal-prep"
     
-    /// Human-readable display name.
     var displayName: String {
         switch self {
         case .healthy: return "Healthy"
@@ -659,7 +516,6 @@ enum RecipeTag: String, CaseIterable {
         }
     }
     
-    /// Color name for UI styling.
     var color: String {
         switch self {
         case .healthy: return "green"
@@ -681,12 +537,6 @@ enum RecipeTag: String, CaseIterable {
 // MARK: - Extensions
 
 extension Recipe {
-    /// Checks if this recipe matches the given search text.
-    /// 
-    /// Searches in title, ingredients, tags, and cuisine type.
-    /// 
-    /// - Parameter searchText: The text to search for
-    /// - Returns: True if the recipe matches the search criteria
     func matches(searchText: String) -> Bool {
         let lowercasedSearch = searchText.lowercased()
         
@@ -696,18 +546,10 @@ extension Recipe {
                (cuisineType?.lowercased().contains(lowercasedSearch) ?? false)
     }
     
-    /// Checks if this recipe has a specific tag.
-    /// 
-    /// - Parameter tag: The tag to check for
-    /// - Returns: True if the recipe has the specified tag
     func hasTag(_ tag: RecipeTag) -> Bool {
         return tags.contains(tag.rawValue)
     }
     
-    /// Checks if this recipe is suitable for a specific diet.
-    /// 
-    /// - Parameter diet: The diet type to check (e.g., "vegetarian", "vegan")
-    /// - Returns: True if the recipe is suitable for the specified diet
     func suitableFor(diet: String) -> Bool {
         switch diet.lowercased() {
         case "vegetarian":
@@ -727,26 +569,20 @@ extension Recipe {
         }
     }
     
-    /// Returns the estimated cost as a formatted string.
     var costDisplay: String {
         guard let cost = costEstimate else { return "N/A" }
         return String(format: "$%.2f", cost)
     }
     
-    /// Returns the calories as a formatted string.
     var caloriesDisplay: String {
         guard let calories = calories else { return "N/A" }
         return "\(calories) cal"
     }
     
-    /// Returns the servings as a formatted string.
     var servingsDisplay: String {
         guard let servings = servings else { return "N/A" }
         return "\(servings) serving\(servings > 1 ? "s" : "")"
     }
     
     // MARK: - Mock Data (Removed for Supabase integration)
-    // Deprecated: Use Supabase fetching instead
-    // All mock data functions have been removed to ensure the app
-    // exclusively uses real data from the Supabase database.
 }

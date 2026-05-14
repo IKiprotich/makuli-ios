@@ -3,7 +3,6 @@
 //  Makuli
 //
 //  Created by Ian on 2025-01-13.
-//  Production-ready Supabase client with comprehensive database operations.
 //
 
 import Supabase
@@ -18,7 +17,6 @@ class SupabaseManager: ObservableObject {
     @Published var connectionError: String?
     
     private init() {
-        // Use production-ready configuration
         guard let url = URL(string: Configuration.supabaseURL) else {
             fatalError("Invalid Supabase URL configuration")
         }
@@ -28,7 +26,6 @@ class SupabaseManager: ObservableObject {
             supabaseKey: Configuration.supabaseAnonKey
         )
         
-        // Initialize connection check
         Task {
             await checkConnection()
         }
@@ -39,7 +36,6 @@ class SupabaseManager: ObservableObject {
     @MainActor
     func checkConnection() async {
         do {
-            // Simple query to test connection
             _ = try await client
                 .from("profiles")
                 .select("id")
@@ -59,7 +55,6 @@ class SupabaseManager: ObservableObject {
     
     // MARK: - Production Database Operations
     
-    /// Performs a database operation with retry logic and error handling
     func performDatabaseOperation<T>(
         _ operation: () async throws -> T,
         retryCount: Int = Configuration.maxRetryAttempts,
@@ -82,7 +77,6 @@ class SupabaseManager: ObservableObject {
                 ProductionLogger.logError(error, context: "\(context) - Attempt \(attempt)")
                 
                 if attempt < retryCount {
-                    // Exponential backoff
                     let delay = pow(2.0, Double(attempt - 1))
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 }
@@ -99,21 +93,18 @@ class SupabaseManager: ObservableObject {
     
     // MARK: - Specialized Database Operations
     
-    /// Fetch meal plan templates with caching
     func fetchMealPlanTemplates() async throws -> [MealPlanTemplate] {
         return try await performDatabaseOperation({
             let response = try await client
                 .from("meal_plan_templates")
                 .select("*")
-                .eq("is_active", value: true)
-                .order("popularity_score", ascending: false)
+                .order("created_at", ascending: false)
                 .execute()
             
             return try JSONDecoder().decode([MealPlanTemplate].self, from: response.data)
         }, context: "fetchMealPlanTemplates")
     }
     
-    /// Fetch template meals for a specific template
     func fetchTemplateMeals(templateId: String) async throws -> [TemplateMeal] {
         return try await performDatabaseOperation({
             let response = try await client
@@ -128,7 +119,6 @@ class SupabaseManager: ObservableObject {
         }, context: "fetchTemplateMeals")
     }
     
-    /// Create a new meal plan from template
     func createMealPlanFromTemplate(
         templateId: String,
         userId: String,
@@ -136,65 +126,106 @@ class SupabaseManager: ObservableObject {
         title: String
     ) async throws -> Plan {
         return try await performDatabaseOperation({
-            // First create the plan
             let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
-            
-            let planData: [String: String] = [
-                "user_id": userId,
-                "title": title,
-                "week_start": ISO8601DateFormatter().string(from: weekStart),
-                "week_end": ISO8601DateFormatter().string(from: weekEnd),
-                "template_id": templateId,
-                "generation_method": "template"
-            ]
-            
+
+            struct PlanInsertData: Encodable {
+                let user_id: String
+                let title: String
+                let week_start: String
+                let week_end: String
+                let generation_method: String
+            }
+            let iso = ISO8601DateFormatter()
+            let planInsert = PlanInsertData(
+                user_id: userId,
+                title: title,
+                week_start: iso.string(from: weekStart),
+                week_end: iso.string(from: weekEnd),
+                generation_method: "template"
+            )
             let planResponse = try await client
                 .from("plans")
-                .insert(planData)
+                .insert(planInsert)
                 .select("*")
                 .single()
                 .execute()
-            
             let plan = try JSONDecoder().decode(Plan.self, from: planResponse.data)
-            
-            // Then copy template meals to plan_recipes
-            let templateMeals = try await fetchTemplateMeals(templateId: templateId)
-            
-            for meal in templateMeals {
+
+            let isLocalTemplate = templateId.hasPrefix("local-")
+            var templateMeals: [TemplateMeal] = []
+            if !isLocalTemplate {
+                templateMeals = (try? await fetchTemplateMeals(templateId: templateId)) ?? []
+            }
+
+            if templateMeals.isEmpty {
+                let allRecipes = (try? await fetchRecipes(limit: 50)) ?? []
+                let mealTypes = ["breakfast", "lunch", "dinner"]
+                let dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+                struct PlanRecipeInsert: Encodable {
+                    let plan_id: String
+                    let day_of_week: Int
+                    let meal_type: String
+                    let day: String
+                    let recipe_id: String?
+                    let custom_meal_name: String
+                }
+
+                var breakfasts = allRecipes.filter { $0.tags.contains("breakfast") || $0.cuisineType == nil }
+                var lunches    = allRecipes.filter { $0.tags.contains("lunch") || $0.tags.contains("salad") || $0.tags.contains("bowl") }
+                var dinners    = allRecipes.filter { $0.tags.contains("dinner") || $0.calories ?? 0 > 400 }
+
+                if breakfasts.isEmpty { breakfasts = allRecipes }
+                if lunches.isEmpty    { lunches    = allRecipes }
+                if dinners.isEmpty    { dinners    = allRecipes }
+
+                for (dayIndex, dayName) in dayNames.enumerated() {
+                    let dayOfWeek = dayIndex + 1 == 7 ? 0 : dayIndex + 1
+                    for (mealIndex, mealType) in mealTypes.enumerated() {
+                        let pool: [Recipe]
+                        switch mealIndex {
+                        case 0: pool = breakfasts
+                        case 1: pool = lunches
+                        default: pool = dinners
+                        }
+                        let recipe = pool[(dayIndex * 3 + mealIndex) % pool.count]
+                        let insert = PlanRecipeInsert(
+                            plan_id: plan.id,
+                            day_of_week: dayOfWeek,
+                            meal_type: mealType,
+                            day: dayName,
+                            recipe_id: recipe.id,
+                            custom_meal_name: recipe.title
+                        )
+                        try await client.from("plan_recipes").insert(insert).execute()
+                    }
+                }
+            } else {
                 struct PlanRecipeInsert: Codable {
                     let plan_id: String
                     let day_of_week: Int
                     let meal_type: String
                     let day: String
                     let custom_meal_name: String
-                    let custom_ingredients: [String]
-                    let custom_instructions: [String]
                     let custom_cook_time: Int
                 }
-                
-                let planRecipeData = PlanRecipeInsert(
-                    plan_id: plan.id,
-                    day_of_week: Int(meal.dayOfWeek) ?? 0,
-                    meal_type: meal.mealType,
-                    day: meal.day,
-                    custom_meal_name: meal.mealName,
-                    custom_ingredients: meal.ingredients,
-                    custom_instructions: meal.instructions,
-                    custom_cook_time: meal.cookingTime
-                )
-                
-                try await client
-                    .from("plan_recipes")
-                    .insert(planRecipeData)
-                    .execute()
+                for meal in templateMeals {
+                    let insert = PlanRecipeInsert(
+                        plan_id: plan.id,
+                        day_of_week: Int(meal.dayOfWeek) ?? 0,
+                        meal_type: meal.mealType,
+                        day: meal.day,
+                        custom_meal_name: meal.mealName,
+                        custom_cook_time: meal.cookingTime
+                    )
+                    try await client.from("plan_recipes").insert(insert).execute()
+                }
             }
-            
+
             return plan
-            
         }, context: "createMealPlanFromTemplate")
     }
     
-    /// Create a new meal plan manually with selected meals
     func createMealPlanManually(
         userId: String,
         weekStart: Date,
@@ -203,7 +234,6 @@ class SupabaseManager: ObservableObject {
         selectedMeals: [String: [String: Bool]]
     ) async throws -> Plan {
         return try await performDatabaseOperation({
-            // First create the plan
             let planData: [String: String] = [
                 "user_id": userId,
                 "title": title,
@@ -221,7 +251,6 @@ class SupabaseManager: ObservableObject {
             
             let plan = try JSONDecoder().decode(Plan.self, from: planResponse.data)
             
-            // Then create plan recipes for each selected meal
             let calendar = Calendar.current
             var currentDate = weekStart
             
@@ -233,9 +262,8 @@ class SupabaseManager: ObservableObject {
                             let dayName = formatDayName(currentDate)
                             let mealName = getDefaultMealName(for: mealType)
                             
-                            // Calculate day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
                             let weekday = calendar.component(.weekday, from: currentDate)
-                            let adjustedDayOfWeek = weekday - 1 // Convert to 0-based
+                            let adjustedDayOfWeek = weekday - 1
                             
                             struct PlanRecipeInsert: Codable {
                                 let plan_id: String
@@ -277,22 +305,19 @@ class SupabaseManager: ObservableObject {
         }, context: "createMealPlanManually")
     }
     
-    /// Fetch user's meal plans (only Spoonacular-generated plans)
     func fetchUserPlans(userId: String) async throws -> [Plan] {
         return try await performDatabaseOperation({
             let response = try await client
                 .from("plans")
                 .select("*")
                 .eq("user_id", value: userId)
-                .eq("generation_method", value: "spoonacular")
                 .order("created_at", ascending: false)
                 .execute()
-            
+
             return try JSONDecoder().decode([Plan].self, from: response.data)
         }, context: "fetchUserPlans")
     }
     
-    /// Fetch plan recipes for a specific plan
     func fetchPlanRecipes(planId: String) async throws -> [PlanRecipe] {
         return try await performDatabaseOperation({
             let response = try await client
@@ -307,27 +332,51 @@ class SupabaseManager: ObservableObject {
         }, context: "fetchPlanRecipes")
     }
     
-    /// Update user profile
     func updateUserProfile(_ profile: UserProfile) async throws {
+        struct ProfileUpdate: Encodable {
+            let name: String?
+            let bio: String?
+            let location: String?
+            let diet: String?
+            let goal: String?
+            let budget: String?
+            let age: Int?
+            let gender: String?
+            let is_premium: Bool
+            let is_onboarding_completed: Bool
+            let profile_image_url: String?
+            let updated_at: String
+        }
+        let update = ProfileUpdate(
+            name: profile.name,
+            bio: profile.bio,
+            location: profile.location,
+            diet: profile.diet,
+            goal: profile.goal,
+            budget: profile.budget,
+            age: profile.age,
+            gender: profile.gender,
+            is_premium: profile.isPremium,
+            is_onboarding_completed: profile.isOnboardingCompleted,
+            profile_image_url: profile.profileImageUrl,
+            updated_at: ISO8601DateFormatter().string(from: Date())
+        )
         try await performDatabaseOperation({
             try await client
                 .from("profiles")
-                .update(profile)
+                .update(update)
                 .eq("id", value: profile.id)
                 .execute()
         }, context: "updateUserProfile")
     }
     
-    /// Create grocery list from plan
     func createGroceryListFromPlan(planId: String, userId: String) async throws -> [GroceryItem] {
         return try await performDatabaseOperation({
-            // Get all plan recipes
             let planRecipes = try await fetchPlanRecipes(planId: planId)
             
             var groceryItems: [GroceryItem] = []
             var ingredientCounts: [String: Int] = [:]
             
-            // Aggregate ingredients
             for planRecipe in planRecipes {
                 if let ingredients = planRecipe.customIngredients {
                     for ingredient in ingredients {
@@ -336,7 +385,6 @@ class SupabaseManager: ObservableObject {
                 }
             }
             
-            // Create grocery items
             for (ingredient, count) in ingredientCounts {
                 let groceryItem = GroceryItem(
                     id: UUID().uuidString,
@@ -357,7 +405,6 @@ class SupabaseManager: ObservableObject {
                 
                 groceryItems.append(groceryItem)
                 
-                // Save to database
                 try await client
                     .from("grocery_items")
                     .insert(groceryItem)
@@ -369,14 +416,13 @@ class SupabaseManager: ObservableObject {
         }, context: "createGroceryListFromPlan")
     }
     
-    /// Fetch recipes from database
     func fetchRecipes(limit: Int = 20, offset: Int = 0) async throws -> [Recipe] {
         return try await performDatabaseOperation({
             let response = try await client
                 .from("recipes")
                 .select("*")
                 .eq("is_public", value: true)
-                .order("rating", ascending: false)
+                .order("created_at", ascending: false)
                 .range(from: offset, to: offset + limit - 1)
                 .execute()
             
@@ -384,7 +430,6 @@ class SupabaseManager: ObservableObject {
         }, context: "fetchRecipes")
     }
     
-    /// Update grocery item status
     func updateGroceryItem(_ item: GroceryItem) async throws {
         try await performDatabaseOperation({
             try await client
@@ -395,7 +440,6 @@ class SupabaseManager: ObservableObject {
         }, context: "updateGroceryItem")
     }
     
-    /// Mark plan recipe as completed
     func markPlanRecipeCompleted(planRecipeId: String) async throws {
         try await performDatabaseOperation({
             struct PlanRecipeUpdate: Codable {
@@ -416,7 +460,6 @@ class SupabaseManager: ObservableObject {
         }, context: "markPlanRecipeCompleted")
     }
     
-    /// Fetch grocery list for a user
     func fetchGroceryList(userId: String) async throws -> [GroceryItem] {
         return try await performDatabaseOperation({
             let response = try await client
@@ -434,20 +477,17 @@ class SupabaseManager: ObservableObject {
         let bucket = "profile-pictures"
         let path = "\(userId)/\(fileName)"
 
-        // Upload to Supabase Storage with upsert/overwrite enabled
         let response = try await client.storage.from(bucket).upload(
             path: path,
             file: imageData,
             options: FileOptions(upsert: true)
         )
 
-        // Manually construct the public URL
         let publicUrl = "\(Configuration.supabaseURL)/storage/v1/object/public/\(bucket)/\(path)"
         return publicUrl
     }
 
     func updateUserProfileImageUrl(userId: String, imageUrl: String) async throws {
-        // Use [String: String] instead of [String: Any]
         let updates = ["profile_image_url": imageUrl]
         _ = try await client
             .from("profiles")
@@ -456,7 +496,6 @@ class SupabaseManager: ObservableObject {
             .execute()
     }
     
-    // --- Stubs for ProfileViewModel ---
     func deleteUserAccount(userId: String) async throws {
         throw SupabaseError.operationFailed
     }
@@ -464,7 +503,16 @@ class SupabaseManager: ObservableObject {
         throw SupabaseError.operationFailed
     }
     func fetchUserProfile(userId: String) async throws -> UserProfile {
-        throw SupabaseError.operationFailed
+        let response: [UserProfile] = try await client
+            .from("profiles")
+            .select("*")
+            .eq("id", value: userId.lowercased())
+            .execute()
+            .value
+        guard let profile = response.first else {
+            throw SupabaseError.operationFailed
+        }
+        return profile
     }
     
     // MARK: - Helper Functions
@@ -586,7 +634,6 @@ class SupabaseManager: ObservableObject {
     
     // MARK: - Spoonacular Integration Methods
     
-    /// Saves a plan to the database
     func savePlan(_ plan: Plan) async throws {
         try await performDatabaseOperation({
             try await client
@@ -596,7 +643,6 @@ class SupabaseManager: ObservableObject {
         }, context: "savePlan")
     }
     
-    /// Saves a plan recipe to the database
     func savePlanRecipe(_ planRecipe: PlanRecipe) async throws {
         try await performDatabaseOperation({
             try await client
@@ -606,7 +652,6 @@ class SupabaseManager: ObservableObject {
         }, context: "savePlanRecipe")
     }
     
-    /// Saves a recipe to the database
     func saveRecipe(_ recipe: Recipe) async throws {
         try await performDatabaseOperation({
             try await client
@@ -616,7 +661,6 @@ class SupabaseManager: ObservableObject {
         }, context: "saveRecipe")
     }
     
-    /// Saves a grocery item to the database
     func saveGroceryItem(_ groceryItem: GroceryItem) async throws {
         try await performDatabaseOperation({
             try await client
@@ -628,12 +672,10 @@ class SupabaseManager: ObservableObject {
     
     // MARK: - Caching & Fallback Methods
     
-    /// Retrieves cached meal plan data for a user
     func getCachedMealPlan(userId: String, weekStart: Date) async throws -> (plan: Plan, recipes: [PlanRecipe])? {
         let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
         
         return try await performDatabaseOperation({
-            // Find plan for the specific week
             let plans: [Plan] = try await client
                 .from("plans")
                 .select()
@@ -648,7 +690,6 @@ class SupabaseManager: ObservableObject {
             
             guard let plan = plans.first else { return nil }
             
-            // Fetch associated recipes
             let planRecipes: [PlanRecipe] = try await client
                 .from("plan_recipes")
                 .select()
@@ -662,7 +703,6 @@ class SupabaseManager: ObservableObject {
         }, context: "getCachedMealPlan")
     }
     
-    /// Retrieves cached recipes for a plan
     func getCachedRecipes(planId: String) async throws -> [Recipe] {
         return try await performDatabaseOperation({
             let planRecipes: [PlanRecipe] = try await client
@@ -688,7 +728,6 @@ class SupabaseManager: ObservableObject {
         }, context: "getCachedRecipes")
     }
     
-    /// Retrieves a cached recipe by Spoonacular ID
     func getCachedRecipe(spoonacularId: String) async throws -> Recipe? {
         return try await performDatabaseOperation({
             let recipes: [Recipe] = try await client
@@ -703,7 +742,6 @@ class SupabaseManager: ObservableObject {
         }, context: "getCachedRecipe")
     }
     
-    /// Retrieves cached grocery list for a plan
     func getCachedGroceryList(planId: String, userId: String) async throws -> [GroceryItem] {
         return try await performDatabaseOperation({
             let groceryItems: [GroceryItem] = try await client
@@ -720,13 +758,11 @@ class SupabaseManager: ObservableObject {
         }, context: "getCachedGroceryList")
     }
     
-    /// Checks if cached data exists and is fresh (within cache expiration time)
     func hasFreshCachedData(userId: String, weekStart: Date) async throws -> Bool {
-        let cacheExpirationHours: Double = 24 // Cache for 24 hours
+        let cacheExpirationHours: Double = 24
         let expirationDate = Date().addingTimeInterval(-cacheExpirationHours * 3600)
         
         return try await performDatabaseOperation({
-            // Use a simple struct to check for existence without decoding full Plan objects
             struct CacheCheck: Codable {
                 let id: String
             }
@@ -748,12 +784,10 @@ class SupabaseManager: ObservableObject {
         }, context: "hasFreshCachedData")
     }
     
-    /// Clears old cached data (older than specified days)
     func clearOldCachedData(olderThanDays days: Int = 7) async throws {
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
         
         try await performDatabaseOperation({
-            // Delete old plans
             try await client
                 .from("plans")
                 .delete()
@@ -761,14 +795,12 @@ class SupabaseManager: ObservableObject {
                 .eq("generation_method", value: "spoonacular")
                 .execute()
             
-            // Delete old recipes (orphaned)
             try await client
                 .from("recipes")
                 .delete()
                 .lt("created_at", value: cutoffDate)
                 .execute()
             
-            // Delete old grocery items
             try await client
                 .from("grocery_items")
                 .delete()
@@ -779,7 +811,6 @@ class SupabaseManager: ObservableObject {
         }, context: "clearOldCachedData")
     }
     
-    /// Saves complete Spoonacular meal plan data to cache
     func saveSpoonacularMealPlanToCache(
         plan: Plan,
         planRecipes: [PlanRecipe],
@@ -789,7 +820,6 @@ class SupabaseManager: ObservableObject {
         try await performDatabaseOperation({
             Logger.info("Saving Spoonacular meal plan to cache: plan ID \(plan.id), \(planRecipes.count) plan recipes, \(recipes.count) recipes")
             
-            // Try to save plan with fallback for generation_method constraint issue
             do {
                 try await client
                     .from("plans")
@@ -798,10 +828,8 @@ class SupabaseManager: ObservableObject {
                 
                 Logger.info("Saved plan to database")
             } catch {
-                // If generation_method constraint fails, try with manual fallback
                 Logger.warning("Plan save failed, trying with manual generation_method: \(error)")
                 
-                // Create a new plan with manual generation method
                 let fallbackPlan = Plan(
                     id: plan.id,
                     userId: plan.userId,
@@ -813,7 +841,7 @@ class SupabaseManager: ObservableObject {
                     createdAt: plan.createdAt,
                     updatedAt: plan.updatedAt,
                     templateId: plan.templateId,
-                    generationMethod: "manual", // Fallback to manual
+                    generationMethod: "manual",
                     isFavorite: plan.isFavorite,
                     completionPercentage: plan.completionPercentage
                 )
@@ -826,7 +854,6 @@ class SupabaseManager: ObservableObject {
                 Logger.info("Saved plan to database with manual generation_method fallback")
             }
             
-            // Save recipes FIRST (before plan recipes that reference them)
             for recipe in recipes {
                 try await client
                     .from("recipes")
@@ -836,7 +863,6 @@ class SupabaseManager: ObservableObject {
             
             Logger.info("Saved \(recipes.count) recipes to database")
             
-            // Save plan recipes AFTER recipes (so foreign key references exist)
             for planRecipe in planRecipes {
                 try await client
                     .from("plan_recipes")
@@ -846,7 +872,6 @@ class SupabaseManager: ObservableObject {
             
             Logger.info("Saved \(planRecipes.count) plan recipes to database")
             
-            // Save grocery items if provided
             if let groceryItems = groceryItems {
                 for groceryItem in groceryItems {
                     try await client
@@ -861,7 +886,6 @@ class SupabaseManager: ObservableObject {
         }, context: "saveSpoonacularMealPlanToCache")
     }
     
-    /// Retrieves user's Spoonacular credentials
     func getUserSpoonacularCredentials(userId: String) async throws -> (username: String, hash: String)? {
         return try await performDatabaseOperation({
             let profiles: [UserProfile] = try await client
@@ -882,7 +906,6 @@ class SupabaseManager: ObservableObject {
         }, context: "getUserSpoonacularCredentials")
     }
     
-    /// Updates user's Spoonacular credentials
     func updateUserSpoonacularCredentials(userId: String, username: String, hash: String) async throws {
         try await performDatabaseOperation({
             try await client
@@ -920,4 +943,3 @@ enum SupabaseError: Error {
 }
 
 // MARK: - Supporting Models for Database Operations
-// PlanRecipe model moved to Plan.swift for consistency

@@ -2,7 +2,7 @@
 //  GoalSelectionView.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
 
 import SwiftUI
@@ -26,7 +26,6 @@ struct GoalSelectionView: View {
         ZStack {
             AppColors.background
             VStack(spacing: 30) {
-                // progress indicator
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
@@ -44,14 +43,11 @@ struct GoalSelectionView: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                // Goal selection
                 ScrollView {
                     VStack(spacing: 15) {
                         ForEach(goalOptions, id: \.0) { option in
                             Button(action: {
-                                // 1. Update UI state instantly
                                 selectedGoal = option.0
-                                // 2. Update shared model in background
                                 DispatchQueue.main.async {
                                     onboardingData.fitnessGoal = selectedGoal
                                 }
@@ -115,12 +111,9 @@ struct GoalSelectionView: View {
                 
                 Spacer()
                 
-                // Continue button
                 Button(action: {
-                    // 1. Advance page immediately
                     if !selectedGoal.isEmpty {
                         currentPage += 1
-                        // 2. Save to onboardingData in background
                         DispatchQueue.main.async {
                             onboardingData.fitnessGoal = selectedGoal
                         }

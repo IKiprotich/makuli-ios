@@ -2,6 +2,8 @@
 //  RecipeCardView.swift
 //  Makuli
 //
+//  Created by Ian on 2025-06-13.
+//
 
 import SwiftUI
 
@@ -71,7 +73,6 @@ extension RecipeCardView {
 
     private var metadataSection: some View {
         HStack(spacing: 6) {
-            // Cook time
             HStack(spacing: 3) {
                 Image(systemName: "clock")
                     .font(.system(size: 10, weight: .medium))
@@ -87,7 +88,6 @@ extension RecipeCardView {
                     .fill(AppColors.primaryOrange.opacity(0.1))
             )
 
-            // Rating
             if recipe.rating > 0 {
                 HStack(spacing: 3) {
                     Image(systemName: "star.fill")
@@ -107,7 +107,6 @@ extension RecipeCardView {
 
             Spacer(minLength: 0)
 
-            // Difficulty dots
             HStack(spacing: 2) {
                 ForEach(0..<3, id: \.self) { index in
                     Circle()

@@ -2,7 +2,7 @@
 //  AuthManager.swift
 //  Makuli
 //
-//  Created by Ian   on 27/06/2025.
+//  Created by Ian on 2025-06-27.
 //
 
 import SwiftUI
@@ -24,7 +24,6 @@ class AuthManager: ObservableObject {
     func getCurrentUser() async {
         do {
             let session = try await supabase.auth.session
-            // Loads complete user profile from database
             await loadUserProfile(supabaseUser: session.user)
         } catch {
             Logger.info("No current user session found")
@@ -42,9 +41,7 @@ class AuthManager: ObservableObject {
                 password: password
             )
             
-            // Create user profile in the database (this is always a new user)
             let _ = try await createUserProfileIfNotExists(response.user)
-            // Load complete user profile from database
             await loadUserProfile(supabaseUser: response.user)
             
             Logger.authEvent("New user created via email signup")
@@ -66,13 +63,10 @@ class AuthManager: ObservableObject {
                 password: password
             )
             
-            // Check if this is a new user or existing user by checking if profile exists
             let isNewUser = try await createUserProfileIfNotExists(response.user)
             
-            // Load complete user profile from database
             await loadUserProfile(supabaseUser: response.user)
             
-            // Log authentication event
             if isNewUser {
                 Logger.authEvent("New user created via email sign-in")
             } else {
@@ -115,13 +109,10 @@ class AuthManager: ObservableObject {
                 )
             )
             
-            // Check if this is a new user or existing user by checking if profile exists
             let isNewUser = try await createUserProfileIfNotExists(response.user)
             
-            // Load complete user profile from database
             await loadUserProfile(supabaseUser: response.user)
             
-            // Log authentication event
             if isNewUser {
                 Logger.authEvent("New user created via Google Sign-In")
             } else {
@@ -154,14 +145,11 @@ class AuthManager: ObservableObject {
         Logger.info("Starting onboarding completion process")
         
         do {
-            // Get current user ID
             let session = try await supabase.auth.session
             let userId = session.user.id.uuidString.lowercased()
             
-            // Try upsert approach - create or update in one operation
             Logger.debug("Using upsert approach for user ID: \(userId)")
             
-            // Fetch only created_at so we can preserve it in the upsert.
             let existingProfiles: [ProfileTimestamp] = try await supabase
                 .from("profiles")
                 .select("created_at")
@@ -179,7 +167,6 @@ class AuthManager: ObservableObject {
                 Logger.debug("Using new createdAt for new profile")
             }
             
-            // Create complete profile data for upsert
             let profileData = ProfileData(
                 id: userId,
                 name: currentUser.name,
@@ -196,7 +183,6 @@ class AuthManager: ObservableObject {
                 isOnboardingCompleted: true
             )
             
-            // Use upsert to handle both insert and update cases
             let response = try await supabase
                 .from("profiles")
                 .upsert(profileData)
@@ -204,7 +190,6 @@ class AuthManager: ObservableObject {
             
             Logger.success("Profile upserted successfully")
             
-            // Verify the upsert worked by checking the database
             let verifyResponse: [DatabaseProfile] = try await supabase
                 .from("profiles")
                 .select("*")
@@ -221,7 +206,6 @@ class AuthManager: ObservableObject {
                 Logger.warning("Profile not found after upsert")
             }
             
-            // Update local user object
             self.user = User(
                 id: userId,
                 email: currentUser.email,
@@ -229,19 +213,19 @@ class AuthManager: ObservableObject {
                 profileImageUrl: currentUser.profileImageUrl,
                 age: age,
                 gender: gender,
-                height: 170.0, // Default height
-                weight: 70.0, // Default weight
-                activityLevel: "moderately active", // Default activity level
+                height: 170.0,
+                weight: 70.0,
+                activityLevel: "moderately active",
                 fitnessGoal: goal,
                 dietaryPreferences: [diet],
                 budgetRange: budget,
-                preferredCuisines: ["american", "italian"], // Default cuisines
-                cookingSkillLevel: "beginner", // Default cooking skill
-                preferredPrepTime: 30, // Default prep time
-                preferredServings: 2, // Default servings
-                allergies: [], // Default empty allergies
-                favoriteIngredients: [], // Default empty favorites
-                dislikedIngredients: [], // Default empty dislikes
+                preferredCuisines: ["american", "italian"],
+                cookingSkillLevel: "beginner",
+                preferredPrepTime: 30,
+                preferredServings: 2,
+                allergies: [],
+                favoriteIngredients: [],
+                dislikedIngredients: [],
                 hasCompletedOnboarding: true,
                 createdAt: Date(),
                 updatedAt: Date()
@@ -250,10 +234,8 @@ class AuthManager: ObservableObject {
             Logger.success("Local user object updated")
             Logger.authEvent("Onboarding completed successfully")
             
-            // Add a small delay to ensure database consistency
-            try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            try await Task.sleep(nanoseconds: 500_000_000)
             
-            // Verify the update by reading back from database
             await verifyOnboardingCompletion(userId: userId)
             
         } catch {
@@ -297,7 +279,6 @@ class AuthManager: ObservableObject {
                 .value
             
             if let profile = response.first {
-                // Create User with database data
                 self.user = User(
                     id: profile.id,
                     email: profile.email,
@@ -305,38 +286,35 @@ class AuthManager: ObservableObject {
                     profileImageUrl: profile.profileImageURL,
                     age: profile.age,
                     gender: profile.gender,
-                    height: 170.0, // Default height
-                    weight: 70.0, // Default weight
-                    activityLevel: "moderately active", // Default activity level
+                    height: 170.0,
+                    weight: 70.0,
+                    activityLevel: "moderately active",
                     fitnessGoal: profile.goal,
                     dietaryPreferences: [profile.diet],
                     budgetRange: profile.budget,
-                    preferredCuisines: ["american", "italian"], // Default cuisines
-                    cookingSkillLevel: "beginner", // Default cooking skill
-                    preferredPrepTime: 30, // Default prep time
-                    preferredServings: 2, // Default servings
-                    allergies: [], // Default empty allergies
-                    favoriteIngredients: [], // Default empty favorites
-                    dislikedIngredients: [], // Default empty dislikes
+                    preferredCuisines: ["american", "italian"],
+                    cookingSkillLevel: "beginner",
+                    preferredPrepTime: 30,
+                    preferredServings: 2,
+                    allergies: [],
+                    favoriteIngredients: [],
+                    dislikedIngredients: [],
                     hasCompletedOnboarding: profile.isOnboardingCompleted,
                     createdAt: Date(),
                     updatedAt: Date()
                 )
                 
-                // Log authentication result
                 if profile.isOnboardingCompleted {
                     Logger.authEvent("Existing user signed in - onboarding completed")
                 } else {
                     Logger.authEvent("Existing user signed in - onboarding required")
                 }
             } else {
-                // Fallback to basic user if profile not found
                 self.user = convertToCustomUser(supabaseUser)
                 Logger.warning("No profile found in database - using fallback user")
             }
         } catch {
             Logger.error("Failed to load user profile", error: error)
-            // Fallback to basic user
             self.user = convertToCustomUser(supabaseUser)
         }
     }
@@ -355,20 +333,20 @@ class AuthManager: ObservableObject {
             fullName: name,
             profileImageUrl: profileImageURL,
             age: 0, 
-            gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
-            height: 170.0, // Default height
-            weight: 70.0, // Default weight
-            activityLevel: "moderately active", // Default activity level
-            fitnessGoal: "maintain_weight", // Default goal value to satisfy database constraint
-            dietaryPreferences: ["none"], // Default diet value to satisfy database constraint
-            budgetRange: "medium", // Default budget value to satisfy database constraint
-            preferredCuisines: ["american", "italian"], // Default cuisines
-            cookingSkillLevel: "beginner", // Default cooking skill
-            preferredPrepTime: 30, // Default prep time
-            preferredServings: 2, // Default servings
-            allergies: [], // Default empty allergies
-            favoriteIngredients: [], // Default empty favorites
-            dislikedIngredients: [], // Default empty dislikes
+            gender: "prefer_not_to_say",
+            height: 170.0,
+            weight: 70.0,
+            activityLevel: "moderately active",
+            fitnessGoal: "maintain_weight",
+            dietaryPreferences: ["none"],
+            budgetRange: "medium",
+            preferredCuisines: ["american", "italian"],
+            cookingSkillLevel: "beginner",
+            preferredPrepTime: 30,
+            preferredServings: 2,
+            allergies: [],
+            favoriteIngredients: [],
+            dislikedIngredients: [],
             hasCompletedOnboarding: false,
             createdAt: Date(),
             updatedAt: Date()
@@ -385,7 +363,6 @@ class AuthManager: ObservableObject {
             }
         }
         
-        // Check for specific database errors
         let errorString = error.localizedDescription
         if errorString.contains("profiles") || errorString.contains("database") {
             return "Database error saving new user"
@@ -395,7 +372,6 @@ class AuthManager: ObservableObject {
     }
     
     private func createUserProfileIfNotExists(_ supabaseUser: Supabase.User) async throws -> Bool {
-        // First, check if profile already exists
         do {
             let existingProfile: [DatabaseProfile] = try await supabase
                 .from("profiles")
@@ -406,29 +382,27 @@ class AuthManager: ObservableObject {
             
             if !existingProfile.isEmpty {
                 Logger.debug("User profile already exists - preserving onboarding status")
-                return false // Existing user
+                return false
             }
         } catch {
             Logger.warning("Error checking existing profile")
-            // Continue to create profile if check failed
         }
         
-        // Create new profile (this is a new user)
         do {
             let profileData = ProfileData(
                 id: supabaseUser.id.uuidString.lowercased(),
                 name: anyJSONToString(supabaseUser.userMetadata["name"]) ?? supabaseUser.email ?? "",
                 email: supabaseUser.email ?? "",
                 age: 0,
-                gender: "prefer_not_to_say", // Default gender value to satisfy database constraint
-                goal: "maintain_weight", // Default goal value to satisfy database constraint
-                diet: "none", // Default diet value to satisfy database constraint
-                budget: "medium", // Default budget value to satisfy database constraint
+                gender: "prefer_not_to_say",
+                goal: "maintain_weight",
+                diet: "none",
+                budget: "medium",
                 isPremium: false,
                 subscriptionRenewal: nil,
                 profileImageURL: anyJSONToString(supabaseUser.userMetadata["avatar_url"]),
                 createdAt: Date(),
-                isOnboardingCompleted: false // New users always need onboarding
+                isOnboardingCompleted: false
             )
             
             try await supabase
@@ -437,7 +411,7 @@ class AuthManager: ObservableObject {
                 .execute()
             
             Logger.authEvent("New user profile created with onboarding required")
-            return true // New user created
+            return true
         } catch {
             Logger.error("Failed to insert profile", error: error)
             throw error
@@ -446,7 +420,6 @@ class AuthManager: ObservableObject {
     
     // MARK: - Profile Data Structures
 
-    // Lightweight struct used only to read back created_at without fetching the full row.
     private struct ProfileTimestamp: Decodable {
         let createdAt: String
         enum CodingKeys: String, CodingKey {
@@ -469,7 +442,6 @@ class AuthManager: ObservableObject {
         let createdAt: String
         let isOnboardingCompleted: Bool
         
-        /// Maps struct properties to database column names for decoding.
         enum CodingKeys: String, CodingKey {
             case id
             case name
@@ -487,7 +459,6 @@ class AuthManager: ObservableObject {
         }
     }
     
-    /// Represents the data used to create or update a user profile in the database (encodable to Supabase).
     private struct ProfileData: Encodable {
         let id: String
         let name: String
@@ -503,7 +474,6 @@ class AuthManager: ObservableObject {
         let createdAt: Date
         let isOnboardingCompleted: Bool
         
-        /// Maps struct properties to database column names for encoding.
         enum CodingKeys: String, CodingKey {
             case id
             case name
@@ -555,5 +525,4 @@ class AuthManager: ObservableObject {
         }
     }
 }
-
 

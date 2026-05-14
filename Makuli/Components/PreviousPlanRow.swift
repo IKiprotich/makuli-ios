@@ -2,7 +2,7 @@
 //  PreviousPlanRow.swift
 //  Makuli
 //
-//  Created by Ian   on 30/06/2025.
+//  Created by Ian on 2025-06-30.
 //
 
 import SwiftUI
@@ -44,7 +44,6 @@ struct PreviousPlanRow: View {
 // MARK: - Preview
 struct PreviousPlanRow_Previews: PreviewProvider {
     static var previews: some View {
-        // Preview removed due to missing mockData
         Text("PreviousPlanRow Preview")
             .padding()
     }

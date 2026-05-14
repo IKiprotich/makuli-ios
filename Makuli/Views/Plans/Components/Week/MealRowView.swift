@@ -2,7 +2,7 @@
 //  MealRowView.swift
 //  Makuli
 //
-//  Created by Ian   on 21/06/2025.
+//  Created by Ian on 2025-06-21.
 //
 
 import SwiftUI
@@ -14,7 +14,6 @@ struct MealRowView: View {
     let onExpansionToggle: (() -> Void)?
     let recipe: Recipe?
     
-    // Initialize with optional closure and recipe
     init(meal: Meal, isExpanded: Bool, onExpansionToggle: (() -> Void)? = nil, recipe: Recipe? = nil) {
         self.meal = meal
         self.isExpanded = isExpanded
@@ -24,9 +23,7 @@ struct MealRowView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing:0) {
-            //main meal row
             HStack(spacing: 16) {
-                //meal category icon
                 Image(systemName: getMealCategoryIcon(meal.category))
                     .foregroundColor(iconColor)
                     .font(.system(size: 16, weight: .medium))
@@ -55,13 +52,11 @@ struct MealRowView: View {
                     }
                 }
                 .onTapGesture {
-                    // Handle expansion toggle when tapping the meal info area
                     onExpansionToggle?()
                 }
                 
                 Spacer()
                 
-            //action buttons
                 HStack(spacing: 12) {
                     if meal.isCompleted {
                         Image(systemName: "checkmark.circle.fill")
@@ -70,7 +65,6 @@ struct MealRowView: View {
                     }
                     else {
                         Button {
-                            //implement mark as completed functionality
                         } label: {
                             Image(systemName: "circle")
                                 .foregroundColor(.secondary)
@@ -79,7 +73,6 @@ struct MealRowView: View {
 
                     }
                     
-                    //view recipes button - only show if recipe exists
                     if let recipe = recipe {
                         NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                             Text("View Recipe")
@@ -100,7 +93,6 @@ struct MealRowView: View {
             .padding(.vertical, 16)
             
             
-            //expanded content
             if isExpanded {
                 expandedContent
             }
@@ -108,7 +100,6 @@ struct MealRowView: View {
         .background(AppColors.warmsand)
     }
 }
-
 
 extension MealRowView {
     
@@ -136,7 +127,6 @@ extension MealRowView {
                 
                 
                 Button("Add Ingredients"){
-                    //implement the add recipe to the grocery list functionality
                 }
                 .font(.caption)
                 .foregroundColor(AppColors.primaryOrange)
@@ -175,5 +165,4 @@ extension MealRowView {
 }
 
 #Preview {
-    //MealRowView()
 }

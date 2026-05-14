@@ -1,3 +1,10 @@
+//
+//  AllergiesView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-23.
+//
+
 import SwiftUI
 
 struct AllergiesView: View {
@@ -34,13 +41,11 @@ struct AllergiesView: View {
                         ForEach(allergyOptions, id: \.self) { allergy in
                             let isSelected = selectedAllergies.contains(allergy)
                             Button(action: {
-                                // 1. Update UI state instantly
                                 if isSelected {
                                     selectedAllergies.removeAll { $0 == allergy }
                                 } else {
                                     selectedAllergies.append(allergy)
                                 }
-                                // 2. Update shared model in background
                                 DispatchQueue.main.async {
                                     onboardingData.allergies = selectedAllergies
                                 }
@@ -63,9 +68,7 @@ struct AllergiesView: View {
                 }
                 Spacer()
                 Button(action: {
-                    // 1. Advance page immediately
                     currentPage += 1
-                    // 2. Save to onboardingData in background
                     DispatchQueue.main.async {
                         onboardingData.allergies = selectedAllergies
                     }

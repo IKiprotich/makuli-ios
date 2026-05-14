@@ -9,131 +9,77 @@
 
 import Foundation
 
-/**
- * UserProfile Model
- * 
- * Represents extended user profile information and preferences.
- * This model contains additional user data beyond basic authentication information.
- * 
- * Key Features:
- * - Extended user preferences and settings
- * - Fitness and health tracking data
- * - Meal planning preferences and history
- * - Achievement and progress tracking
- * - Notification and privacy settings
- * 
- * Database Relationships:
- * - Belongs to a User (one-to-one relationship)
- * - Can have multiple progress metrics
- * - Can have multiple achievements
- */
 struct UserProfile: Identifiable, Codable {
-    /// Unique identifier for the user profile
     var id: String
     
-    /// ID of the user who owns this profile
     var userId: String?
     
-    /// User's name
     var name: String?
     
-    /// User's email address
     var email: String?
     
-    /// User's age
     var age: Int?
     
-    /// User's gender
     var gender: String?
     
-    /// User's fitness goal
     var goal: String?
     
-    /// User's dietary preferences
     var diet: String?
     
-    /// User's budget preference
     var budget: String?
     
-    /// Whether user has premium access
     var isPremium: Bool
     
-    /// Whether user has completed onboarding
     var isOnboardingCompleted: Bool
     
-    /// User's subscription type (optional, backend may omit this field)
     var subscriptionType: String?
     
-    /// Subscription renewal date
     var subscriptionRenewal: Date?
     
-    /// Number of plans created this month
     var plansCreatedThisMonth: Int
     
-    /// Number of Spoonacular generations this month
     var spoonacularGenerationsThisMonth: Int
     
-    /// Last plan reset date
     var lastPlanReset: Date
     
-    /// User's profile picture URL
     var profileImageUrl: String?
     
-    /// User's bio or description
     var bio: String?
     
-    /// User's location/city
     var location: String?
     
-    /// User's preferred language (optional, backend may omit this field)
     var preferredLanguage: String?
     
-    /// User's timezone (optional, backend may omit this field)
     var timezone: String?
     
-    /// User's preferred measurement system (optional, backend may omit this field)
     var measurementSystem: String?
     
-    /// User's preferred currency (optional, backend may omit this field)
     var preferredCurrency: String?
     
-    /// User's notification preferences (optional, backend may omit this field)
     var notificationPreferences: NotificationPreferences?
     
-    /// User's privacy settings (optional, backend may omit this field)
     var privacySettings: PrivacySettings?
     
-    /// User's fitness goals and targets (optional, backend may omit this field)
     var fitnessGoals: FitnessGoals?
     
-    /// User's meal planning preferences (optional, backend may omit this field)
     var mealPlanningPreferences: MealPlanningPreferences?
     
-    /// User's dietary preferences (optional, backend may omit this field)
     var dietaryPreferences: DietaryPreferences?
     
-    /// User's cooking preferences (optional, backend may omit this field)
     var cookingPreferences: CookingPreferences?
     
-    /// User's budget preferences (optional, backend may omit this field)
     var budgetPreferences: BudgetPreferences?
     
-    /// User's achievement and progress data (optional, backend may omit this field)
     var achievements: [Achievement]?
     
-    /// User's progress metrics over time (optional, backend may omit this field)
     var progressMetrics: [ProgressMetrics]?
     
-    /// Spoonacular username for API operations (optional)
     var spoonacularUsername: String?
     
-    /// Spoonacular user hash for API operations (optional)
     var spoonacularHash: String?
     
-    /// Timestamp when the profile was created
     var createdAt: Date
     
-    /// Timestamp when the profile was last updated
     var updatedAt: Date
     
     // MARK: - Coding Keys
@@ -183,7 +129,6 @@ struct UserProfile: Identifiable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         id = try container.decode(String.self, forKey: .id)
-        // Use decodeIfPresent to avoid crash if user_id is missing from backend response
         userId = try container.decodeIfPresent(String.self, forKey: .userId)
         name = try container.decodeIfPresent(String.self, forKey: .name)
         email = try container.decodeIfPresent(String.self, forKey: .email)
@@ -194,29 +139,21 @@ struct UserProfile: Identifiable, Codable {
         budget = try container.decodeIfPresent(String.self, forKey: .budget)
         isPremium = try container.decode(Bool.self, forKey: .isPremium)
         isOnboardingCompleted = try container.decode(Bool.self, forKey: .isOnboardingCompleted)
-        // Use decodeIfPresent to avoid crash if subscription_type is missing from backend response
         subscriptionType = try container.decodeIfPresent(String.self, forKey: .subscriptionType)
         subscriptionRenewal = try container.decodeIfPresent(Date.self, forKey: .subscriptionRenewal)
-        plansCreatedThisMonth = try container.decode(Int.self, forKey: .plansCreatedThisMonth)
-        spoonacularGenerationsThisMonth = try container.decode(Int.self, forKey: .spoonacularGenerationsThisMonth)
-        lastPlanReset = try container.decode(Date.self, forKey: .lastPlanReset)
+        plansCreatedThisMonth = try container.decodeIfPresent(Int.self, forKey: .plansCreatedThisMonth) ?? 0
+        spoonacularGenerationsThisMonth = try container.decodeIfPresent(Int.self, forKey: .spoonacularGenerationsThisMonth) ?? 0
+        lastPlanReset = try container.decodeIfPresent(Date.self, forKey: .lastPlanReset) ?? Date()
         profileImageUrl = try container.decodeIfPresent(String.self, forKey: .profileImageUrl)
         bio = try container.decodeIfPresent(String.self, forKey: .bio)
         location = try container.decodeIfPresent(String.self, forKey: .location)
-        // Use decodeIfPresent to avoid crash if preferred_language is missing from backend response
         preferredLanguage = try container.decodeIfPresent(String.self, forKey: .preferredLanguage)
-        // Use decodeIfPresent to avoid crash if timezone is missing from backend response
         timezone = try container.decodeIfPresent(String.self, forKey: .timezone)
-        // Use decodeIfPresent to avoid crash if measurement_system is missing from backend response
         measurementSystem = try container.decodeIfPresent(String.self, forKey: .measurementSystem)
-        // Use decodeIfPresent to avoid crash if preferred_currency is missing from backend response
         preferredCurrency = try container.decodeIfPresent(String.self, forKey: .preferredCurrency)
-        // Use decodeIfPresent to avoid crash if notification_preferences is missing from backend response
         notificationPreferences = try container.decodeIfPresent(NotificationPreferences.self, forKey: .notificationPreferences)
-        // Use decodeIfPresent to avoid crash if privacy_settings is missing from backend response
         privacySettings = try container.decodeIfPresent(PrivacySettings.self, forKey: .privacySettings)
         
-        // Use decodeIfPresent to avoid crash if any of these fields are missing from backend response
         fitnessGoals = try container.decodeIfPresent(FitnessGoals.self, forKey: .fitnessGoals)
         mealPlanningPreferences = try container.decodeIfPresent(MealPlanningPreferences.self, forKey: .mealPlanningPreferences)
         dietaryPreferences = try container.decodeIfPresent(DietaryPreferences.self, forKey: .dietaryPreferences)
@@ -227,7 +164,6 @@ struct UserProfile: Identifiable, Codable {
         spoonacularUsername = try container.decodeIfPresent(String.self, forKey: .spoonacularUsername)
         spoonacularHash = try container.decodeIfPresent(String.self, forKey: .spoonacularHash)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -246,47 +182,6 @@ struct UserProfile: Identifiable, Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new UserProfile instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - userId: Reference to the user
-     *   - name: User's name
-     *   - email: User's email address
-     *   - age: User's age
-     *   - gender: User's gender
-     *   - goal: User's fitness goal
-     *   - diet: User's dietary preferences
-     *   - budget: User's budget preference
-     *   - isPremium: Whether user has premium access
-     *   - isOnboardingCompleted: Whether user has completed onboarding
-     *   - subscriptionType: User's subscription type
-     *   - subscriptionRenewal: User's subscription renewal date
-     *   - plansCreatedThisMonth: Number of plans created this month
-     *   - spoonacularGenerationsThisMonth: Number of Spoonacular generations this month
-     *   - lastPlanReset: Last plan reset date
-     *   - profileImageUrl: User's profile picture URL
-     *   - bio: User's bio or description
-     *   - location: User's location/city
-     *   - preferredLanguage: User's preferred language
-     *   - timezone: User's timezone
-     *   - measurementSystem: User's preferred measurement system
-     *   - preferredCurrency: User's preferred currency
-     *   - notificationPreferences: User's notification preferences
-     *   - privacySettings: User's privacy settings
-     *   - fitnessGoals: User's fitness goals
-     *   - mealPlanningPreferences: User's meal planning preferences
-     *   - dietaryPreferences: User's dietary restrictions and preferences
-     *   - cookingPreferences: User's cooking experience and preferences
-     *   - budgetPreferences: User's budget and cost preferences
-     *   - achievements: Array of achievements
-     *   - progressMetrics: Array of progress metrics
-     *   - spoonacularUsername: Spoonacular username for API operations
-     *   - spoonacularHash: Spoonacular user hash for API operations
-     *   - createdAt: Creation timestamp
-     *   - updatedAt: Last update timestamp
-     */
     init(id: String, userId: String?, name: String?, email: String?, age: Int?, gender: String?, goal: String?, diet: String?, budget: String?, isPremium: Bool, isOnboardingCompleted: Bool, subscriptionType: String?, subscriptionRenewal: Date?, plansCreatedThisMonth: Int, spoonacularGenerationsThisMonth: Int, lastPlanReset: Date, profileImageUrl: String?, bio: String?, location: String?, preferredLanguage: String?, timezone: String?, measurementSystem: String?, preferredCurrency: String?, notificationPreferences: NotificationPreferences?, privacySettings: PrivacySettings?, fitnessGoals: FitnessGoals?, mealPlanningPreferences: MealPlanningPreferences?, dietaryPreferences: DietaryPreferences?, cookingPreferences: CookingPreferences?, budgetPreferences: BudgetPreferences?, achievements: [Achievement]?, progressMetrics: [ProgressMetrics]?, spoonacularUsername: String?, spoonacularHash: String?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.userId = userId
@@ -328,109 +223,49 @@ struct UserProfile: Identifiable, Codable {
     
     // MARK: - Computed Properties
     
-    /**
-     * Validated profile picture URL that can be safely loaded
-     * 
-     * - Returns: URL if valid, nil otherwise
-     */
     var validProfilePictureUrl: URL? {
         guard let profileImageUrl = profileImageUrl, !profileImageUrl.isEmpty else { return nil }
         return URL(string: profileImageUrl)
     }
     
-    /**
-     * Display name for the profile
-     * 
-     * - Returns: Location if available, otherwise "Location not set"
-     */
     var displayLocation: String {
         return location ?? "Location not set"
     }
     
-    /**
-     * Display bio for the profile
-     * 
-     * - Returns: Bio if available, otherwise "No bio available"
-     */
     var displayBio: String {
         return bio ?? "No bio available"
     }
     
-    /**
-     * Whether the profile has a bio
-     * 
-     * - Returns: True if bio is not empty
-     */
     var hasBio: Bool {
         return bio != nil && !bio!.isEmpty
     }
     
-    /**
-     * Whether the profile has a location
-     * 
-     * - Returns: True if location is set
-     */
     var hasLocation: Bool {
         return location != nil && !location!.isEmpty
     }
     
-    /**
-     * Whether the profile has a profile picture
-     * 
-     * - Returns: True if profile picture URL is set
-     */
     var hasProfilePicture: Bool {
         return profileImageUrl != nil && !profileImageUrl!.isEmpty
     }
     
-    /**
-     * Total number of achievements earned
-     * 
-     * - Returns: Count of earned achievements
-     */
     var totalAchievements: Int {
         return achievements?.count ?? 0
     }
     
-    /**
-     * Latest progress metrics
-     * 
-     * - Returns: Most recent progress metrics or nil
-     */
     var latestProgressMetrics: ProgressMetrics? {
         return progressMetrics?.max { $0.date < $1.date }
     }
     
     // MARK: - Helper Methods
     
-    /**
-     * Gets achievements by category
-     * 
-     * - Parameter category: The achievement category to filter by
-     * - Returns: Array of achievements in the specified category
-     */
     func achievementsByCategory(_ category: String) -> [Achievement] {
         return achievements?.filter { $0.category.lowercased() == category.lowercased() } ?? []
     }
     
-    /**
-     * Gets progress metrics for a specific date range
-     * 
-     * - Parameters:
-     *   - startDate: Start date for the range
-     *   - endDate: End date for the range
-     * - Returns: Array of progress metrics within the date range
-     */
     func progressMetricsForDateRange(startDate: Date, endDate: Date) -> [ProgressMetrics] {
         return progressMetrics?.filter { $0.date >= startDate && $0.date <= endDate } ?? []
     }
     
-    /**
-     * Creates a copy of this profile with updated bio
-     * 
-     * - Parameter newBio: New bio text
-     * - Returns: New UserProfile instance with updated bio
-     */
     func withBio(_ newBio: String?) -> UserProfile {
         return UserProfile(
             id: id,
@@ -472,12 +307,6 @@ struct UserProfile: Identifiable, Codable {
         )
     }
     
-    /**
-     * Creates a copy of this profile with updated location
-     * 
-     * - Parameter newLocation: New location
-     * - Returns: New UserProfile instance with updated location
-     */
     func withLocation(_ newLocation: String?) -> UserProfile {
         return UserProfile(
             id: id,
@@ -520,34 +349,21 @@ struct UserProfile: Identifiable, Codable {
     }
 }
 
-/**
- * NotificationPreferences Model
- * 
- * Represents user's notification preferences and settings.
- */
 struct NotificationPreferences: Codable {
-    /// Whether meal reminders are enabled
     let mealReminders: Bool
     
-    /// Whether grocery list reminders are enabled
     let groceryReminders: Bool
     
-    /// Whether achievement notifications are enabled
     let achievementNotifications: Bool
     
-    /// Whether weekly progress reports are enabled
     let weeklyReports: Bool
     
-    /// Whether new recipe notifications are enabled
     let newRecipeNotifications: Bool
     
-    /// Preferred notification time (24-hour format)
     let preferredNotificationTime: String
     
-    /// Whether push notifications are enabled
     let pushNotificationsEnabled: Bool
     
-    /// Whether email notifications are enabled
     let emailNotificationsEnabled: Bool
     
     // MARK: - Coding Keys
@@ -565,19 +381,6 @@ struct NotificationPreferences: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new NotificationPreferences instance
-     * 
-     * - Parameters:
-     *   - mealReminders: Whether meal reminders are enabled
-     *   - groceryReminders: Whether grocery reminders are enabled
-     *   - achievementNotifications: Whether achievement notifications are enabled
-     *   - weeklyReports: Whether weekly reports are enabled
-     *   - newRecipeNotifications: Whether new recipe notifications are enabled
-     *   - preferredNotificationTime: Preferred notification time
-     *   - pushNotificationsEnabled: Whether push notifications are enabled
-     *   - emailNotificationsEnabled: Whether email notifications are enabled
-     */
     init(mealReminders: Bool, groceryReminders: Bool, achievementNotifications: Bool, weeklyReports: Bool, newRecipeNotifications: Bool, preferredNotificationTime: String, pushNotificationsEnabled: Bool, emailNotificationsEnabled: Bool) {
         self.mealReminders = mealReminders
         self.groceryReminders = groceryReminders
@@ -590,25 +393,15 @@ struct NotificationPreferences: Codable {
     }
 }
 
-/**
- * PrivacySettings Model
- * 
- * Represents user's privacy settings and preferences.
- */
 struct PrivacySettings: Codable {
-    /// Whether profile is public
     let isProfilePublic: Bool
     
-    /// Whether meal plans are visible to others
     let mealPlansVisible: Bool
     
-    /// Whether progress is shared with friends
     let progressSharingEnabled: Bool
     
-    /// Whether achievements are public
     let achievementsPublic: Bool
     
-    /// Whether location is shared
     let locationSharingEnabled: Bool
     
     // MARK: - Coding Keys
@@ -623,16 +416,6 @@ struct PrivacySettings: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new PrivacySettings instance
-     * 
-     * - Parameters:
-     *   - isProfilePublic: Whether profile is public
-     *   - mealPlansVisible: Whether meal plans are visible
-     *   - progressSharingEnabled: Whether progress sharing is enabled
-     *   - achievementsPublic: Whether achievements are public
-     *   - locationSharingEnabled: Whether location sharing is enabled
-     */
     init(isProfilePublic: Bool, mealPlansVisible: Bool, progressSharingEnabled: Bool, achievementsPublic: Bool, locationSharingEnabled: Bool) {
         self.isProfilePublic = isProfilePublic
         self.mealPlansVisible = mealPlansVisible
@@ -642,31 +425,19 @@ struct PrivacySettings: Codable {
     }
 }
 
-/**
- * FitnessGoals Model
- * 
- * Represents user's fitness goals and targets.
- */
 struct FitnessGoals: Codable {
-    /// Target weight in kilograms
     let targetWeight: Double?
     
-    /// Target daily calorie intake
     let targetCalories: Int?
     
-    /// Target protein intake in grams
     let targetProtein: Double?
     
-    /// Target carbohydrate intake in grams
     let targetCarbohydrates: Double?
     
-    /// Target fat intake in grams
     let targetFat: Double?
     
-    /// Weekly workout goal in minutes
     let weeklyWorkoutMinutes: Int?
     
-    /// Target steps per day
     let targetStepsPerDay: Int?
     
     // MARK: - Coding Keys
@@ -683,18 +454,6 @@ struct FitnessGoals: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new FitnessGoals instance
-     * 
-     * - Parameters:
-     *   - targetWeight: Target weight in kilograms
-     *   - targetCalories: Target daily calorie intake
-     *   - targetProtein: Target protein intake in grams
-     *   - targetCarbohydrates: Target carbohydrate intake in grams
-     *   - targetFat: Target fat intake in grams
-     *   - weeklyWorkoutMinutes: Weekly workout goal in minutes
-     *   - targetStepsPerDay: Target steps per day
-     */
     init(targetWeight: Double?, targetCalories: Int?, targetProtein: Double?, targetCarbohydrates: Double?, targetFat: Double?, weeklyWorkoutMinutes: Int?, targetStepsPerDay: Int?) {
         self.targetWeight = targetWeight
         self.targetCalories = targetCalories
@@ -706,31 +465,19 @@ struct FitnessGoals: Codable {
     }
 }
 
-/**
- * MealPlanningPreferences Model
- * 
- * Represents user's meal planning preferences and settings.
- */
 struct MealPlanningPreferences: Codable {
-    /// Preferred number of meals per day
     let mealsPerDay: Int
     
-    /// Preferred meal prep time in minutes
     let preferredPrepTime: Int
     
-    /// Whether to include snacks
     let includeSnacks: Bool
     
-    /// Preferred cuisine types
     let preferredCuisines: [String]
     
-    /// Whether to rotate meals
     let rotateMeals: Bool
     
-    /// Whether to include leftovers
     let includeLeftovers: Bool
     
-    /// Preferred meal complexity (Easy, Medium, Hard)
     let preferredComplexity: String
     
     // MARK: - Coding Keys
@@ -747,18 +494,6 @@ struct MealPlanningPreferences: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new MealPlanningPreferences instance
-     * 
-     * - Parameters:
-     *   - mealsPerDay: Preferred number of meals per day
-     *   - preferredPrepTime: Preferred meal prep time in minutes
-     *   - includeSnacks: Whether to include snacks
-     *   - preferredCuisines: Array of preferred cuisine types
-     *   - rotateMeals: Whether to rotate meals
-     *   - includeLeftovers: Whether to include leftovers
-     *   - preferredComplexity: Preferred meal complexity
-     */
     init(mealsPerDay: Int, preferredPrepTime: Int, includeSnacks: Bool, preferredCuisines: [String], rotateMeals: Bool, includeLeftovers: Bool, preferredComplexity: String) {
         self.mealsPerDay = mealsPerDay
         self.preferredPrepTime = preferredPrepTime
@@ -770,28 +505,17 @@ struct MealPlanningPreferences: Codable {
     }
 }
 
-/**
- * DietaryPreferences Model
- * 
- * Represents user's dietary preferences and restrictions.
- */
 struct DietaryPreferences: Codable {
-    /// Dietary restrictions (e.g., ["Vegetarian", "Gluten-Free"])
     let restrictions: [String]
     
-    /// Allergies and intolerances
     let allergies: [String]
     
-    /// Favorite ingredients
     let favoriteIngredients: [String]
     
-    /// Disliked ingredients
     let dislikedIngredients: [String]
     
-    /// Whether to avoid certain ingredients
     let avoidIngredients: [String]
     
-    /// Preferred cooking methods
     let preferredCookingMethods: [String]
     
     // MARK: - Coding Keys
@@ -807,17 +531,6 @@ struct DietaryPreferences: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new DietaryPreferences instance
-     * 
-     * - Parameters:
-     *   - restrictions: Array of dietary restrictions
-     *   - allergies: Array of allergies and intolerances
-     *   - favoriteIngredients: Array of favorite ingredients
-     *   - dislikedIngredients: Array of disliked ingredients
-     *   - avoidIngredients: Array of ingredients to avoid
-     *   - preferredCookingMethods: Array of preferred cooking methods
-     */
     init(restrictions: [String], allergies: [String], favoriteIngredients: [String], dislikedIngredients: [String], avoidIngredients: [String], preferredCookingMethods: [String]) {
         self.restrictions = restrictions
         self.allergies = allergies
@@ -828,28 +541,17 @@ struct DietaryPreferences: Codable {
     }
 }
 
-/**
- * CookingPreferences Model
- * 
- * Represents user's cooking preferences and experience level.
- */
 struct CookingPreferences: Codable {
-    /// Cooking skill level (Beginner, Intermediate, Advanced)
     let skillLevel: String
     
-    /// Preferred cooking time in minutes
     let preferredCookingTime: Int
     
-    /// Whether to use kitchen appliances
     let useAppliances: Bool
     
-    /// Preferred cooking methods
     let preferredMethods: [String]
     
-    /// Whether to use pre-made ingredients
     let usePreMadeIngredients: Bool
     
-    /// Whether to batch cook
     let batchCooking: Bool
     
     // MARK: - Coding Keys
@@ -865,17 +567,6 @@ struct CookingPreferences: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new CookingPreferences instance
-     * 
-     * - Parameters:
-     *   - skillLevel: Cooking skill level
-     *   - preferredCookingTime: Preferred cooking time in minutes
-     *   - useAppliances: Whether to use kitchen appliances
-     *   - preferredMethods: Array of preferred cooking methods
-     *   - usePreMadeIngredients: Whether to use pre-made ingredients
-     *   - batchCooking: Whether to batch cook
-     */
     init(skillLevel: String, preferredCookingTime: Int, useAppliances: Bool, preferredMethods: [String], usePreMadeIngredients: Bool, batchCooking: Bool) {
         self.skillLevel = skillLevel
         self.preferredCookingTime = preferredCookingTime
@@ -886,28 +577,17 @@ struct CookingPreferences: Codable {
     }
 }
 
-/**
- * BudgetPreferences Model
- * 
- * Represents user's budget preferences and cost constraints.
- */
 struct BudgetPreferences: Codable {
-    /// Weekly budget for groceries
     let weeklyBudget: Double?
     
-    /// Monthly budget for groceries
     let monthlyBudget: Double?
     
-    /// Preferred price range per meal
     let preferredMealPrice: Double?
     
-    /// Whether to prioritize budget-friendly recipes
     let prioritizeBudget: Bool
     
-    /// Whether to include premium ingredients
     let includePremiumIngredients: Bool
     
-    /// Whether to suggest budget alternatives
     let suggestAlternatives: Bool
     
     // MARK: - Coding Keys
@@ -923,17 +603,6 @@ struct BudgetPreferences: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new BudgetPreferences instance
-     * 
-     * - Parameters:
-     *   - weeklyBudget: Weekly budget for groceries
-     *   - monthlyBudget: Monthly budget for groceries
-     *   - preferredMealPrice: Preferred price range per meal
-     *   - prioritizeBudget: Whether to prioritize budget-friendly recipes
-     *   - includePremiumIngredients: Whether to include premium ingredients
-     *   - suggestAlternatives: Whether to suggest budget alternatives
-     */
     init(weeklyBudget: Double?, monthlyBudget: Double?, preferredMealPrice: Double?, prioritizeBudget: Bool, includePremiumIngredients: Bool, suggestAlternatives: Bool) {
         self.weeklyBudget = weeklyBudget
         self.monthlyBudget = monthlyBudget
@@ -944,34 +613,21 @@ struct BudgetPreferences: Codable {
     }
 }
 
-/**
- * Achievement Model
- * 
- * Represents a user achievement or milestone.
- */
 struct Achievement: Codable {
-    /// Unique identifier for the achievement
     let id: String
     
-    /// Achievement title
     let title: String
     
-    /// Achievement description
     let description: String
     
-    /// Achievement category
     let category: String
     
-    /// Achievement icon or emoji
     let icon: String
     
-    /// Whether the achievement has been earned
     let isEarned: Bool
     
-    /// Date when the achievement was earned
     let earnedAt: Date?
     
-    /// Achievement points or value
     let points: Int
     
     // MARK: - Coding Keys
@@ -1000,7 +656,6 @@ struct Achievement: Codable {
         isEarned = try container.decode(Bool.self, forKey: .isEarned)
         points = try container.decode(Int.self, forKey: .points)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -1013,19 +668,6 @@ struct Achievement: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new Achievement instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - title: Achievement title
-     *   - description: Achievement description
-     *   - category: Achievement category
-     *   - icon: Achievement icon
-     *   - isEarned: Whether achievement is earned
-     *   - earnedAt: Date when earned
-     *   - points: Achievement points
-     */
     init(id: String, title: String, description: String, category: String, icon: String, isEarned: Bool, earnedAt: Date?, points: Int) {
         self.id = id
         self.title = title
@@ -1236,12 +878,10 @@ enum SubscriptionType: String, CaseIterable {
 // MARK: - Extensions
 
 extension UserProfile {
-    /// Whether user has premium access
     var hasPremiumAccess: Bool {
         return isPremium
     }
     
-    /// Subscription display name
     var subscriptionDisplayName: String {
         switch subscriptionType?.lowercased() {
         case "free": return "Free Plan"
@@ -1251,26 +891,22 @@ extension UserProfile {
         }
     }
     
-    /// Days until subscription renewal
     var daysUntilRenewal: Int? {
         guard let renewal = subscriptionRenewal else { return nil }
         let calendar = Calendar.current
         return calendar.dateComponents([.day], from: Date(), to: renewal).day
     }
     
-    /// Number of plans remaining this month
     var plansRemainingThisMonth: Int {
         let maxPlans = hasPremiumAccess ? 10 : 3
         return max(0, maxPlans - plansCreatedThisMonth)
     }
     
-    /// Number of Spoonacular generations remaining this month
     var spoonacularGenerationsRemainingThisMonth: Int {
         let maxGenerations = hasPremiumAccess ? 20 : 5
         return max(0, maxGenerations - spoonacularGenerationsThisMonth)
     }
     
-    /// Whether profile is complete
     var isProfileComplete: Bool {
         var completedFields = 0
         let totalFields = 6
@@ -1285,38 +921,28 @@ extension UserProfile {
         return completedFields >= totalFields
     }
     
-    /// Whether user can create more plans
     var canCreateMorePlans: Bool {
         return plansCreatedThisMonth < (hasPremiumAccess ? 10 : 3)
     }
     
-    /// Whether user can use Spoonacular generation
     var canUseSpoonacularGeneration: Bool {
         return spoonacularGenerationsThisMonth < (hasPremiumAccess ? 20 : 5)
     }
     
-    /// Check if user needs to reset monthly limits
     mutating func resetMonthlyLimitsIfNeeded() {
         let calendar = Calendar.current
         if !calendar.isDate(lastPlanReset, equalTo: Date(), toGranularity: .month) {
-            // Note: This would need to be handled differently since these are let properties
-            // In a real implementation, you'd need to create a new instance or use a different approach
         }
     }
     
-    /// Increment plan creation count
     mutating func incrementPlanCreationCount() {
         resetMonthlyLimitsIfNeeded()
-        // Note: This would need to be handled differently since these are let properties
     }
     
-    /// Increment Spoonacular generation count
     mutating func incrementSpoonacularGenerationCount() {
         resetMonthlyLimitsIfNeeded()
-        // Note: This would need to be handled differently since these are let properties
     }
     
-    /// Check if user can perform action based on subscription
     func canPerformAction(_ action: UserAction) -> Bool {
         switch action {
         case .createPlan:
@@ -1334,9 +960,7 @@ extension UserProfile {
     
     // MARK: - Spoonacular Integration
     
-    /// Maps user diet preferences to Spoonacular diet parameter
     var spoonacularDiet: String? {
-        // Check dietary restrictions first (more specific)
         let restrictions = dietaryPreferences?.restrictions ?? []
         
         if restrictions.contains("vegan") {
@@ -1351,7 +975,6 @@ extension UserProfile {
             return "mediterranean"
         }
         
-        // Fall back to main diet field
         switch diet?.lowercased() {
         case "vegan":
             return "vegan"
@@ -1368,36 +991,28 @@ extension UserProfile {
         }
     }
     
-    /// Maps user exclusions to Spoonacular exclude parameter
     var spoonacularExclusions: String? {
         var exclusions: [String] = []
         
-        // Add allergies
         exclusions.append(contentsOf: dietaryPreferences?.allergies ?? [])
         
-        // Add disliked ingredients
         exclusions.append(contentsOf: dietaryPreferences?.dislikedIngredients ?? [])
         
-        // Add ingredients to avoid
         exclusions.append(contentsOf: dietaryPreferences?.avoidIngredients ?? [])
         
-        // Remove duplicates and filter out empty strings
         let uniqueExclusions = Array(Set(exclusions)).filter { !$0.isEmpty }
         
         return uniqueExclusions.isEmpty ? nil : uniqueExclusions.joined(separator: ",")
     }
     
-    /// Maps user calorie target to Spoonacular targetCalories parameter
     var spoonacularTargetCalories: Int? {
         return fitnessGoals?.targetCalories
     }
     
-    /// Maps user cuisine preferences to Spoonacular cuisine parameter
     var spoonacularCuisines: [String] {
         return mealPlanningPreferences?.preferredCuisines ?? []
     }
     
-    /// Maps user cooking skill level to recipe complexity
     var spoonacularRecipeComplexity: String {
         let skillLevel = cookingPreferences?.skillLevel ?? "beginner"
         
@@ -1413,60 +1028,49 @@ extension UserProfile {
         }
     }
     
-    /// Maps user cooking time preferences to maxReadyTime parameter
     var spoonacularMaxReadyTime: Int? {
         let preferredTime = cookingPreferences?.preferredCookingTime ?? 30
         let mealPrepTime = mealPlanningPreferences?.preferredPrepTime ?? 30
         
-        // Return the higher of the two, but cap at 60 minutes
         return min(max(preferredTime, mealPrepTime), 60)
     }
     
-    /// Maps user budget preferences to Spoonacular maxPrice parameter
     var spoonacularMaxPrice: Double? {
         guard let budgetPrefs = budgetPreferences else { return nil }
         
-        // Use weekly budget divided by 21 meals (3 meals/day * 7 days)
         if let weeklyBudget = budgetPrefs.weeklyBudget {
             return weeklyBudget / 21.0
         }
         
-        // Fall back to preferred meal price
         if let mealPrice = budgetPrefs.preferredMealPrice {
             return mealPrice
         }
         
-        // Default based on budget category
         switch budget?.lowercased() {
         case "low":
-            return 3.0 // $3 per meal
+            return 3.0
         case "medium":
-            return 5.0 // $5 per meal
+            return 5.0
         case "high":
-            return 8.0 // $8 per meal
+            return 8.0
         default:
-            return 5.0 // Default to medium
+            return 5.0
         }
     }
     
-    /// Maps user meal planning preferences to Spoonacular parameters
     var spoonacularMealPlanningParams: [String: Any] {
         var params: [String: Any] = [:]
         
-        // Add meals per day
         if let mealsPerDay = mealPlanningPreferences?.mealsPerDay {
             params["mealsPerDay"] = mealsPerDay
         }
         
-        // Add cuisine preferences
         if !spoonacularCuisines.isEmpty {
             params["cuisine"] = spoonacularCuisines.joined(separator: ",")
         }
         
-        // Add recipe complexity
         params["maxReadyTime"] = spoonacularMaxReadyTime
         
-        // Add price limit
         if let maxPrice = spoonacularMaxPrice {
             params["maxPrice"] = maxPrice
         }
@@ -1474,58 +1078,7 @@ extension UserProfile {
         return params
     }
     
-    /// Creates a comprehensive Spoonacular request parameters dictionary
-    func createSpoonacularRequestParams() -> [String: String] {
-        var params: [String: String] = [
-            "timeFrame": "week",
-            "apiKey": Configuration.spoonacularApiKey
-        ]
-        
-        // Add diet
-        if let diet = spoonacularDiet {
-            params["diet"] = diet
-        }
-        
-        // Add exclusions
-        if let exclusions = spoonacularExclusions {
-            params["exclude"] = exclusions
-        }
-        
-        // Add target calories
-        if let targetCalories = spoonacularTargetCalories {
-            params["targetCalories"] = String(targetCalories)
-        }
-        
-        // Add cuisine preferences
-        if !spoonacularCuisines.isEmpty {
-            params["cuisine"] = spoonacularCuisines.joined(separator: ",")
-        }
-        
-        // Add max ready time
-        if let maxReadyTime = spoonacularMaxReadyTime {
-            params["maxReadyTime"] = String(maxReadyTime)
-        }
-        
-        // Add max price
-        if let maxPrice = spoonacularMaxPrice {
-            params["maxPrice"] = String(Int(maxPrice * 100)) // Convert to cents
-        }
-        
-        return params
-    }
     
-    /// Validates if user has sufficient preferences for Spoonacular meal planning
-    var hasValidSpoonacularPreferences: Bool {
-        // Check if we have at least basic dietary information
-        let hasDietaryInfo = diet != nil || !(dietaryPreferences?.restrictions ?? []).isEmpty
-        
-        // Check if we have calorie target or budget info
-        let hasNutritionalInfo = fitnessGoals?.targetCalories != nil || budget != nil
-        
-        return hasDietaryInfo && hasNutritionalInfo
-    }
-    
-    /// Gets a summary of user preferences for debugging/logging
     var spoonacularPreferencesSummary: String {
         var summary: [String] = []
         

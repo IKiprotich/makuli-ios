@@ -22,53 +22,43 @@ class GroceryListViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     
-    /// Groceries grouped by category for better organization
     var groceriesByCategory: [String: [GroceryItem]] {
         Dictionary(grouping: groceries) { $0.category }
     }
     
-    /// Total number of items
     var totalItems: Int {
         return groceries.count
     }
     
-    /// Number of checked items
     var checkedItemsCount: Int {
         return groceries.filter { $0.isCompleted }.count
     }
     
-    /// Completion percentage
     var completionPercentage: Double {
         guard totalItems > 0 else { return 0.0 }
         return Double(checkedItemsCount) / Double(totalItems) * 100.0
     }
     
-    /// Total estimated cost
     var totalCost: Double {
         return groceries.reduce(0.0) { $0 + ($1.estimatedPrice ?? 0) }
     }
     
-    /// Available categories
     var availableCategories: [String] {
         let categories = Set(groceries.map { $0.category })
         return Array(categories).sorted()
     }
     
-    /// Unchecked items (still need to buy)
     var uncheckedItems: [GroceryItem] {
         return groceries.filter { !$0.isCompleted }
     }
     
-    /// Checked items (already purchased)
     var checkedItemsList: [GroceryItem] {
         return groceries.filter { $0.isCompleted }
     }
     
     // MARK: - Public Methods
     
-    /// Fetches grocery list for a user
     func fetchGroceries(for userId: String) async {
-        // Cancel any existing fetch task
         fetchTask?.cancel()
         
         fetchTask = Task {
@@ -78,21 +68,18 @@ class GroceryListViewModel: ObservableObject {
         await fetchTask?.value
     }
     
-    /// Forces a refresh of the grocery list
     func refreshGroceries(for userId: String) async {
         groceries = []
         errorMessage = nil
         await performFetch(for: userId)
     }
     
-    /// Generates grocery list from a meal plan
     func generateGroceryList(from planId: String, for userId: String) async -> Bool {
         do {
             Logger.info("Generating grocery list from plan: \(planId)")
             isGenerating = true
             errorMessage = nil
             let generatedItems = try await supabaseManager.createGroceryListFromPlan(planId: planId, userId: userId)
-            // Update local state
             self.groceries = generatedItems
             self.selectedPlanId = planId
             Logger.info("Successfully generated \(generatedItems.count) grocery items")
@@ -106,13 +93,11 @@ class GroceryListViewModel: ObservableObject {
         }
     }
     
-    /// Toggles an item's checked status
     func toggleItemChecked(itemId: String) async -> Bool {
         do {
             Logger.info("Toggling grocery item: \(itemId)")
             if let index = groceries.firstIndex(where: { $0.id == itemId }) {
                 groceries[index].isCompleted.toggle()
-                // Persist change
                 try await supabaseManager.updateGroceryItem(groceries[index])
             }
             return true
@@ -123,7 +108,6 @@ class GroceryListViewModel: ObservableObject {
         }
     }
     
-    /// Adds a custom item to the grocery list
     func addCustomItem(
         name: String,
         quantity: String,
@@ -157,15 +141,12 @@ class GroceryListViewModel: ObservableObject {
         }
     }
     
-    /// Removes an item from the grocery list
     func removeItem(itemId: String) async -> Bool {
-        // TODO: Implement remove logic in SupabaseManager if needed
         Logger.error("removeGroceryItem is not implemented in SupabaseManager")
         self.errorMessage = "Remove item not implemented."
         return false
     }
     
-    /// Updates item quantity
     func updateItemQuantity(itemId: String, newQuantity: String) async -> Bool {
         do {
             Logger.info("Updating quantity for item: \(itemId)")
@@ -181,15 +162,12 @@ class GroceryListViewModel: ObservableObject {
         }
     }
     
-    /// Clears all checked items
     func clearCheckedItems() async -> Bool {
-        // TODO: Implement batch remove in SupabaseManager if needed
         Logger.error("removeGroceryItems is not implemented in SupabaseManager")
         self.errorMessage = "Clear checked items not implemented."
         return false
     }
     
-    /// Shares grocery list (if user has premium)
     func shareGroceryList() -> String? {
         guard !groceries.isEmpty else { return nil }
         
@@ -214,7 +192,6 @@ class GroceryListViewModel: ObservableObject {
         return shareText
     }
     
-    /// Exports grocery list to a structured format
     func exportGroceryList() -> GroceryListExport? {
         guard !groceries.isEmpty else { return nil }
         
@@ -228,17 +205,13 @@ class GroceryListViewModel: ObservableObject {
         )
     }
     
-    /// Marks all items as checked
     func checkAllItems() async -> Bool {
-        // TODO: Implement batch check in SupabaseManager if needed
         Logger.error("checkAllGroceryItems is not implemented in SupabaseManager")
         self.errorMessage = "Check all items not implemented."
         return false
     }
     
-    /// Unmarks all items
     func uncheckAllItems() async -> Bool {
-        // TODO: Implement batch uncheck in SupabaseManager if needed
         Logger.error("uncheckAllGroceryItems is not implemented in SupabaseManager")
         self.errorMessage = "Uncheck all items not implemented."
         return false
@@ -246,17 +219,14 @@ class GroceryListViewModel: ObservableObject {
     
     // MARK: - Helper Methods
     
-    /// Clears error message
     func clearError() {
         errorMessage = nil
     }
     
-    /// Gets items for a specific category
     func items(for category: String) -> [GroceryItem] {
         return groceries.filter { $0.category == category }.sorted { $0.name < $1.name }
     }
     
-    /// Searches items by name
     func searchItems(query: String) -> [GroceryItem] {
         guard !query.isEmpty else { return groceries }
         
@@ -264,10 +234,7 @@ class GroceryListViewModel: ObservableObject {
         return groceries.filter { $0.name.lowercased().contains(lowercaseQuery) }
     }
     
-    /// Gets items that match dietary restrictions
     func getItemsForDiet(_ diet: String) -> [GroceryItem] {
-        // This would need dietary information in GroceryItem model
-        // For now, return all items
         return groceries
     }
     
@@ -282,9 +249,7 @@ class GroceryListViewModel: ObservableObject {
             self.groceries = fetchedGroceries
             Logger.info("Successfully loaded \(fetchedGroceries.count) grocery items")
         } catch is CancellationError {
-            // Task was cancelled (e.g., user navigated away)
             Logger.debug("Grocery fetch cancelled")
-            // Do not set errorMessage for cancellations
         } catch {
             Logger.error("Failed to fetch grocery list: \(error)")
             self.errorMessage = "Failed to load grocery list. Please check your connection and try again."

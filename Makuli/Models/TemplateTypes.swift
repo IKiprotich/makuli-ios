@@ -1,3 +1,10 @@
+//
+//  TemplateTypes.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-22.
+//
+
 import Foundation
 
 struct TemplateMeal: Codable, Identifiable {
@@ -21,7 +28,6 @@ struct FullMealPlanTemplate: Codable, Identifiable {
     let id: UUID
     let templateName: String
     let meals: [TemplateMeal]
-    // Add more properties as needed
 }
 
 struct CreateMealPlanTemplateRequest: Codable {
@@ -34,12 +40,26 @@ struct CreateMealPlanTemplateRequest: Codable {
     let estimatedCostMax: Double
     let imageUrl: String?
     let tags: [String]
-    let isActive: Bool
     let icon: String
     let colorScheme: String?
     let targetCaloriesPerDay: Int?
     let macros: String?
-    let createdBy: String
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case description
+        case category
+        case difficulty
+        case durationDays = "duration_days"
+        case estimatedCostMin = "estimated_cost_min"
+        case estimatedCostMax = "estimated_cost_max"
+        case imageUrl = "image_url"
+        case tags
+        case icon
+        case colorScheme = "color_scheme"
+        case targetCaloriesPerDay = "target_calories_per_day"
+        case macros
+    }
 }
 
 struct CreateTemplateMealRequest: Codable {
@@ -57,6 +77,23 @@ struct CreateTemplateMealRequest: Codable {
     let prepTime: Int?
     let ingredients: [String]?
     let instructions: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case templateId = "template_id"
+        case dayOfWeek = "day_of_week"
+        case mealType = "meal_type"
+        case mealName = "meal_name"
+        case recipeId = "recipe_id"
+        case cookingTime = "cooking_time"
+        case difficulty
+        case position
+        case day
+        case estimatedCost = "estimated_cost"
+        case calories
+        case prepTime = "prep_time"
+        case ingredients
+        case instructions
+    }
 }
 
 enum TemplateCategory: String, Codable, CaseIterable {
@@ -88,7 +125,6 @@ struct DayMeals: Codable {
     let breakfast: TemplateMeal?
     let lunch: TemplateMeal?
     let dinner: TemplateMeal?
-    // Add more properties as needed
 }
 
 struct PlanDayMeals: Codable {

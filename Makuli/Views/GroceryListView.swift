@@ -147,10 +147,8 @@ extension GroceryListView {
     
     private var groceryListContent: some View {
         VStack(spacing: 0) {
-            // Progress header
             progressHeader
             
-            // Grocery list
             List {
                 ForEach(groupedGroceries.keys.sorted(), id: \.self) { category in
                     Section(category.uppercased()) {
@@ -247,9 +245,6 @@ extension GroceryListView {
     }
     
     private func generateFromMealPlan() {
-        // This would typically show a plan selector
-        // For now, just show an alert
-        // TODO: Implement meal plan selection
     }
     
     private func shareGroceryList() {

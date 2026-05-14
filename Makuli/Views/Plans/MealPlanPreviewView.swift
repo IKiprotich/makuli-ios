@@ -17,7 +17,6 @@ struct MealPlanPreviewView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingFinalPlan = false
     
-    // Sample meal data - in real app, this would come from your database
     private let sampleMeals = [
         "Breakfast": [
             "Quinoa Power Breakfast Bowl": "quinoa_bowl",
@@ -34,11 +33,9 @@ struct MealPlanPreviewView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
                 AppColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 24) {
-                    // Instructional text
                     VStack(spacing: 8) {
                         Text("Here are the recipes we've chosen for your meal plan. Feel free to swap out any that you don't like!")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -47,7 +44,6 @@ struct MealPlanPreviewView: View {
                             .padding(.horizontal, 20)
                     }
                     
-                    // Meal plan sections
                     ScrollView {
                         VStack(spacing: 24) {
                             ForEach(Array(weekDays.enumerated()), id: \.offset) { index, date in
@@ -61,7 +57,6 @@ struct MealPlanPreviewView: View {
                     
                     Spacer()
                     
-                    // Save meal plan button
                     Button(action: {
                         showingFinalPlan = true
                     }) {
@@ -108,13 +103,11 @@ struct MealPlanPreviewView: View {
     
     private func daySection(for date: Date) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Day header
             Text(formatDayHeader(date))
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(AppColors.text)
                 .padding(.horizontal, 20)
             
-            // Meals for this day
             VStack(spacing: 12) {
                 ForEach(Array(selectedMealsForDay(date).enumerated()), id: \.offset) { index, mealType in
                     if isMealSelected(for: date, mealType: mealType) {
@@ -130,7 +123,6 @@ struct MealPlanPreviewView: View {
         let mealImage = getMealImage(for: mealType)
         
         return HStack(spacing: 16) {
-            // Meal image
             AsyncImage(url: URL(string: mealImage)) { image in
                 image
                     .resizable()
@@ -148,9 +140,7 @@ struct MealPlanPreviewView: View {
             .clipped()
             .cornerRadius(8)
             
-            // Meal details
             VStack(alignment: .leading, spacing: 4) {
-                // Meal type tag
                 Text(mealType)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .padding(.horizontal, 8)
@@ -159,7 +149,6 @@ struct MealPlanPreviewView: View {
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 
-                // Meal name
                 Text(mealName)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(AppColors.text)
@@ -168,9 +157,7 @@ struct MealPlanPreviewView: View {
             
             Spacer()
             
-            // Swap button
             Button(action: {
-                // Handle meal swap
             }) {
                                     ZStack {
                         RoundedRectangle(cornerRadius: 8)

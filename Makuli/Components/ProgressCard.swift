@@ -2,7 +2,7 @@
 //  ProgressCard.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import SwiftUI
@@ -20,7 +20,6 @@ struct ProgressCard: View {
                 
                 Spacer()
                 
-                // Status indicator
                 Circle()
                     .fill(metric.isPositive ? AppColors.successGreen : AppColors.warnRed)
                     .frame(width: 8, height: 8)

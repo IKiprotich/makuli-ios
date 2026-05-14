@@ -2,77 +2,42 @@
 //  Ingredient.swift
 //  Makuli
 //
-//  Created by Ian   on 22/06/2025.
+//  Created by Ian on 2025-06-22.
 //
 
 import Foundation
 
-/**
- * Ingredient Model
- * 
- * Represents an ingredient used in recipes.
- * This model contains detailed information about ingredients including nutritional data,
- * substitutions, and preparation instructions.
- * 
- * Key Features:
- * - Ingredient name, quantity, and unit tracking
- * - Nutritional information per serving
- * - Substitution options for dietary restrictions
- * - Preparation instructions and notes
- * - Category and allergen information
- * 
- * Database Relationships:
- * - Belongs to a Recipe (via recipe_id)
- * - Can have multiple substitutions
- * - Can be linked to grocery items
- */
 struct Ingredient: Identifiable, Codable {
-    /// Unique identifier for the ingredient
     let id: String
-    
-    /// Reference to the recipe this ingredient belongs to
+
     let recipeId: String
     
-    /// Name of the ingredient
     let name: String
     
-    /// Quantity needed for the recipe
     let quantity: Double
     
-    /// Unit of measurement (e.g., "cups", "grams", "pieces")
     let unit: String
-    
-    /// Category of the ingredient (e.g., "Produce", "Dairy", "Protein")
+
     let category: String
     
-    /// Preparation instructions for this ingredient
     let preparation: String?
     
-    /// Optional notes about the ingredient
     let notes: String?
     
-    /// Whether this ingredient is optional
     let isOptional: Bool
     
-    /// Whether this ingredient is a garnish
     let isGarnish: Bool
     
-    /// Whether this ingredient has been completed/checked off
     var isCompleted: Bool
     
-    /// Nutritional information per serving
     let nutrition: IngredientNutrition?
     
-    /// Allergen information (e.g., ["Gluten", "Dairy", "Nuts"])
     let allergens: [String]
     
-    /// Substitution options for this ingredient
     let substitutions: [IngredientSubstitution]
     
-    /// Timestamp when the ingredient was created
     let createdAt: Date
     
-    /// Timestamp when the ingredient was last updated
     let updatedAt: Date
     
     // MARK: - Coding Keys
@@ -116,7 +81,6 @@ struct Ingredient: Identifiable, Codable {
         allergens = try container.decode([String].self, forKey: .allergens)
         substitutions = try container.decode([IngredientSubstitution].self, forKey: .substitutions)
         
-        // Handle date decoding with ISO8601 format
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -135,26 +99,6 @@ struct Ingredient: Identifiable, Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new Ingredient instance
-     * 
-     * - Parameters:
-     *   - id: Unique identifier
-     *   - recipeId: Reference to the recipe
-     *   - name: Ingredient name
-     *   - quantity: Quantity needed
-     *   - unit: Unit of measurement
-     *   - category: Ingredient category
-     *   - preparation: Optional preparation instructions
-     *   - notes: Optional notes
-     *   - isOptional: Whether ingredient is optional
-     *   - isGarnish: Whether ingredient is a garnish
-     *   - nutrition: Optional nutritional information
-     *   - allergens: Array of allergens
-     *   - substitutions: Array of substitution options
-     *   - createdAt: Creation timestamp
-     *   - updatedAt: Last update timestamp
-     */
     init(id: String, recipeId: String, name: String, quantity: Double, unit: String, category: String, preparation: String?, notes: String?, isOptional: Bool, isGarnish: Bool, isCompleted: Bool, nutrition: IngredientNutrition?, allergens: [String], substitutions: [IngredientSubstitution], createdAt: Date, updatedAt: Date) {
         self.id = id
         self.recipeId = recipeId
@@ -176,11 +120,6 @@ struct Ingredient: Identifiable, Codable {
     
     // MARK: - Computed Properties
     
-    /**
-     * Formatted quantity string with unit
-     * 
-     * - Returns: Formatted string like "2.5 cups" or "3 pieces"
-     */
     var formattedQuantity: String {
         if quantity.truncatingRemainder(dividingBy: 1) == 0 {
             return "\(Int(quantity)) \(unit)"
@@ -189,11 +128,7 @@ struct Ingredient: Identifiable, Codable {
         }
     }
     
-    /**
-     * Display name with optional indicator
-     * 
-     * - Returns: Name with "(optional)" suffix if optional
-     */
+
     var displayName: String {
         if isOptional {
             return "\(name) (optional)"
@@ -202,29 +137,15 @@ struct Ingredient: Identifiable, Codable {
         }
     }
     
-    /**
-     * Whether this ingredient contains any allergens
-     * 
-     * - Returns: True if ingredient has allergens
-     */
     var hasAllergens: Bool {
         return !allergens.isEmpty
     }
     
-    /**
-     * Whether this ingredient has substitution options
-     * 
-     * - Returns: True if ingredient has substitutions
-     */
     var hasSubstitutions: Bool {
         return !substitutions.isEmpty
     }
     
-    /**
-     * Category color for UI display
-     * 
-     * - Returns: Color name based on category
-     */
+
     var categoryColor: String {
         switch category.lowercased() {
         case "produce", "vegetables", "fruits":
@@ -242,11 +163,7 @@ struct Ingredient: Identifiable, Codable {
         }
     }
     
-    /**
-     * Allergen warning text
-     * 
-     * - Returns: Formatted allergen warning or empty string
-     */
+    
     var allergenWarning: String {
         guard !allergens.isEmpty else { return "" }
         return "Contains: \(allergens.joined(separator: ", "))"
@@ -254,32 +171,14 @@ struct Ingredient: Identifiable, Codable {
     
     // MARK: - Helper Methods
     
-    /**
-     * Checks if this ingredient contains a specific allergen
-     * 
-     * - Parameter allergen: The allergen to check for
-     * - Returns: True if ingredient contains this allergen
-     */
     func containsAllergen(_ allergen: String) -> Bool {
         return allergens.contains { $0.lowercased() == allergen.lowercased() }
     }
     
-    /**
-     * Gets substitution options for a specific dietary restriction
-     * 
-     * - Parameter restriction: The dietary restriction to filter by
-     * - Returns: Array of substitutions that match the restriction
-     */
     func substitutionsForRestriction(_ restriction: String) -> [IngredientSubstitution] {
         return substitutions.filter { $0.dietaryRestrictions.contains { $0.lowercased() == restriction.lowercased() } }
     }
-    
-    /**
-     * Creates a copy of this ingredient with updated quantity
-     * 
-     * - Parameter newQuantity: New quantity value
-     * - Returns: New Ingredient instance with updated quantity
-     */
+
     func withQuantity(_ newQuantity: Double) -> Ingredient {
         return Ingredient(
             id: id,
@@ -301,12 +200,6 @@ struct Ingredient: Identifiable, Codable {
         )
     }
     
-    /**
-     * Creates a copy of this ingredient with updated preparation instructions
-     * 
-     * - Parameter newPreparation: New preparation instructions
-     * - Returns: New Ingredient instance with updated preparation
-     */
     func withPreparation(_ newPreparation: String?) -> Ingredient {
         return Ingredient(
             id: id,
@@ -329,35 +222,21 @@ struct Ingredient: Identifiable, Codable {
     }
 }
 
-/**
- * IngredientNutrition Model
- * 
- * Represents nutritional information for a single ingredient.
- * Contains macronutrients and other nutritional data per serving.
- */
 struct IngredientNutrition: Codable {
-    /// Calories per serving
     let calories: Double
     
-    /// Protein content in grams
     let protein: Double
     
-    /// Carbohydrate content in grams
     let carbohydrates: Double
     
-    /// Fat content in grams
     let fat: Double
     
-    /// Fiber content in grams
     let fiber: Double
     
-    /// Sugar content in grams
     let sugar: Double
     
-    /// Sodium content in milligrams
     let sodium: Double
     
-    /// Serving size description
     let servingSize: String
     
     // MARK: - Coding Keys
@@ -375,19 +254,6 @@ struct IngredientNutrition: Codable {
     
     // MARK: - Convenience Initializer
     
-    /**
-     * Creates a new IngredientNutrition instance
-     * 
-     * - Parameters:
-     *   - calories: Calories per serving
-     *   - protein: Protein content in grams
-     *   - carbohydrates: Carbohydrate content in grams
-     *   - fat: Fat content in grams
-     *   - fiber: Fiber content in grams
-     *   - sugar: Sugar content in grams
-     *   - sodium: Sodium content in milligrams
-     *   - servingSize: Serving size description
-     */
     init(calories: Double, protein: Double, carbohydrates: Double, fat: Double, fiber: Double, sugar: Double, sodium: Double, servingSize: String) {
         self.calories = calories
         self.protein = protein
@@ -400,32 +266,19 @@ struct IngredientNutrition: Codable {
     }
 }
 
-/**
- * IngredientSubstitution Model
- * 
- * Represents a substitution option for an ingredient.
- * Contains alternative ingredients and their usage instructions.
- */
 struct IngredientSubstitution: Codable {
-    /// Name of the substitution ingredient
     let name: String
     
-    /// Quantity needed for substitution
     let quantity: Double
     
-    /// Unit of measurement for substitution
     let unit: String
     
-    /// Dietary restrictions this substitution accommodates
     let dietaryRestrictions: [String]
     
-    /// Instructions for using this substitution
     let instructions: String
     
-    /// Notes about the substitution
     let notes: String?
     
-    /// Whether this is a 1:1 substitution
     let isOneToOne: Bool
     
     // MARK: - Coding Keys
@@ -441,19 +294,7 @@ struct IngredientSubstitution: Codable {
     }
     
     // MARK: - Convenience Initializer
-    
-    /**
-     * Creates a new IngredientSubstitution instance
-     * 
-     * - Parameters:
-     *   - name: Substitution ingredient name
-     *   - quantity: Quantity needed
-     *   - unit: Unit of measurement
-     *   - dietaryRestrictions: Array of dietary restrictions
-     *   - instructions: Usage instructions
-     *   - notes: Optional notes
-     *   - isOneToOne: Whether this is a 1:1 substitution
-     */
+
     init(name: String, quantity: Double, unit: String, dietaryRestrictions: [String], instructions: String, notes: String?, isOneToOne: Bool) {
         self.name = name
         self.quantity = quantity
@@ -466,11 +307,6 @@ struct IngredientSubstitution: Codable {
     
     // MARK: - Computed Properties
     
-    /**
-     * Formatted quantity string with unit
-     * 
-     * - Returns: Formatted string like "2.5 cups" or "3 pieces"
-     */
     var formattedQuantity: String {
         if quantity.truncatingRemainder(dividingBy: 1) == 0 {
             return "\(Int(quantity)) \(unit)"
@@ -479,11 +315,6 @@ struct IngredientSubstitution: Codable {
         }
     }
     
-    /**
-     * Display name with dietary restrictions
-     * 
-     * - Returns: Name with dietary restriction indicators
-     */
     var displayName: String {
         if !dietaryRestrictions.isEmpty {
             let restrictions = dietaryRestrictions.joined(separator: ", ")
@@ -497,9 +328,7 @@ struct IngredientSubstitution: Codable {
 // MARK: - Ingredient Extensions
 
 extension Ingredient {
-    /**
-     * Standard ingredient categories for consistent organization
-     */
+  
     static let standardCategories = [
         "Produce",
         "Dairy & Eggs",
@@ -516,9 +345,7 @@ extension Ingredient {
         "Other"
     ]
     
-    /**
-     * Standard units of measurement
-     */
+  
     static let standardUnits = [
         "cups",
         "tbsp",
@@ -536,9 +363,7 @@ extension Ingredient {
         "whole"
     ]
     
-    /**
-     * Common allergens
-     */
+   
     static let commonAllergens = [
         "Gluten",
         "Dairy",

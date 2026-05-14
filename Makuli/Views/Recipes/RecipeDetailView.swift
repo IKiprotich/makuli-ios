@@ -2,7 +2,7 @@
 //  RecipeDetailView.swift
 //  Makuli
 //
-//  Created by Ian   on 22/06/2025.
+//  Created by Ian on 2025-06-22.
 //
 
 import SwiftUI
@@ -15,7 +15,6 @@ struct RecipeDetailView: View {
     
     init(recipe: Recipe) {
         self.recipe = recipe
-        // Convert string ingredients to Ingredient objects
         let convertedIngredients = recipe.ingredients.map { ingredientString in
             Ingredient(
                 id: UUID().uuidString,
@@ -42,23 +41,18 @@ struct RecipeDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                //header section
                 headerSection
                 
-                //ingredients section
                 ingredientsSection
                 
-                //substitutions section
                 if let substitutions = recipe.substitutions, !substitutions.isEmpty {
                     SubstitutionSectionView(substitutions: substitutions)
                         .padding(.horizontal)
                 }
                 
-                //steps section
                 stepsSection
                 
                 
-                //bottom padding for the sticky CTA
                 Spacer(minLength: 100)
             }
             .padding(.top)
@@ -73,14 +67,13 @@ struct RecipeDetailView: View {
     }
 }
 
-
 extension RecipeDetailView {
     
     // MARK: Header section
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("🍽️") // Default emoji since Recipe model doesn't have imageName
+                Text("🍽️")
                     .font(.system(size: 60))
                     .frame(width: 80, height: 80)
                     .background(
@@ -175,7 +168,6 @@ extension RecipeDetailView {
     }
     
     
-    //MARK: CTA Section
     private var ctaSection: some View {
         VStack(spacing: 0) {
             LinearGradient(
@@ -206,9 +198,7 @@ extension RecipeDetailView {
         }
     }
     
-    //MARK: ACTIONS
     private func addToPlan(){
-        //implement the add to plan functionality later
         Logger.debug("Adding recipe to plan")
     }
     
@@ -217,7 +207,6 @@ extension RecipeDetailView {
     
     
 }
-
 
 #if DEBUG
 #Preview("Salmon") {

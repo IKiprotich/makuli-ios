@@ -2,6 +2,8 @@
 //  ProfileView.swift
 //  Makuli
 //
+//  Created by Ian on 2025-01-13.
+//
 
 import SwiftUI
 import PhotosUI
@@ -10,21 +12,17 @@ struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
 
-    // Single ViewModel that owns both profile data and update actions
     @StateObject private var profileViewModel = UserProfileViewModel()
     @StateObject private var viewModel = ProfileViewModel()
 
-    // Photo picker
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedImageData: Data?
     @State private var imageToCrop: UIImage?
     @State private var showCropper = false
 
-    // Destructive action confirmations
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAlert = false
 
-    // Preference sheets
     @State private var showingCalorieTarget = false
     @State private var showingMacroTargets = false
     @State private var showingDietPreference = false
@@ -34,51 +32,48 @@ struct ProfileView: View {
     @State private var showingMealsPerDay = false
     @State private var showingGoal = false
     @State private var showingBudget = false
+    @State private var showingDeveloperPanel = false
 
-    // Notification toggles (backed by UserDefaults in a real app)
     @State private var mealReminders = true
     @State private var pushNotifications = true
+
+    @State private var editingName = false
+    @State private var editNameText = ""
+
+    @State private var appeared = false
+
+    @State private var pressedRow: String? = nil
 
     private var user: User? { authViewModel.user }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    profileHeaderSection
-                        .padding(.bottom, 28)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    heroHeader
+                    statsCard
+                        .padding(.horizontal, 20)
+                        .offset(y: -20)
 
-                    sectionGroup("Nutrition", icon: "flame.fill") {
-                        nutritionRows
+                    VStack(spacing: 24) {
+                        mealPlanSection
+                        appSettingsSection
+                        supportSection
+                        accountSection
                     }
-
-                    sectionGroup("Meal Plan", icon: "calendar") {
-                        mealPlanRows
-                    }
-
-                    sectionGroup("Subscription", icon: "crown.fill") {
-                        subscriptionRows
-                    }
-
-                    sectionGroup("App Settings", icon: "gearshape.fill") {
-                        settingsRows
-                    }
-
-                    sectionGroup("Support & Legal", icon: "questionmark.circle.fill") {
-                        supportRows
-                    }
-
-                    accountActions
-                        .padding(.top, 24)
-                        .padding(.bottom, 40)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 100)
                 }
-                .padding(.horizontal, 20)
             }
             .background(AppColors.background.ignoresSafeArea())
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.large)
+            .ignoresSafeArea(.all, edges: .top)
+            .navigationBarHidden(true)
         }
-        // Confirmations
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 20)
+        .animation(.spring(response: 0.65, dampingFraction: 0.85), value: appeared)
+        .onAppear { appeared = true }
         .alert("Log Out", isPresented: $showingLogoutAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Log Out", role: .destructive) { Task { await authViewModel.signOut() } }
@@ -97,14 +92,12 @@ struct ProfileView: View {
         } message: {
             Text("This action is permanent. All your data will be deleted.")
         }
-        // Error / success feedback
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") { viewModel.errorMessage = nil }
         } message: { Text(viewModel.errorMessage ?? "") }
         .alert("Success", isPresented: .constant(viewModel.successMessage != nil)) {
             Button("OK") { viewModel.successMessage = nil }
         } message: { Text(viewModel.successMessage ?? "") }
-        // Preference sheets
         .sheet(isPresented: $showingCalorieTarget) {
             CalorieTargetView(currentValue: profileViewModel.profile?.fitnessGoals?.targetCalories ?? 2200) { newValue in
                 Task {
@@ -205,66 +198,122 @@ struct ProfileView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingDeveloperPanel) {
+            DeveloperPanelView()
+        }
         .task { await profileViewModel.fetchProfile() }
     }
 }
 
-// MARK: - Sections
+// MARK: - Hero Header
 
 extension ProfileView {
 
-    private var profileHeaderSection: some View {
-        VStack(spacing: 20) {
-            // Avatar
-            ZStack(alignment: .bottomTrailing) {
-                avatarImage
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(AppColors.surface, lineWidth: 3))
-                    .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+    private var heroHeader: some View {
+        ZStack(alignment: .bottom) {
+            LinearGradient(
+                colors: [AppColors.primaryOrange.opacity(0.15), AppColors.background],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 320)
 
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 30, height: 30)
-                        .background(AppColors.primaryOrange)
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 1)
-                }
-                .offset(x: 4, y: 4)
-                .onChange(of: selectedItem) { item in
-                    Task {
-                        if let data = try? await item?.loadTransferable(type: Data.self),
-                           let ui = UIImage(data: data) {
-                            selectedImageData = data
-                            imageToCrop = ui
-                            showCropper = true
+            VStack(spacing: 16) {
+                Spacer().frame(height: 60)
+
+                photoPickerAvatar
+
+                if editingName {
+                    HStack(spacing: 8) {
+                        TextField("Your name", text: $editNameText)
+                            .font(AppFonts.title2())
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(AppColors.text)
+                            .frame(maxWidth: 200)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(AppColors.card)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(AppColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
+                            )
+                        Button {
+                            editingName = false
+                        } label: {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(AppColors.primaryOrange)
+                        }
+                    }
+                } else {
+                    HStack(spacing: 6) {
+                        Text(profileViewModel.profile?.name ?? user?.name ?? "Your Name")
+                            .font(AppFonts.largeTitle())
+                            .foregroundColor(AppColors.text)
+                        Button {
+                            editNameText = profileViewModel.profile?.name ?? user?.name ?? ""
+                            editingName = true
+                        } label: {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(AppColors.textSecondary.opacity(0.6))
                         }
                     }
                 }
-            }
 
-            // Name & email
-            if profileViewModel.isLoading {
-                ProgressView()
-            } else if let profile = profileViewModel.profile {
-                VStack(spacing: 4) {
-                    Text(profile.name ?? "—")
-                        .font(.title2).fontWeight(.semibold)
-                        .foregroundColor(AppColors.text)
-                    Text(profile.email ?? user?.email ?? "")
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.textSecondary)
-                }
-            } else {
-                Text("Profile unavailable")
-                    .font(.subheadline)
+                Text(profileViewModel.profile?.email ?? user?.email ?? "")
+                    .font(AppFonts.subheadline())
                     .foregroundColor(AppColors.textSecondary)
+
+                Spacer().frame(height: 28)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var photoPickerAvatar: some View {
+        ZStack(alignment: .bottomTrailing) {
+            avatarImage
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: [AppColors.primaryOrange, AppColors.primaryOrange.opacity(0.5)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 3
+                        )
+                )
+                .shadow(color: AppColors.primaryOrange.opacity(0.25), radius: 12, x: 0, y: 4)
+
+            PhotosPicker(selection: $selectedItem, matching: .images) {
+                ZStack {
+                    Circle()
+                        .fill(AppColors.primaryOrange)
+                        .frame(width: 26, height: 26)
+                        .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 1)
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+            .offset(x: 3, y: 3)
+            .onChange(of: selectedItem) { _, item in
+                Task {
+                    if let data = try? await item?.loadTransferable(type: Data.self),
+                       let ui = UIImage(data: data) {
+                        selectedImageData = data
+                        imageToCrop = ui
+                        showCropper = true
+                    }
+                }
             }
         }
-        .padding(.vertical, 24)
-        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
@@ -286,118 +335,396 @@ extension ProfileView {
     }
 
     private var defaultAvatar: some View {
-        Image(systemName: "person.crop.circle.fill")
-            .resizable()
-            .foregroundColor(AppColors.primaryOrange.opacity(0.4))
-    }
-
-    // MARK: - Row Groups
-
-    private var nutritionRows: some View {
-        Group {
-            ProfileRowView(icon: "target",                 iconColor: AppColors.primaryOrange, title: "Goal",             value: profileViewModel.profile?.goal ?? user?.goal ?? "—",              showChevron: true) { showingGoal = true }
-            ProfileRowView(icon: "dollarsign.circle.fill", iconColor: AppColors.successGreen,  title: "Budget",           value: profileViewModel.profile?.budget ?? user?.budget ?? "—",          showChevron: true) { showingBudget = true }
-            ProfileRowView(icon: "flame.fill",             iconColor: AppColors.primaryOrange, title: "Calorie target",   value: "\(profileViewModel.profile?.fitnessGoals?.targetCalories ?? 2200) kcal", showChevron: true) { showingCalorieTarget = true }
-            ProfileRowView(icon: "chart.pie.fill",         iconColor: AppColors.successGreen,  title: "Macro targets",    value: macroSummary,                                                      showChevron: true) { showingMacroTargets = true }
-            ProfileRowView(icon: "leaf.fill",              iconColor: AppColors.successGreen,  title: "Diet preference",  value: profileViewModel.profile?.diet ?? user?.diet ?? "—",              showChevron: true) { showingDietPreference = true }
-            ProfileRowView(icon: "xmark.circle.fill",      iconColor: AppColors.warnRed,       title: "Dislikes",         value: dislikesSummary,                                                   showChevron: true) { showingDislikes = true }
-            ProfileRowView(icon: "hand.thumbsup.fill",     iconColor: AppColors.primaryOrange, title: "Favourite cuisines", value: cuisinesSummary,                                               showChevron: true) { showingFavoriteCuisines = true }
-            ProfileRowView(icon: "fork.knife.circle.fill", iconColor: AppColors.primaryOrange, title: "Cooking skill",    value: profileViewModel.profile?.cookingPreferences?.skillLevel ?? user?.cookingSkillLevel ?? "—", showChevron: true) { showingCookingSkills = true }
+        ZStack {
+            Circle().fill(AppColors.primaryOrange.opacity(0.12))
+            Image(systemName: "person.fill")
+                .resizable()
+                .scaledToFit()
+                .padding(18)
+                .foregroundColor(AppColors.primaryOrange.opacity(0.7))
         }
     }
+}
 
-    private var mealPlanRows: some View {
-        let count = profileViewModel.profile?.mealPlanningPreferences?.mealsPerDay ?? user?.preferredServings ?? 3
-        return ProfileRowView(icon: "list.bullet", iconColor: AppColors.primaryOrange, title: "Meals per day", value: "\(count) meal\(count == 1 ? "" : "s")", showChevron: true) { showingMealsPerDay = true }
-    }
+// MARK: - Stats Card
 
-    private var subscriptionRows: some View {
-        Group {
-            ProfileRowView(title: "Plan", value: (user?.isPremium == true) ? "Premium" : "Free")
+extension ProfileView {
 
-            Button(user?.isPremium == true ? "Manage Subscription" : "Upgrade to Premium") {}
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .frame(maxWidth: .infinity)
-                .frame(height: 46)
-                .background(user?.isPremium == true ? AppColors.surface : AppColors.primaryOrange)
-                .foregroundColor(user?.isPremium == true ? AppColors.primaryOrange : .white)
-                .cornerRadius(10)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 4)
+    private var statsCard: some View {
+        HStack(spacing: 0) {
+            statTile(
+                value: "\(profileViewModel.profile?.plansCreatedThisMonth ?? 0)",
+                label: "Plans Created"
+            )
+            statDivider
+            statTile(
+                value: "0",
+                label: "Recipes Saved"
+            )
+            statDivider
+            statTile(
+                value: "0",
+                label: "Week Streak"
+            )
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(AppColors.card)
+                .shadow(color: .black.opacity(0.08), radius: 16, x: 0, y: 6)
+        )
     }
 
-    private var settingsRows: some View {
-        Group {
-            ProfileRowView(title: "Meal Reminders",    toggleValue: $mealReminders)
-            ProfileRowView(title: "Push Notifications", toggleValue: $pushNotifications)
-            ProfileRowView(title: "Dark Mode", toggleValue: Binding(
-                get: { themeManager.isDarkMode },
-                set: { themeManager.setDarkMode($0) }
-            ))
+    private func statTile(value: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(AppColors.text)
+            Text(label)
+                .font(AppFonts.caption())
+                .foregroundColor(AppColors.textSecondary)
+                .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity)
     }
 
-    private var supportRows: some View {
-        Group {
-            ProfileRowView(icon: "questionmark.circle.fill", iconColor: .blue,   title: "Help & Support",   value: "", showChevron: true) {}
-            ProfileRowView(icon: "doc.text.fill",            iconColor: .gray,   title: "Privacy Policy",   value: "", showChevron: true) {}
-            ProfileRowView(icon: "doc.text.fill",            iconColor: .gray,   title: "Terms of Service", value: "", showChevron: true) {}
-        }
+    private var statDivider: some View {
+        Rectangle()
+            .fill(AppColors.border)
+            .frame(width: 1, height: 36)
     }
+}
 
-    private var accountActions: some View {
-        VStack(spacing: 12) {
-            Button {
-                showingLogoutAlert = true
-            } label: {
-                Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(AppColors.primaryOrange)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
+// MARK: - Settings Sections
 
-            Button(role: .destructive) {
-                showingDeleteAlert = true
-            } label: {
-                Label("Delete Account", systemImage: "trash")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.red.opacity(0.1))
-                    .foregroundColor(.red)
-                    .cornerRadius(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.3), lineWidth: 1))
-            }
-        }
-    }
+extension ProfileView {
 
-    // MARK: - Section Container
+    // MARK: Meal Plan Section
 
-    private func sectionGroup<Content: View>(_ title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .foregroundColor(AppColors.primaryOrange)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(title)
-                    .font(AppFonts.title2())
-                    .foregroundColor(AppColors.text)
-            }
-            .padding(.top, 20)
-
+    private var mealPlanSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("Meal Plan")
             VStack(spacing: 0) {
-                content()
+                settingsRow(
+                    id: "diet",
+                    icon: "leaf.fill",
+                    iconColor: AppColors.successGreen,
+                    title: "Diet Preference",
+                    value: profileViewModel.profile?.diet ?? user?.diet ?? "—"
+                ) { showingDietPreference = true }
+
+                rowDivider
+
+                settingsRow(
+                    id: "goal",
+                    icon: "target",
+                    iconColor: AppColors.primaryOrange,
+                    title: "Goal",
+                    value: profileViewModel.profile?.goal ?? user?.goal ?? "—"
+                ) { showingGoal = true }
+
+                rowDivider
+
+                let mealCount = profileViewModel.profile?.mealPlanningPreferences?.mealsPerDay ?? user?.preferredServings ?? 3
+                settingsRow(
+                    id: "meals",
+                    icon: "fork.knife",
+                    iconColor: Color(red: 0.2, green: 0.6, blue: 0.9),
+                    title: "Meals per Day",
+                    value: "\(mealCount) meal\(mealCount == 1 ? "" : "s")"
+                ) { showingMealsPerDay = true }
+
+                rowDivider
+
+                let calories = profileViewModel.profile?.fitnessGoals?.targetCalories ?? 2200
+                settingsRow(
+                    id: "calories",
+                    icon: "flame.fill",
+                    iconColor: Color(red: 1.0, green: 0.45, blue: 0.1),
+                    title: "Calorie Target",
+                    value: "\(calories) kcal"
+                ) { showingCalorieTarget = true }
             }
-            .background(AppColors.card)
-            .cornerRadius(12)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.card)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         }
     }
 
-    // MARK: - Computed Summaries
+    // MARK: App Settings Section
+
+    private var appSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("App Settings")
+            VStack(spacing: 0) {
+                toggleRow(
+                    id: "reminders",
+                    icon: "bell.fill",
+                    iconColor: Color(red: 1.0, green: 0.75, blue: 0.0),
+                    title: "Meal Reminders",
+                    binding: $mealReminders
+                )
+
+                rowDivider
+
+                toggleRow(
+                    id: "notifications",
+                    icon: "app.badge.fill",
+                    iconColor: Color(red: 0.2, green: 0.55, blue: 0.95),
+                    title: "Push Notifications",
+                    binding: $pushNotifications
+                )
+
+                rowDivider
+
+                toggleRow(
+                    id: "darkmode",
+                    icon: "moon.fill",
+                    iconColor: Color(red: 0.38, green: 0.27, blue: 0.78),
+                    title: "Dark Mode",
+                    binding: Binding(
+                        get: { themeManager.isDarkMode },
+                        set: { themeManager.setDarkMode($0) }
+                    )
+                )
+
+                rowDivider
+
+                settingsRow(
+                    id: "devpanel",
+                    icon: "hammer.fill",
+                    iconColor: Color(red: 0.5, green: 0.5, blue: 0.55),
+                    title: "Seed Demo Data",
+                    value: ""
+                ) { showingDeveloperPanel = true }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.card)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        }
+    }
+
+    // MARK: Support Section
+
+    private var supportSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("Support")
+            VStack(spacing: 0) {
+                settingsRow(
+                    id: "help",
+                    icon: "questionmark.circle.fill",
+                    iconColor: Color(red: 0.2, green: 0.55, blue: 0.95),
+                    title: "Help & Support",
+                    value: ""
+                ) {}
+
+                rowDivider
+
+                settingsRow(
+                    id: "privacy",
+                    icon: "hand.raised.fill",
+                    iconColor: Color(red: 0.4, green: 0.4, blue: 0.45),
+                    title: "Privacy Policy",
+                    value: ""
+                ) {}
+
+                rowDivider
+
+                settingsRow(
+                    id: "terms",
+                    icon: "doc.text.fill",
+                    iconColor: Color(red: 0.4, green: 0.4, blue: 0.45),
+                    title: "Terms of Service",
+                    value: ""
+                ) {}
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.card)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        }
+    }
+
+    // MARK: Account Section
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("Account")
+            VStack(spacing: 0) {
+                Button {
+                    showingLogoutAlert = true
+                } label: {
+                    HStack(spacing: 14) {
+                        iconSquare(systemName: "rectangle.portrait.and.arrow.right.fill", color: AppColors.primaryOrange)
+
+                        Text("Log Out")
+                            .font(AppFonts.body())
+                            .foregroundColor(AppColors.primaryOrange)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .frame(minHeight: 52)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(PressableRowStyle(id: "logout", pressedRow: $pressedRow))
+
+                rowDivider
+
+                Button {
+                    showingDeleteAlert = true
+                } label: {
+                    HStack(spacing: 14) {
+                        iconSquare(systemName: "trash.fill", color: .red)
+
+                        Text("Delete Account")
+                            .font(AppFonts.body())
+                            .foregroundColor(.red)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .frame(minHeight: 52)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(PressableRowStyle(id: "delete", pressedRow: $pressedRow))
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.card)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        }
+    }
+}
+
+// MARK: - Row Builders
+
+extension ProfileView {
+
+    private func settingsRow(
+        id: String,
+        icon: String,
+        iconColor: Color,
+        title: String,
+        value: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                iconSquare(systemName: icon, color: iconColor)
+
+                Text(title)
+                    .font(AppFonts.body())
+                    .foregroundColor(AppColors.text)
+
+                Spacer()
+
+                if !value.isEmpty {
+                    Text(value)
+                        .font(AppFonts.subheadline())
+                        .foregroundColor(AppColors.textSecondary)
+                        .lineLimit(1)
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(minHeight: 52)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableRowStyle(id: id, pressedRow: $pressedRow))
+    }
+
+    private func toggleRow(
+        id: String,
+        icon: String,
+        iconColor: Color,
+        title: String,
+        binding: Binding<Bool>
+    ) -> some View {
+        HStack(spacing: 14) {
+            iconSquare(systemName: icon, color: iconColor)
+
+            Text(title)
+                .font(AppFonts.body())
+                .foregroundColor(AppColors.text)
+
+            Spacer()
+
+            Toggle("", isOn: binding)
+                .labelsHidden()
+                .tint(AppColors.primaryOrange)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .frame(minHeight: 52)
+    }
+
+    private func iconSquare(systemName: String, color: Color) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color.opacity(0.15))
+                .frame(width: 28, height: 28)
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(color)
+        }
+    }
+
+    private var rowDivider: some View {
+        Divider()
+            .padding(.leading, 58)
+            .foregroundColor(AppColors.border)
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundColor(AppColors.textSecondary)
+            .tracking(0.8)
+            .padding(.leading, 4)
+    }
+}
+
+// MARK: - Pressable Row Button Style
+
+private struct PressableRowStyle: ButtonStyle {
+    let id: String
+    @Binding var pressedRow: String?
+
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
+            .onChange(of: configuration.isPressed) { _, pressed in
+                pressedRow = pressed ? id : nil
+            }
+    }
+}
+
+// MARK: - Computed Summaries
+
+extension ProfileView {
 
     private var macroSummary: String {
         let p = Int(profileViewModel.profile?.fitnessGoals?.targetProtein ?? 25)

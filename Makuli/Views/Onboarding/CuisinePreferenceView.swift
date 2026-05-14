@@ -1,3 +1,10 @@
+//
+//  CuisinePreferenceView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-23.
+//
+
 import SwiftUI
 
 struct CuisinePreferenceView: View {

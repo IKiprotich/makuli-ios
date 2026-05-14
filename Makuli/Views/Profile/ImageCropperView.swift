@@ -1,3 +1,10 @@
+//
+//  ImageCropperView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-22.
+//
+
 import SwiftUI
 
 struct ImageCropperView: View {
@@ -59,7 +66,6 @@ struct ImageCropperView: View {
     }
 
     private func cropImage() -> UIImage {
-        // For simplicity, crop the center square of the image
         let originalSize = image.size
         let side = min(originalSize.width, originalSize.height)
         let cropRect = CGRect(

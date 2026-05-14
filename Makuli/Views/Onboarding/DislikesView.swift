@@ -1,3 +1,10 @@
+//
+//  DislikesView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-23.
+//
+
 import SwiftUI
 
 struct DislikesView: View {
@@ -34,13 +41,11 @@ struct DislikesView: View {
                         ForEach(dislikeOptions, id: \.self) { item in
                             let isSelected = selectedDislikes.contains(item)
                             Button(action: {
-                                // 1. Update UI state instantly
                                 if isSelected {
                                     selectedDislikes.removeAll { $0 == item }
                                 } else {
                                     selectedDislikes.append(item)
                                 }
-                                // 2. Update shared model in background
                                 DispatchQueue.main.async {
                                     onboardingData.dislikedIngredients = selectedDislikes
                                 }
@@ -63,9 +68,7 @@ struct DislikesView: View {
                 }
                 Spacer()
                 Button(action: {
-                    // 1. Advance page immediately
                     currentPage += 1
-                    // 2. Save to onboardingData in background
                     DispatchQueue.main.async {
                         onboardingData.dislikedIngredients = selectedDislikes
                     }

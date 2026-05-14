@@ -2,7 +2,7 @@
 //  ProfileRowView.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
 
 import SwiftUI
@@ -40,17 +40,14 @@ struct ProfileRowView: View {
     }
     
     
-    // Convenience initializer for simple rows with values
     init(title: String, value: String) {
         self.init(title: title, value: value, showChevron: false)
     }
     
-    // Convenience initializer for navigation rows
     init(icon: String? = nil, iconColor: Color = .gray, title: String, action: @escaping () -> Void) {
         self.init(icon: icon, iconColor: iconColor, title: title, showChevron: true, action: action)
     }
     
-    // Convenience initializer for toggle rows
     init(title: String, toggleValue: Binding<Bool>) {
         self.init(title: title, showToggle: true, toggleValue: toggleValue)
     }
@@ -61,14 +58,12 @@ struct ProfileRowView: View {
             action?()
         } label: {
             HStack(spacing: 12) {
-                //icon
                 if let icon = icon {
                     Image(systemName: icon)
                         .foregroundColor(iconColor)
                         .frame(width: 20, height: 20)
                 }
                 
-                //title
                 Text(title)
                     .font(.body)
                     .foregroundColor(Color(.label))
@@ -77,7 +72,6 @@ struct ProfileRowView: View {
                 
                 Spacer()
                 
-                //value, toggle, or chevron
                 if showToggle {
                     Toggle("", isOn: $toggleValue)
                         .labelsHidden()
@@ -113,5 +107,4 @@ struct ProfileRowView: View {
 }
 
 #Preview {
-    //ProfileRowView()
 }

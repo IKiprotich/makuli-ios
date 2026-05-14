@@ -28,16 +28,15 @@ struct Configuration {
     static var supabaseURL: String {
         switch environment {
         case .production:
-            return "https://mbotzyrpzblbmesnfqix.supabase.co" // Your production URL
+            return "https://mbotzyrpzblbmesnfqix.supabase.co"
         case .development:
-            return "https://mbotzyrpzblbmesnfqix.supabase.co" // Same for now, can be different
+            return "https://mbotzyrpzblbmesnfqix.supabase.co"
         }
     }
     
     static var supabaseAnonKey: String {
         switch environment {
         case .production:
-            // In production, this should ideally come from secure storage
             return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ib3R6eXJwemJsYm1lc25mcWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTA4ODksImV4cCI6MjA5NDE2Njg4OX0.-87OvopCtecr9VXO4RIVO3h2-aRBo9JusxdaFvLwi2w"
         case .development:
             return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ib3R6eXJwemJsYm1lc25mcWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTA4ODksImV4cCI6MjA5NDE2Njg4OX0.-87OvopCtecr9VXO4RIVO3h2-aRBo9JusxdaFvLwi2w"
@@ -46,33 +45,7 @@ struct Configuration {
     
 
     
-    // MARK: - Spoonacular Configuration
-    static var spoonacularApiKey: String {
-        // For now, using the provided API key
-        // In production, this should be stored securely
-        return "0fb3b79782eb4a3987adbf8c65e0ddee"
-    }
-    
-    static var spoonacularBaseURL: String {
-        return "https://api.spoonacular.com"
-    }
-    
-    static var spoonacularEndpoints: SpoonacularEndpoints {
-        return SpoonacularEndpoints()
-    }
-    
-    struct SpoonacularEndpoints {
-        let mealPlannerGenerate = "/mealplanner/generate"
-        let recipeInformation = "/recipes/{id}/information"
-        let shoppingList = "/mealplanner/{username}/shopping-list"
-        let connectUser = "/users/connect"
-    }
-    
     // MARK: - Feature Flags
-    static var enableSpoonacular: Bool {
-        return !spoonacularApiKey.isEmpty
-    }
-    
     static var enableAnalytics: Bool { isProduction }
     static var enableCrashReporting: Bool { isProduction }
     static var enablePerformanceMonitoring: Bool { true }
@@ -82,7 +55,7 @@ struct Configuration {
     static var maxRecipesPerPage: Int { 20 }
     static var maxPlansPerUser: Int { isProduction ? 50 : 10 }
     static var cacheExpiration: TimeInterval { 
-        isProduction ? 3600 : 300 // 1 hour prod, 5 min dev
+        isProduction ? 3600 : 300
     }
     
     // MARK: - Database Configuration
@@ -97,7 +70,6 @@ struct Configuration {
     
     struct FreePlanLimits {
         let maxPlansPerMonth = 5
-        let maxSpoonacularGenerationsPerMonth = 10
         let maxRecipesPerPlan = 21
     }
     
@@ -136,10 +108,8 @@ class KeychainManager {
             kSecValueData as String: data
         ]
         
-        // Delete existing item
         SecItemDelete(query as CFDictionary)
         
-        // Add new item
         return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
     }
     
@@ -186,19 +156,14 @@ class ProductionLogger {
             "environment": Configuration.environment.description
         ]
         
-        // In production, send to crash reporting service
         if Configuration.enableCrashReporting {
-            // Example: Crashlytics.crashlytics().record(error: error)
-            // Example: Sentry.capture(error: error)
         }
         
-        // Always log locally for debugging
         print("🚨 [\(Configuration.environment.description)] ERROR: \(errorData)")
     }
     
     static func logEvent(_ event: String, parameters: [String: Any] = [:]) {
         if Configuration.enableAnalytics {
-            // Example: Analytics.logEvent(event, parameters: parameters)
         }
         
         print("📊 [\(Configuration.environment.description)] EVENT: \(event) - \(parameters)")

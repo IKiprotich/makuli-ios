@@ -1,3 +1,10 @@
+//
+//  ProfileDislikesView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct ProfileDislikesView: View {
@@ -17,7 +24,6 @@ struct ProfileDislikesView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Dislikes")
                         .font(.largeTitle)
@@ -30,7 +36,6 @@ struct ProfileDislikesView: View {
                 }
                 .padding(.top, 20)
                 
-                // Dislikes grid
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(dislikeOptions, id: \.self) { item in
@@ -59,7 +64,6 @@ struct ProfileDislikesView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedDislikes)
                     dismiss()

@@ -2,7 +2,7 @@
 //  MealCardView.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import SwiftUI
@@ -12,7 +12,6 @@ struct MealCardView: View {
     
     var body: some View {
         HStack(spacing: 12){
-            //meal plan description
             VStack(alignment: .leading, spacing: 4){
                 
                 Text(meal.category.rawValue.capitalized)
@@ -30,7 +29,6 @@ struct MealCardView: View {
             
             Spacer()
             
-            //image of the mealplan(placeholder for now)
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.gray.opacity(0.2))
                 .frame(width: 80, height: 60)
@@ -47,6 +45,3 @@ struct MealCardView: View {
     }
 }
 
-//#Preview {
-//    MealCardView(meal: MealPlan(mealType: MealType(rawValue: "breakfast")!, name: "Avocado Toast with Eggs", duration: 10, difficulty: Difficulty(rawValue: "easy")!, imageName: "cup.and.saucer", backgroundColor: "orange"))
-//}

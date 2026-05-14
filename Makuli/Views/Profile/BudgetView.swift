@@ -1,3 +1,10 @@
+//
+//  BudgetView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-08-04.
+//
+
 import SwiftUI
 
 struct BudgetView: View {
@@ -19,7 +26,6 @@ struct BudgetView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 24) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Budget Preference")
                         .font(.largeTitle)
@@ -32,7 +38,6 @@ struct BudgetView: View {
                 }
                 .padding(.top, 20)
                 
-                // Budget options
                 VStack(spacing: 16) {
                     ForEach(budgetOptions, id: \.0) { option in
                         let isSelected = selectedBudget == option.0
@@ -79,7 +84,6 @@ struct BudgetView: View {
                 
                 Spacer()
                 
-                // Save button
                 Button("Save Changes") {
                     onSave(selectedBudget)
                     dismiss()

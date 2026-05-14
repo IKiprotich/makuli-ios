@@ -2,8 +2,7 @@
 //  MockPlans.swift
 //  Makuli
 //
-//  Static Plan and PlanRecipe fixtures for SwiftUI previews and development.
-//  Not included in release builds.
+//  Created by Ian on 2025-06-13.
 //
 
 #if DEBUG
@@ -16,12 +15,9 @@ enum MockPlans {
     // MARK: - Date Helpers
 
     private static var calendar: Calendar { Calendar.current }
-
-    /// Returns the Monday of the current week at midnight
     private static var thisMonday: Date {
         let today = Date()
         let weekday = calendar.component(.weekday, from: today)
-        // weekday: 1=Sun, 2=Mon, ..., 7=Sat
         let daysFromMonday = (weekday == 1) ? 6 : weekday - 2
         return calendar.startOfDay(for: calendar.date(byAdding: .day, value: -daysFromMonday, to: today)!)
     }
@@ -31,8 +27,6 @@ enum MockPlans {
     }
 
     // MARK: - Current Week Plan
-
-    /// Active plan for the current week — partially completed, realistic state.
     static var currentWeekPlan: Plan {
         let monday = thisMonday
         return Plan(
@@ -52,46 +46,35 @@ enum MockPlans {
         )
     }
 
-    /// Meals for the current week plan. Days 0–1 are partially completed.
     static var currentWeekRecipes: [PlanRecipe] {
         let planId = "mock-plan-current-week"
         let monday = thisMonday
         let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         let dayOffsets = [0, 1, 2, 3, 4, 5, 6]
-        // weekday int (0=Sun per Supabase convention, adjust to match app):
-        // In Plan.swift: dayOfWeek 0=Sunday, 1=Monday, ..., 6=Saturday
         let dayOfWeeks = [1, 2, 3, 4, 5, 6, 0]
 
         var meals: [PlanRecipe] = []
         var position = 0
 
         let mealPlan: [(String, String, String?, Int?)] = [
-            // (mealType, customMealName, recipeId, cookTime)
-            // Monday
             ("breakfast", "Avocado Toast with Poached Eggs",     "mock-recipe-001", 10),
             ("lunch",     "Roasted Vegetable Quinoa Bowl",        "mock-recipe-008", 30),
             ("dinner",    "Mediterranean Herb-Crusted Salmon",    "mock-recipe-015", 20),
-            // Tuesday
             ("breakfast", "Spinach & Feta Omelette",             "mock-recipe-006",  8),
             ("lunch",     "Classic Caesar Salad",                 "mock-recipe-007", 10),
             ("dinner",    "Wild Mushroom Risotto",                "mock-recipe-020", 35),
-            // Wednesday
             ("breakfast", "Greek Yogurt Parfait with Granola",   "mock-recipe-002",  0),
             ("lunch",     "Tuna Niçoise Salad",                  "mock-recipe-014", 15),
             ("dinner",    "Chicken Tikka Masala",                "mock-recipe-016", 40),
-            // Thursday
             ("breakfast", "Overnight Oats with Chia & Berries",  "mock-recipe-005",  0),
             ("lunch",     "Spiced Red Lentil Soup",              "mock-recipe-009", 35),
             ("dinner",    "Classic Spaghetti Bolognese",         "mock-recipe-017", 60),
-            // Friday
             ("breakfast", "Banana Protein Pancakes",             "mock-recipe-004", 15),
             ("lunch",     "Turkey & Avocado Club Wrap",          "mock-recipe-012",  5),
             ("dinner",    "Herb Butter Roast Chicken",           "mock-recipe-022", 90),
-            // Saturday
             ("breakfast", "Shakshuka with Feta",                 "mock-recipe-003", 25),
             ("lunch",     "Korean Bibimbap Bowl",                "mock-recipe-013", 30),
             ("dinner",    "Korean Beef Bulgogi",                 "mock-recipe-018", 15),
-            // Sunday
             ("breakfast", "Avocado Toast with Poached Eggs",     "mock-recipe-001", 10),
             ("lunch",     "Fresh Vietnamese Spring Rolls",       "mock-recipe-010", 15),
             ("dinner",    "Thai Green Curry with Tofu",          "mock-recipe-023", 25),
@@ -99,7 +82,7 @@ enum MockPlans {
 
         for (index, (mealType, name, recipeId, cookTime)) in mealPlan.enumerated() {
             let dayIndex = index / 3
-            let isCompleted = index < 6 // Monday + Tuesday meals all done
+            let isCompleted = index < 6
             let completedAt: Date? = isCompleted
                 ? calendar.date(byAdding: .day, value: dayIndex, to: monday)
                 : nil
@@ -276,12 +259,10 @@ enum MockPlans {
 
     // MARK: - Convenience Accessors
 
-    /// All plans newest-first
     static var allPlans: [Plan] {
         [currentWeekPlan, lastWeekPlan, twoWeeksAgoPlan]
     }
 
-    /// Recipes keyed by plan ID
     static var allPlanRecipes: [String: [PlanRecipe]] {
         [
             currentWeekPlan.id: currentWeekRecipes,
@@ -290,16 +271,13 @@ enum MockPlans {
         ]
     }
 
-    /// Today's meals from the current week plan
     static var todaysMeals: [PlanRecipe] {
         let today = Date()
         let weekday = Calendar.current.component(.weekday, from: today)
-        // weekday: 1=Sun → dayOfWeek 0; 2=Mon → 1; ... 7=Sat → 6
         let targetDayOfWeek = weekday - 1
         return currentWeekRecipes.filter { $0.dayOfWeek == targetDayOfWeek }
     }
 
-    /// Upcoming meals (tomorrow and beyond from current week)
     static var upcomingMeals: [PlanRecipe] {
         let today = Date()
         let weekday = Calendar.current.component(.weekday, from: today)

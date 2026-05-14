@@ -2,9 +2,8 @@
 //  OnboardingView.swift
 //  Makuli
 //
-//  Created by Ian   on 25/06/2025.
+//  Created by Ian on 2025-06-25.
 //
-
 
 import SwiftUI
 
@@ -14,10 +13,9 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    private let totalPages = 13 // Decremented by 1 since splash screen is removed
+    private let totalPages = 13
     
     init() {
-        // Initialize with default values for onboarding
         let defaultOnboardingData = OnboardingData(
             id: UUID().uuidString,
             userId: "",

@@ -1,3 +1,10 @@
+//
+//  BudgetInputView.swift
+//  Makuli
+//
+//  Created by Ian on 2025-06-26.
+//
+
 import SwiftUI
 
 struct BudgetInputView: View {
@@ -17,7 +24,6 @@ struct BudgetInputView: View {
             AppColors.background
             
             VStack(spacing: 30) {
-                // Progress bar
                 ProgressView(value: Double(currentPage), total: Double(totalPages))
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColors.primaryOrange))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
@@ -36,7 +42,6 @@ struct BudgetInputView: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                // Budget selection
                 VStack(spacing: 15) {
                     ForEach(budgetOptions, id: \.0) { option in
                         let isSelected = onboardingData.budgetRange == option.0
@@ -87,7 +92,6 @@ struct BudgetInputView: View {
                 
                 Spacer()
                 
-                // Continue button
                 Button(action: {
                     if !onboardingData.budgetRange.isEmpty {
                         withAnimation(.easeInOut(duration: 0.3)) {

@@ -2,7 +2,7 @@
 //  CurrentPlanCard.swift
 //  Makuli
 //
-//  Created by Ian   on 20/06/2025.
+//  Created by Ian on 2025-06-20.
 //
 
 import SwiftUI
@@ -33,7 +33,7 @@ struct CurrentPlanCard: View {
                 
                 Spacer()
                 
-                let validImageURL: URL? = nil // No real image URL for now
+                let validImageURL: URL? = nil
                 if let url = validImageURL {
                     AsyncImage(url: url) { image in
                         image
@@ -59,7 +59,6 @@ struct CurrentPlanCard: View {
                 }
             }
             
-            // Progress bar
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Progress")
@@ -74,7 +73,6 @@ struct CurrentPlanCard: View {
                         .foregroundColor(AppColors.successGreen)
                 }
                 
-                // Resume button with NavigationLink
                 NavigationLink(destination: WeekDetailView(plan: PlanWithRecipes(id: plan.id, plan: plan, recipes: []))) {
                     HStack {
                         Text("Resume")
@@ -105,8 +103,4 @@ struct CurrentPlanCard: View {
         }
     }
 }
-
-//#Preview {
-//    CurrentPlanCard(plan: Plan.mockWeeklyPlan().plan)
-//}
 

@@ -1,3 +1,10 @@
+//
+//  UserProfileViewModel.swift
+//  Makuli
+//
+//  Created by Ian on 2025-07-08.
+//
+
 import Supabase
 import SwiftUI
 
@@ -11,17 +18,14 @@ class UserProfileViewModel: ObservableObject {
     
     private var fetchTask: Task<Void, Never>?
     
-    // Notification name for profile updates
     static let profileUpdatedNotification = Notification.Name("ProfileUpdated")
 
     func fetchProfile() async {
-        // Don't fetch if we already have a profile and no error
         if profile != nil && error == nil {
             print("[DEBUG] Profile already loaded, skipping fetch")
             return
         }
         
-        // Cancel any existing fetch task to prevent duplicate requests
         fetchTask?.cancel()
         
         fetchTask = Task {
@@ -32,18 +36,15 @@ class UserProfileViewModel: ObservableObject {
     }
     
     func forceRefreshProfile() async {
-        // Clear current data and force fetch
         profile = nil
         error = nil
         await fetchProfile()
     }
     
-    // Method to notify other views that profile has been updated
     func notifyProfileUpdated() {
         NotificationCenter.default.post(name: Self.profileUpdatedNotification, object: nil)
     }
     
-    // Method to listen for profile updates
     func startListeningForUpdates() {
         NotificationCenter.default.addObserver(
             forName: Self.profileUpdatedNotification,
@@ -56,7 +57,6 @@ class UserProfileViewModel: ObservableObject {
         }
     }
     
-    // Method to stop listening for updates
     nonisolated func stopListeningForUpdates() {
         NotificationCenter.default.removeObserver(self, name: Self.profileUpdatedNotification, object: nil)
     }
@@ -71,7 +71,6 @@ class UserProfileViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            // Use consistent ID format (lowercase) as in AuthManager
             let userId = user.id.uuidString.lowercased()
             
             let response: [UserProfile] = try await SupabaseManager.shared.client
@@ -108,10 +107,8 @@ class UserProfileViewModel: ObservableObject {
             profile?.profileImageUrl = imageUrl
             try await SupabaseManager.shared.updateUserProfileImageUrl(userId: userId, imageUrl: imageUrl)
             
-            // Force refresh the profile data to ensure all views get the updated image URL
             await forceRefreshProfile()
             
-            // Notify other views that profile has been updated
             notifyProfileUpdated()
             
             uploadSuccess = true

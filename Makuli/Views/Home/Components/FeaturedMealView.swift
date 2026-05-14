@@ -2,14 +2,14 @@
 //  FeaturedMealView.swift
 //  Makuli
 //
-//  Created by Ian   on 19/06/2025.
+//  Created by Ian on 2025-06-19.
 //
 
 import SwiftUI
 
 struct FeaturedMealView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text("Hello, World!"/*@END_MENU_TOKEN@*/)
     }
 }
 
