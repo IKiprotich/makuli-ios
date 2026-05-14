@@ -1,114 +1,74 @@
 # Makuli 🍽️
 
-> **Meal planning App for iOS** — personalized nutrition, intelligent automation, and a seamless user experience built with SwiftUI.
+iOS meal planning app — curated recipes, weekly plans, and grocery lists, built with SwiftUI and Supabase.
 
 [![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift)](https://swift.org)
-[![SwiftUI](https://img.shields.io/badge/SwiftUI-iOS%2017%2B-blue?logo=apple)](https://developer.apple.com/xcode/swiftui/)
-[![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase)](https://supabase.com)
-[![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991?logo=openai)](https://openai.com)
+[![SwiftUI](https://img.shields.io/badge/SwiftUI-iOS%2018%2B-blue?logo=apple)](https://developer.apple.com/xcode/swiftui/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase)](https://supabase.com)
 
 ---
 
-## Overview
+## Screenshots
 
-Makuli is a production-grade iOS meal planning app that combines a clean SwiftUI interface and a Supabase PostgreSQL backend. Users get personalized meal plans based on dietary preferences, with automatic grocery list generation and progress analytics, all secured through Google OAuth.
+| Home | Plans | Profile |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/fe6ada14-8e40-42c3-a29b-0b3b03dd5613" width="220" /> | <img src="https://github.com/user-attachments/assets/c44e0433-e6bc-456d-86e8-91ea5537041d" width="220" /> | <img src="https://github.com/user-attachments/assets/df68d853-b28e-419e-b534-a8b567b4f248" width="220" /> |
+
+| Plan Creation | Recipes | Grocery List |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/102468c7-a03b-4678-9833-4c39e91ae5e0" width="220" /> | <img src="https://github.com/user-attachments/assets/35595b33-207d-4cdf-a0d9-7f2098f17eb2" width="220" /> | <img src="https://github.com/user-attachments/assets/bcae5f47-d905-4ddc-96f3-d90bc052397e" width="220" /> |
+
+---
+
+## Stack
+
+```
+SwiftUI + MVVM        iOS 18 · Async/Await · Combine
+Supabase              PostgreSQL · Auth · Row-Level Security
+Auth                  Google OAuth 2.0
+Tooling               Xcode 16 · Swift Package Manager
+```
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| 📋 **Template System** | Curated, database-driven meal plan templates for quick-start planning |
-| 👤 **User Profiles** | Stores dietary preferences, allergies, and calorie targets per user |
-| 🛒 **Grocery Lists** | Automatically aggregates ingredients from a meal plan into a consolidated shopping list |
-| 📊 **Progress Tracking** | Visual analytics dashboard tracking meal completion over time |
-| 🔐 **Authentication** | Secure, passwordless login via Supabase Auth + Google OAuth 2.0 |
+- **Home dashboard** — progress ring, 7-day week strip, colour-coded meal rows, recipe discovery
+- **Template planning** — 15 weekly templates including a full Kenyan Cuisine week
+- **47 recipes** — Kenyan/East African, Mediterranean, Asian, Indian, Mexican, Italian, and more
+- **Rich meal images** — every meal card shows a food photo via `AsyncImage` with shimmer loading
+- **Grocery list** — auto-generated from all ingredients in a plan
+- **Profile** — editable avatar, dietary preferences, usage stats
+- **Auto-seeding** — full recipe and template library seeds on first launch, no manual setup
 
 ---
 
-## Tech Stack
+## Recipe Library
 
-```
-iOS App        SwiftUI · MVVM · Combine · Async/Await
-Backend        Supabase (PostgreSQL + Realtime + Storage)
-Auth           Supabase Auth · Google OAuth 2.0
-Tooling        Xcode 15 · Swift Package Manager
-```
+**🇰🇪 Kenyan & East African** — Nyama Choma · Kenyan Pilau · Ugali na Sukuma Wiki · Githeri · Mukimo · Mandazi · Chapati 
 
-### Architecture
+**🌊 Mediterranean** — Herb-Crusted Salmon · Shakshuka · Quinoa Bowl · Lamb Kofta · Wild Mushroom Risotto
 
-Makuli follows the **MVVM pattern** with a clean separation of concerns:
+**🥢 Asian** — Chicken Tikka Masala · Teriyaki Salmon · Thai Green Curry · Pad Thai · Korean Bulgogi · Bibimbap · Pho Bo
 
-- **Models** — Codable structs mapped directly to Supabase schema
-- **ViewModels** — `@Observable` classes handling business logic and async data fetching
-- **Views** — Declarative SwiftUI views bound to ViewModels, with zero business logic
-- **Services** — Thin wrappers around Supabase and OpenAI clients, injected via environment
-
----
-
-## Project Structure
-
-```
-Makuli/
-├── docs/                        # Setup guides and architecture docs
-│   └── SUPABASE_TEMPLATE_SETUP.md
-├── Makuli/
-│   ├── Models/                  # Codable data models
-│   ├── Views/                   # SwiftUI view hierarchy
-│   ├── ViewModels/              # State management (@Observable)
-│   ├── Services/                # Supabase 
-│   └── Utils/                   # Extensions and helpers
-├── Makuli.xcodeproj/
-└── README.md
-```
+**🌍 More** — Jollof Rice · Chicken Shawarma · Beef Tacos · Lamb Biryani · Tuscan Garlic Chicken · Miso Aubergine
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** Xcode 15+, a Supabase project, an OpenAI API key
-
 ```bash
-# 1. Clone the repo
 git clone https://github.com/IKiprotich/makuli.git
-cd makuli
-
-# 2. Set up the database
-# Follow docs/SUPABASE_TEMPLATE_SETUP.md
-
-# 3. Open in Xcode and build
 open Makuli.xcodeproj
+```
+
+Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `Configuration.swift`, then run. The seeder populates all tables on first launch.
+
+**One SQL migration required:**
+```sql
+ALTER TABLE plan_recipes ADD COLUMN IF NOT EXISTS custom_image_url text;
 ```
 
 ---
 
-## Documentation
 
-| Guide | Description |
-|---|---|
-| 📖 [Complete Docs](docs/README.md) | Architecture overview, data models, and troubleshooting |
-| 🗄️ [Database Setup](docs/SUPABASE_TEMPLATE_SETUP.md) | Supabase schema, RLS policies, and template seeding |
-
----
-
-## Recent Updates
-
-- ✅ Introduced database-driven meal plan templates with automatic seeding
-- ✅ Rebuilt `PlansView` with template browsing and one-tap plan creation
-- ✅ Standardized error handling across all ViewModels
-- ✅ Reorganised and expanded developer documentation
-
----
-
-## Why Makuli?
-
-Building Makuli meant solving real engineering challenges:
-
-- **Offline-first UX** — Caching meal plans locally so the app stays usable without a connection
-- **Real-time sync** — Using Supabase Realtime to keep grocery lists in sync across devices
-- **Secure data access** — Row-Level Security policies ensuring users can only access their own data
-
----
-
-*Built with Swift, curiosity, and too many meal prep ideas.*
